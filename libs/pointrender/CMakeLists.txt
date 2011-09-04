@@ -3,7 +3,7 @@ project(pointrender)
 find_package(OpenGL)
 
 if(AQSIS_USE_OPENEXR AND QT_FOUND AND OPENGL_FOUND)
-	include_directories(${AQSIS_OPENEXR_INCLUDE_DIR} ${QT_INCLUDES}
+	include_directories(${AQSIS_OPENEXR_INCLUDE_DIR} "${AQSIS_OPENEXR_INCLUDE_DIR}/OpenEXR" ${QT_INCLUDES}
 						${OPENGL_INCLUDE_DIR})
 
 	qt4_wrap_cpp(moc_srcs ptview.h interactivecamera.h)

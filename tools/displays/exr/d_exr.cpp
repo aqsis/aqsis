@@ -104,21 +104,21 @@
 #if AQSIS_SYSTEM_WIN32 && (defined(AQSIS_COMPILER_MSVC6) || defined(AQSIS_COMPILER_MSVC7))
 #	pragma warning(push,1)
 #endif
-#include <ImfOutputFile.h>
-#include <ImfChannelList.h>
-#include <ImfIntAttribute.h>
-#include <ImfFloatAttribute.h>
-#include <ImfMatrixAttribute.h>
-#include <ImfStringAttribute.h>
-#include <ImfChromaticitiesAttribute.h>
-#include <ImfStandardAttributes.h>
-#include <ImfCompressionAttribute.h>
-#include <ImfLut.h>
-#include <ImfArray.h>
-#include <ImathFun.h>
-#include <Iex.h>
-#include <half.h>
-#include <halfFunction.h>
+#include <OpenEXR/ImfOutputFile.h>
+#include <OpenEXR/ImfChannelList.h>
+#include <OpenEXR/ImfIntAttribute.h>
+#include <OpenEXR/ImfFloatAttribute.h>
+#include <OpenEXR/ImfMatrixAttribute.h>
+#include <OpenEXR/ImfStringAttribute.h>
+#include <OpenEXR/ImfChromaticitiesAttribute.h>
+#include <OpenEXR/ImfStandardAttributes.h>
+#include <OpenEXR/ImfCompressionAttribute.h>
+#include <OpenEXR/ImfLut.h>
+#include <OpenEXR/ImfArray.h>
+#include <OpenEXR/ImathFun.h>
+#include <OpenEXR/Iex.h>
+#include <OpenEXR/half.h>
+#include <OpenEXR/halfFunction.h>
 #if AQSIS_SYSTEM_WIN32 && (defined(AQSIS_COMPILER_MSVC6) || defined(AQSIS_COMPILER_MSVC7))
 #	pragma warning(pop)
 #endif

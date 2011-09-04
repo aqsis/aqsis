@@ -1,9 +1,11 @@
 project(shadervm)
 
 # Check for boost regex.
-if(NOT Boost_REGEX_FOUND)
-	message(FATAL_ERROR "Aqsis shadervm requires boost regex to build")
+if(NOT Boost_REGEX_FOUND OR NOT AQSIS_USE_OPENEXR)
+	message(FATAL_ERROR "Aqsis shadervm requires boost regex and OpenEXR to build")
 endif()
+
+include_directories(${AQSIS_OPENEXR_INCLUDE_DIR} "${AQSIS_OPENEXR_INCLUDE_DIR}/OpenEXR")
 
 set(shadervm_srcs
 	dsoshadeops.cpp

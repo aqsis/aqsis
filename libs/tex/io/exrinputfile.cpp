@@ -41,10 +41,10 @@
 #include <algorithm>
 #include <cctype>
 
-#include <ImfInputFile.h>
-#include <ImfChannelList.h>
-#include <ImfFrameBuffer.h>
-#include <Iex.h>
+#include <OpenEXR/ImfInputFile.h>
+#include <OpenEXR/ImfChannelList.h>
+#include <OpenEXR/ImfFrameBuffer.h>
+#include <OpenEXR/Iex.h>
 
 #include <aqsis/util/logging.h>
 #include <aqsis/tex/texexception.h>

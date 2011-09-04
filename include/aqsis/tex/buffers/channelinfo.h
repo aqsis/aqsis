@@ -44,7 +44,7 @@
 #include <string>
 
 #ifdef USE_OPENEXR
-#include <half.h>
+#include <OpenEXR/half.h>
 #endif
 
 #include <aqsis/util/enum.h>

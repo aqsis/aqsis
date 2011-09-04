@@ -20,7 +20,7 @@ source_group("Header files" FILES ${tex_hdrs})
 
 set(linklibs ${io_linklibs})
 if(AQSIS_USE_OPENEXR)
-    include_directories(${AQSIS_OPENEXR_INCLUDE_DIR})
+    include_directories(${AQSIS_OPENEXR_INCLUDE_DIR} "${AQSIS_OPENEXR_INCLUDE_DIR}/OpenEXR")
     add_definitions(-DUSE_OPENEXR)
 	list(APPEND linklibs ${AQSIS_OPENEXR_LIBRARIES})
 endif()
