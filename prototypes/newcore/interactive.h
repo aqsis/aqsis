@@ -121,9 +121,8 @@ class InteractiveRender : public QWidget
 
             Ri::Renderer& ri = renderer.firstFilter();
             // Set up the display
-            Aqsis::Display* disp = &m_display;
             ri.Display("Ci.tif", "__Display_instance__", "rgb",
-                       ParamListBuilder()("pointer instance", &disp));
+                       ParamListBuilder()("instance", static_cast<void*>(&m_display)));
 			m_frameTimer = new QTimer(this);
             m_frameTimer->setInterval(40);
 			connect(m_frameTimer, SIGNAL(timeout()), this, SLOT(nextFrame()));
@@ -243,9 +242,8 @@ class InteractiveRender : public QWidget
             ri.Format(m_imageSize.x, m_imageSize.y, 1);
 
             // Viewing transformation
-            float fov = 90;
             ri.Projection("perspective",
-                          ParamListBuilder()("float fov", &fov));
+                          ParamListBuilder()("fov", 90));
             ri.Translate(0, 0, m_dist);
             ri.Rotate(m_theta, 1, 0, 0);
             ri.Rotate(m_phi, 0, 1, 0);
