@@ -130,14 +130,6 @@ namespace {
 class Bake3dCache
 {
     public:
-        Bake3dCache()
-        { }
-
-        ~Bake3dCache()
-        {
-            flush();
-        }
-
         /// Find or create a point cloud with the given name.
         ///
         /// The standard attributes; position, normal, and radius are added on
@@ -170,11 +162,12 @@ class Bake3dCache
             return pointFile;
         }
 
-        /// Flush all files to disk.
+        /// Flush all files to disk and clear the cache
         void flush()
         {
             for(FileMap::iterator i = m_files.begin(); i != m_files.end(); ++i)
                 Partio::write(i->first.c_str(), *i->second);
+            m_files.clear();
         }
 
     private:
