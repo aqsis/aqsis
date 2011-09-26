@@ -18,12 +18,6 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 
-/** \file
-		\brief Implements the basic shader operations. (bake3d related)
-		\author Michel Joron joron@sympatico.ca
-*/
-
-
 #ifdef AQSIS_SYSTEM_WIN32
 #include <io.h>
 #endif
@@ -37,18 +31,25 @@
 #include <aqsis/util/autobuffer.h>
 #include <aqsis/util/logging.h>
 
+#include <OpenEXR/ImathVec.h>
+
 namespace Aqsis
 {
 
+using Imath::V3f;
+
 // Utils for bake3d() shadeop.
 namespace {
-struct BakeVar
+struct UserVar
 {
-    const IqShaderData* value;
+    IqShaderData* value;
     EqVariableType type;
     Partio::ParticleAttribute attr;
 
-    BakeVar(const IqShaderData* value, EqVariableType type)
+    UserVar(IqShaderData* value, EqVariableType type,
+             const Partio::ParticleAttribute& attr)
+        : value(value), type(type), attr(attr) {}
+    UserVar(IqShaderData* value, EqVariableType type)
         : value(value), type(type) {}
 };
 }
@@ -62,8 +63,8 @@ struct BakeVar
 /// \param normal - normal array
 /// \param bakeVars - array of shader data and associated types
 /// \param nBakeVars - length of bakeVars array.
-static void extractBakeVars(float* out, int igrid, IqShaderData* position,
-                            IqShaderData* normal, BakeVar* bakeVars,
+static void extractUserVars(float* out, int igrid, IqShaderData* position,
+                            IqShaderData* normal, UserVar* bakeVars,
                             int nBakeVars)
 {
     // Temp vars for extracting data from IqShaderData
@@ -82,7 +83,7 @@ static void extractBakeVars(float* out, int igrid, IqShaderData* position,
     // of floats to pass to Ptc API.
     for(int i = 0; i < nBakeVars; ++i)
     {
-        const BakeVar& var = bakeVars[i];
+        const UserVar& var = bakeVars[i];
         switch(var.type)
         {
             case type_float:
@@ -176,12 +177,62 @@ class Bake3dCache
 };
 }
 
+
+namespace {
+/// A cache for open point cloud bake files for texture3d().
+class Texture3dCache
+{
+    public:
+        /// Find a point cloud with the given name, or open it from file.
+        Partio::ParticlesData* find(const std::string& fileName)
+        {
+            Partio::ParticlesDataMutable* pointFile = 0;
+            FileMap::iterator ptcIter = m_files.find(fileName);
+            if(ptcIter == m_files.end())
+            {
+                // Create new bake file & insert into map.
+                pointFile = Partio::read(fileName.c_str());
+                m_files[fileName].reset(pointFile, releasePartioFile);
+                if(pointFile)
+                {
+                    // Sort file so that it can be looked up efficiently.
+                    pointFile->sort();
+                    // TODO: Ensure that radius, position & normal attributes
+                    // are present.
+                }
+                else
+                {
+                    Aqsis::log() << error
+                        << "texture3d: Could not open point cloud \"" << fileName
+                        << "\" for reading\n";
+                }
+            }
+            else
+                pointFile = ptcIter->second.get();
+            return pointFile;
+        }
+
+        /// Flush all files from the cache.
+        void clear()
+        {
+            m_files.clear();
+        }
+
+    private:
+        typedef std::map<std::string, boost::shared_ptr<Partio::ParticlesDataMutable> > FileMap;
+        FileMap m_files;
+};
+}
+
+
 // TODO: Make non-global
 static Bake3dCache g_bakeCloudCache;
+static Texture3dCache g_texture3dCloudCache;
 
 void flushBake3dCache()
 {
     g_bakeCloudCache.flush();
+    g_texture3dCloudCache.clear();
 }
 
 //------------------------------------------------------------------------------
@@ -233,7 +284,7 @@ void CqShaderExecEnv::SO_bake3d( IqShaderData* ptc,
     pointFile->attributeInfo("normal", normalAttr);
     pointFile->attributeInfo("radius", radiusAttr);
     // Extract list of user-specified output vars from arguments
-    std::vector<BakeVar> bakeVars;
+    std::vector<UserVar> bakeVars;
     bakeVars.reserve(cParams/2);
     CqString paramName;
     // Number of output floats.  Start with space for position and normal data.
@@ -243,7 +294,7 @@ void CqShaderExecEnv::SO_bake3d( IqShaderData* ptc,
         if(apParams[i]->Type() == type_string)
         {
             apParams[i]->GetString(paramName);
-            const IqShaderData* paramValue = apParams[i+1];
+            IqShaderData* paramValue = apParams[i+1];
             // Parameters with special meanings may be present in the varargs
             // list, but shouldn't be saved to the output file, these include:
             //
@@ -275,10 +326,10 @@ void CqShaderExecEnv::SO_bake3d( IqShaderData* ptc,
                             << paramName << "\"\n";
                         continue;
                 }
-                bakeVars.push_back(BakeVar(paramValue, type));
+                bakeVars.push_back(UserVar(paramValue, type));
                 // Find the named attribute in the point file, or create it if
                 // it doesn't exist.
-                BakeVar& var = bakeVars.back();
+                UserVar& var = bakeVars.back();
                 if(pointFile->attributeInfo(paramName.c_str(), var.attr))
                 {
                     if(var.attr.count != count)
@@ -315,6 +366,7 @@ void CqShaderExecEnv::SO_bake3d( IqShaderData* ptc,
             if(interpolate)
             {
                 // Get micropoly position on 2D grid.
+                // TODO: What if the grid is 1D or 0D?
                 iv = igrid / uSize;
                 iu = igrid - iv*uSize;
                 // Check whether we're off the edge (number of polys in each
@@ -324,7 +376,7 @@ void CqShaderExecEnv::SO_bake3d( IqShaderData* ptc,
             }
 
             // Extract all baking variables into allData.
-            extractBakeVars(allData.get(), igrid, position, normal,
+            extractUserVars(allData.get(), igrid, position, normal,
                             &bakeVars[0], bakeVars.size());
 
             // Get radius if it's avaliable, otherwise compute automatically
@@ -348,7 +400,7 @@ void CqShaderExecEnv::SO_bake3d( IqShaderData* ptc,
                 // micropolygon & merge into outData.
                 for(int i = 0; i < 3; ++i)
                 {
-                    extractBakeVars(tmpData, interpIndices[i], position, normal,
+                    extractUserVars(tmpData, interpIndices[i], position, normal,
                                     &bakeVars[0], bakeVars.size());
                     for(int j = 0; j < nOutFloats; ++j)
                         outData[j] += tmpData[j];
@@ -409,7 +461,7 @@ void CqShaderExecEnv::SO_bake3d( IqShaderData* ptc,
             // Save out user-defined attributes
             for(int i = 0, iend = bakeVars.size(); i < iend; ++i)
             {
-                BakeVar& var = bakeVars[i];
+                UserVar& var = bakeVars[i];
                 float* out = pointFile->dataWrite<float>(var.attr, ptIdx);
                 for(int j = 0; j < var.attr.count; ++j)
                     out[j] = *d++;
@@ -422,216 +474,249 @@ void CqShaderExecEnv::SO_bake3d( IqShaderData* ptc,
 
 
 //------------------------------------------------------------------------------
+// Texture3d stuff
+
+// Parse and validate the varargs part of the texture3d argument list.
+//
+// nargs and args specify the varargs list.
+static bool parseTexture3dVarargs(int nargs, IqShaderData** args,
+                                  const Partio::ParticlesData* pointFile,
+                                  CqString& coordSystem,
+                                  std::vector<UserVar>& userVars)
+{
+    userVars.reserve(nargs/2);
+    CqString paramName;
+    for(int i = 0; i+1 < nargs; i+=2)
+    {
+        if(args[i]->Type() != type_string)
+        {
+            Aqsis::log() << error
+                << "unexpected non-string for parameter name in texture3d()\n";
+            return false;
+        }
+        args[i]->GetString(paramName);
+        IqShaderData* paramValue = args[i+1];
+        // Parameters with special meanings may be present in the varargs
+        // list, and shouldn't be looked up in the file:
+        if(paramName == "coordsystem")
+            paramValue->GetString(coordSystem);
+        else if(paramName == "filterradius")
+            ; // For brick maps; ignored for now
+        else if(paramName == "filterscale")
+            ; // For brick maps; ignored for now
+        else if(paramName == "maxdepth")
+            ; // For brick maps; ignored for now
+        else
+        {
+            // If none of the above special cases, we have a user-defined
+            // variable.  Look it up in the point file, and check whether the
+            // type corresponds with the provided shader variable.
+            EqVariableType type = paramValue->Type();
+            Partio::ParticleAttribute attr;
+            pointFile->attributeInfo(paramName.c_str(), attr);
+            if(attr.type != Partio::FLOAT && attr.type != Partio::VECTOR)
+            {
+                Aqsis::log() << warning
+                    << "texture3d: Can't load non-float data \""
+                    << paramName << "\"\n";
+                continue;
+            }
+            int desiredCount = 0;
+            switch(type)
+            {
+                case type_float:  desiredCount = 1;  break;
+                case type_point:  desiredCount = 3;  break;
+                case type_color:  desiredCount = 3;  break;
+                case type_normal: desiredCount = 3;  break;
+                case type_vector: desiredCount = 3;  break;
+                case type_matrix: desiredCount = 16; break;
+                default:
+                    Aqsis::log() << warning
+                        << "texture3d: Can't load non float-based argument \""
+                        << paramName << "\"\n";
+                    continue;
+            }
+            if(desiredCount != attr.count)
+            {
+                Aqsis::log() << warning
+                    << "texture3d: variable \"" << paramName
+                    << "\" mismatched in point file\n";
+                continue;
+            }
+            userVars.push_back(UserVar(paramValue, type, attr));
+        }
+    }
+    return userVars.size() > 0;
+}
+
+
 /** \brief Shadeops "texture3d" to restore any parameter from one pointcloud file refer.
  *  \param ptc the name of the pointcloud file
- *  \param point  the P
- *  \param normat its normal
+ *  \param position
+ *  \param normal
  *  \result result 0 or 1
  *  \param pShader shaderexecenv
  *  \param cParams number of remaining user parameters.
  *  \param aqParams list of user parameters (to save to ptc)
  */
-void	CqShaderExecEnv::SO_texture3d(IqShaderData* ptc,
-                                   IqShaderData* point,
+void CqShaderExecEnv::SO_texture3d(IqShaderData* ptc,
+                                   IqShaderData* position,
                                    IqShaderData* normal,
                                    IqShaderData* Result,
                                    IqShader* pShader,
                                    TqInt cParams, IqShaderData** apParams )
 {
-    // FIXME!
-
-#if 0
-    bool __fVarying;
-    TqUint __iGrid;
-
-    __fVarying=(point)->Class()==class_varying;
-    __fVarying=(normal)->Class()==class_varying||__fVarying;
-    __fVarying=(Result)->Class()==class_varying||__fVarying;
-
-    __iGrid = 0;
     const CqBitVector& RS = RunningState();
-    CqString _aq_ptc;
-    (ptc)->GetString(_aq_ptc,__iGrid);
-    TqUshort VarStarts[CqBake3DOptionsMaxParams] = {0};
-    PtcPointCloud MyCloudRead = PtcManager.FindCloudRead(_aq_ptc.c_str(), VarStarts);
-    CqBake3DOptions     sampleOpts;
-    CqBake3DOptionsExtractor optExtractor(apParams, cParams, sampleOpts);
+    CqString ptcName;
+    ptc->GetString(ptcName);
 
+    Partio::ParticlesData* pointFile = g_texture3dCloudCache.find(ptcName);
+    bool varying = position->Class() == class_varying ||
+                   normal->Class() == class_varying ||
+                   Result->Class() == class_varying;
+    int npoints = varying ? shadingPointCount() : 1;
 
-    if (!MyCloudRead)
+    CqString coordSystem = "world";
+    std::vector<UserVar> userVars;
+
+    if(!pointFile || !parseTexture3dVarargs(cParams, apParams,
+                                            pointFile, coordSystem, userVars))
     {
-        const char *varnames[CqBake3DOptionsMaxParams];
-        const char *vartypes[CqBake3DOptionsMaxParams];
-        TqInt varnumber = 0;
-        MyCloudRead = PtcOpenPointCloudFile(_aq_ptc.c_str(), &varnumber, vartypes, varnames);
+        // Error - no point file or no arguments to look up: set result to 0
+        // and return.
+        for(int igrid = 0; igrid < npoints; ++igrid)
+            if(!varying || RS.Value(igrid))
+                Result->SetFloat(0, igrid);
+        return;
+    }
 
-        TqInt i, j;
+    // Grab the standard attributes for computing filter weights
+    Partio::ParticleAttribute positionAttr, normalAttr, radiusAttr;
+    pointFile->attributeInfo("position", positionAttr);
+    pointFile->attributeInfo("normal", normalAttr);
+    pointFile->attributeInfo("radius", radiusAttr);
 
-        TqInt okay = 0;
+    for(int igrid = 0; igrid < npoints; ++igrid)
+    {
+        if(varying && !RS.Value(igrid))
+            continue;
+        CqVector3D cqP, cqN;
+        position->GetPoint(cqP, igrid);
+        normal->GetNormal(cqN, igrid);
 
-        // Double check if this variable exist in this PTC...
-
-        TqInt found = 0;
-        for (j=0; j < sampleOpts.m_Count; j++)
+        // Using the four nearest neighbours for filtering is roughly the
+        // minimum we can get away with for a surface made out of
+        // quadrilaterals.  This isn't exactly perfect near edges but it seems
+        // to be good enough.
+        //
+        // Since the lookups happen without prefiltering, no effort is made to
+        // avoid aliasing by using a filter radius based on the size of the
+        // current shading element.
+        const int nfilter = 4;
+        Partio::ParticleIndex indices[nfilter];
+        float distSquared[nfilter];
+        float maxRadius2 = 0;
+        V3f P(cqP.x(), cqP.y(), cqP.z());
+        // The reinterpret_casts are ugly here of course, but V3f is basically
+        // a POD type, so they work ok.
+        int pointsFound = pointFile->findNPoints(reinterpret_cast<float*>(&P),
+                                                 nfilter, FLT_MAX, indices,
+                                                 distSquared, &maxRadius2);
+        if(pointsFound < nfilter)
         {
-            for (i=0; i < varnumber; i ++)
+            Result->SetFloat(0.0f, igrid);
+            Aqsis::log() << error << "Not enough points found to filter!";
+        }
+        // Read position, normal and radius
+        V3f foundP[nfilter];
+        pointFile->dataAsFloat(positionAttr, nfilter, indices, false,
+                               reinterpret_cast<float*>(foundP));
+        V3f foundN[nfilter];
+        pointFile->dataAsFloat(normalAttr, nfilter, indices, false,
+                               reinterpret_cast<float*>(foundN));
+        float foundRadius[nfilter];
+        pointFile->dataAsFloat(radiusAttr, nfilter, indices, false, foundRadius);
+
+        // Compute filter weights for nearby points.  inverseWidthSquared
+        // decides the blurryness of the gaussian filter.  The value was chosen
+        // by eyeballing the results of various widths.  As usual it's a trade
+        // off: Too small a value will be too blurry, (and artifacty if nfilter
+        // is 4); too large a value and it ends up looking like nearest
+        // neighbour filtering.
+        const float inverseWidthSquared = 1.3f;
+        float weights[nfilter];
+        float totWeight = 0;
+        V3f N(cqN.x(), cqN.y(), cqN.z());
+        for(int i = 0; i < nfilter; ++i)
+        {
+            // The weights depend on how well the normals are aligned, and the
+            // distance between the current shading point and the points found
+            // in the point cloud.
+            float wN = std::max(0.0f, N.dot(foundN[i]));
+            // TODO: Speed this up using a lookup table for exp?
+            float wP = std::exp(-inverseWidthSquared * distSquared[i]
+                                / (foundRadius[i]*foundRadius[i]));
+            // Clamping to a minimum of 1e-7 means the weights don't quite
+            // become zero as distSquared becomes large, so texture lookups
+            // even far from any point in the cloud return something nonzero.
+            //
+            // Not sure if this is a good idea or not, so commented out for now
+            // wP = std::max(1e-7f, wP);
+            float w = wN*wP;
+            weights[i] = w;
+            totWeight += w;
+        }
+        // Normalize the weights
+        float renorm = totWeight != 0 ? 1/totWeight : 0;
+        for(int i = 0; i < nfilter; ++i)
+            weights[i] *= renorm;
+
+        for(std::vector<UserVar>::const_iterator var = userVars.begin();
+            var != userVars.end(); ++var)
+        {
+            // Read and filter each piece of user-defined data
+            float varData[16*nfilter];
+            pointFile->dataAsFloat(var->attr, nfilter, indices, false, varData);
+            int varSize = var->attr.count;
+            float accum[16];
+            for(int c = 0; c < varSize; ++c)
+                accum[c] = 0;
+            for(int i = 0; i < nfilter; ++i)
+                for(int c = 0; c < varSize; ++c)
+                    accum[c] += weights[i] * varData[i*varSize + c];
+            // Ah, if only we could get at the raw floats stored by
+            // IqShaderData, we wouldn't need this switch
+            switch(var->type)
             {
-                if (strcmp(sampleOpts.m_VarNames[j], varnames[i]) == 0)
-                {
-                    found ++;
+                case type_float:
+                    var->value->SetFloat(accum[0], igrid);
                     break;
-                }
+                case type_color:
+                    var->value->SetColor(CqColor(accum[0], accum[1],
+                                               accum[2]), igrid);
+                    break;
+                case type_point:
+                    // TODO: Transformations!
+                    var->value->SetPoint(CqVector3D(accum[0], accum[1],
+                                                    accum[2]), igrid);
+                    break;
+                case type_normal:
+                    var->value->SetNormal(CqVector3D(accum[0], accum[1],
+                                                   accum[2]), igrid);
+                    break;
+                case type_vector:
+                    var->value->SetVector(CqVector3D(accum[0], accum[1],
+                                                   accum[2]), igrid);
+                    break;
+                case type_matrix:
+                    var->value->SetMatrix(CqMatrix(accum), igrid);
+                    break;
+                default: assert(0 && "unknown type");
             }
         }
-        okay = (found == sampleOpts.m_Count);
-
-        if (!okay)
-        {
-            PtcClosePointCloudFile(MyCloudRead);
-            MyCloudRead = 0;
-        }
-        else
-        {
-
-            for (i=0; i< sampleOpts.m_Count; i++)
-            {
-                // First we need to find where shader' variable with the userdata
-                TqInt found = -1;
-                for (j=0; j < varnumber && found == -1; j++)
-                {
-                    if (strcmp(varnames[j], sampleOpts.m_VarNames[i]) == 0)
-                        found = j;
-                }
-
-                TqInt where  = 0;
-                // If it is existing find its location within the userdata block
-                if (found >= 0)
-                {
-
-                    for (j=0; j < found; j++)
-                    {
-                        if ( strcmp(vartypes[j], "float") == 0 ||
-                                strcmp(vartypes[j], "integer") == 0 ||
-                                strcmp(vartypes[j], "bool") == 0 )
-                            where ++;
-                        else if ( strcmp(vartypes[j], "matrix") == 0 )
-                            where += 16;
-                        else
-                            where += 3;
-                    }
-                    VarStarts[i] = where;
-                }
-            }
-            PtcManager.SaveCloudRead(_aq_ptc.c_str(), MyCloudRead, VarStarts);
-        }
+        // Return success for this point
+        Result->SetFloat(1.0f, igrid);
     }
-
-
-
-    TqFloat *userdata = NULL;
-
-    do
-    {
-        if(RS.Value( __iGrid ) )
-        {
-            TqInt okay = 1;
-
-            if (MyCloudRead != 0)
-            {
-                TqFloat radius;
-                if (userdata == NULL)
-                {
-                    TqInt size = 0;
-                    PtcGetPointCloudInfo(MyCloudRead, "datasize", &size);
-
-                    userdata = new TqFloat[size];
-                }
-
-                /*
-                it could to do a simple find using qsort/bsearch based on point
-                okay = PtcFindDataPoint(MyCloudRead, pointf, normalf, &radius, userdata);
-                */
-                // Take all the information and call PtcReadDataPoint()
-                TqFloat pointf[3];
-                TqFloat normalf[3];
-                okay = PtcReadDataPoint(MyCloudRead, pointf, normalf, &radius, userdata);
-
-                CqVector3D _aq_point;
-                (point)->GetPoint(_aq_point,__iGrid);
-                CqVector3D _aq_normal;
-                (normal)->GetPoint(_aq_normal,__iGrid);
-                TqFloat fRes = 0.0f;
-
-                // Convert all the information from userdata and save the data into the user parameters
-                for (TqInt i=0; i< sampleOpts.m_Count; i++)
-                {
-                    // First we need to find where shader' variable with the userdata
-                    TqInt where  = VarStarts[i];
-                    if ( strcmp(sampleOpts.m_VarTypes[i], "float") == 0 ||
-                            strcmp(sampleOpts.m_VarTypes[i], "integer") == 0 ||
-                            strcmp(sampleOpts.m_VarTypes[i], "bool") == 0 )
-                    {
-                        TqFloat f;
-
-                        f = userdata[where];
-                        sampleOpts.m_UserData[ i ]->SetFloat( f, __iGrid);
-                    } else if ( strcmp(sampleOpts.m_VarTypes[i], "vector") == 0)
-                    {
-                        CqVector3D v;
-
-                        for (TqInt j=0; i < 3; i++)
-                        {
-                            v[j] = userdata[where + j];
-                        }
-                        sampleOpts.m_UserData[ i ]->SetVector( v, __iGrid);
-                    } else if ( strcmp(sampleOpts.m_VarTypes[i], "color") == 0)
-                    {
-                        CqColor c;
-
-                        for (TqInt j=0; j < 3; j++)
-                        {
-                            c[j] = userdata[where + j];
-                        }
-                        sampleOpts.m_UserData[ i ]->SetColor( c, __iGrid);
-                    } else if ( strcmp(sampleOpts.m_VarTypes[i], "point") == 0)
-                    {
-                        CqVector3D p;
-
-                        for (TqInt j=0; j < 3; j++)
-                        {
-                            p[j] = userdata[where + j];
-                        }
-                        sampleOpts.m_UserData[ i ]->SetPoint( p, __iGrid);
-                    } else if ( strcmp(sampleOpts.m_VarTypes[i], "normal") == 0)
-                    {
-                        CqVector3D n;
-
-                        for (TqInt j=0; j < 3; j++)
-                        {
-                            n[j] = userdata[where + j];
-                        }
-                        sampleOpts.m_UserData[ i ]->SetNormal( n, __iGrid);
-                    } else if ( strcmp(sampleOpts.m_VarTypes[i], "matrix") == 0)
-                    {
-                        CqMatrix m;
-
-                        for (TqInt j=0; j < 16; j++)
-                        {
-                            m.pElements()[j] = userdata[where + j];
-                        }
-                        sampleOpts.m_UserData[ i ]->SetMatrix( m, __iGrid);
-                    }
-                }
-                fRes = okay;
-                (Result)->SetFloat(fRes,__iGrid);
-            }
-        }
-    } while( ( ++__iGrid < shadingPointCount() ) && __fVarying);
-    if (userdata != NULL)
-    {
-        delete [] userdata;
-    }
-#endif
 }
 
 //---------------------------------------------------------------------
