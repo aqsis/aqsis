@@ -381,7 +381,7 @@ class AQSIS_SHADERVM_SHARE CqShaderExecEnv : public IqShaderExecEnv, boost::nonc
 		template<typename IntegratorT>
 		void pointCloudIntegrate(IqShaderData* P, IqShaderData* N,
 								 IqShaderData* result, int cParams,
-								 IqShaderData** apParams);
+								 IqShaderData** apParams, IqShader* pShader);
 
 		/// Turn 1D iteration into 2D grid indices
 		///

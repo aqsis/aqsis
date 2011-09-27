@@ -278,6 +278,7 @@ void CqShaderExecEnv::SO_bake3d( IqShaderData* ptc,
     bool interpolate = false;
     const IqShaderData* radius = 0;
     const IqShaderData* radiusScale = 0;
+    CqString coordSystem = "world";
     // P, N and r output attributes are always present
     Partio::ParticleAttribute positionAttr, normalAttr, radiusAttr;
     pointFile->attributeInfo("position", positionAttr);
@@ -295,24 +296,24 @@ void CqShaderExecEnv::SO_bake3d( IqShaderData* ptc,
         {
             apParams[i]->GetString(paramName);
             IqShaderData* paramValue = apParams[i+1];
+            EqVariableType paramType = paramValue->Type();
             // Parameters with special meanings may be present in the varargs
             // list, but shouldn't be saved to the output file, these include:
-            //
-            // TODO: also "coordsystem".
-            if(paramName == "interpolate")
+            if(paramName == "interpolate" && paramType == type_float)
                 paramValue->GetBool(interpolate);
-            else if(paramName == "radius")
+            else if(paramName == "radius" && paramType == type_float)
                 radius = paramValue;
-            else if(paramName == "radiusscale")
+            else if(paramName == "radiusscale" && paramType == type_float)
                 radiusScale = paramValue;
+            else if(paramName == "coordsystem" && paramType == type_string)
+                paramValue->GetString(coordSystem);
             else
             {
                 // If none of the above special cases, we have an output
                 // variable which should be saved to the file.
                 int count = 0;
                 Partio::ParticleAttributeType parType = Partio::FLOAT;
-                EqVariableType type = paramValue->Type();
-                switch(type)
+                switch(paramType)
                 {
                     case type_float:  count = 1;  parType = Partio::FLOAT;  break;
                     case type_point:  count = 3;  parType = Partio::VECTOR; break;
@@ -326,7 +327,7 @@ void CqShaderExecEnv::SO_bake3d( IqShaderData* ptc,
                             << paramName << "\"\n";
                         continue;
                 }
-                bakeVars.push_back(UserVar(paramValue, type));
+                bakeVars.push_back(UserVar(paramValue, paramType));
                 // Find the named attribute in the point file, or create it if
                 // it doesn't exist.
                 UserVar& var = bakeVars.back();
@@ -350,6 +351,14 @@ void CqShaderExecEnv::SO_bake3d( IqShaderData* ptc,
             Aqsis::log() << "unexpected non-string for parameter name "
                             "in bake3d()\n";
     }
+
+    /// Compute transformations
+    CqMatrix positionTrans;
+    getRenderContext()->matSpaceToSpace("current", coordSystem.c_str(),
+                                        pShader->getTransform(),
+                                        pTransform().get(), 0, positionTrans);
+    CqMatrix normalTrans = normalTransform(positionTrans);
+
     CqAutoBuffer<TqFloat, 100> allData(interpolate ?
                                        2*nOutFloats : nOutFloats);
 
@@ -455,8 +464,10 @@ void CqShaderExecEnv::SO_bake3d( IqShaderData* ptc,
             float* P = pointFile->dataWrite<float>(positionAttr, ptIdx);
             float* N = pointFile->dataWrite<float>(normalAttr, ptIdx);
             float* r = pointFile->dataWrite<float>(radiusAttr, ptIdx);
-            P[0] = *d++; P[1] = *d++; P[2] = *d++;
-            N[0] = *d++; N[1] = *d++; N[2] = *d++;
+            CqVector3D cqP = positionTrans * CqVector3D(d[0], d[1], d[2]); d += 3;
+            P[0] = cqP.x(); P[1] = cqP.y(); P[2] = cqP.z();
+            CqVector3D cqN = normalTrans * CqVector3D(d[0], d[1], d[2]); d += 3;
+            N[0] = cqN.x(); N[1] = cqN.y(); N[2] = cqN.z();
             r[0] = radiusVal;
             // Save out user-defined attributes
             for(int i = 0, iend = bakeVars.size(); i < iend; ++i)
@@ -496,9 +507,10 @@ static bool parseTexture3dVarargs(int nargs, IqShaderData** args,
         }
         args[i]->GetString(paramName);
         IqShaderData* paramValue = args[i+1];
+        EqVariableType paramType = paramValue->Type();
         // Parameters with special meanings may be present in the varargs
         // list, and shouldn't be looked up in the file:
-        if(paramName == "coordsystem")
+        if(paramName == "coordsystem" && paramType == type_string)
             paramValue->GetString(coordSystem);
         else if(paramName == "filterradius")
             ; // For brick maps; ignored for now
@@ -511,7 +523,6 @@ static bool parseTexture3dVarargs(int nargs, IqShaderData** args,
             // If none of the above special cases, we have a user-defined
             // variable.  Look it up in the point file, and check whether the
             // type corresponds with the provided shader variable.
-            EqVariableType type = paramValue->Type();
             Partio::ParticleAttribute attr;
             pointFile->attributeInfo(paramName.c_str(), attr);
             if(attr.type != Partio::FLOAT && attr.type != Partio::VECTOR)
@@ -522,7 +533,7 @@ static bool parseTexture3dVarargs(int nargs, IqShaderData** args,
                 continue;
             }
             int desiredCount = 0;
-            switch(type)
+            switch(paramType)
             {
                 case type_float:  desiredCount = 1;  break;
                 case type_point:  desiredCount = 3;  break;
@@ -543,7 +554,7 @@ static bool parseTexture3dVarargs(int nargs, IqShaderData** args,
                     << "\" mismatched in point file\n";
                 continue;
             }
-            userVars.push_back(UserVar(paramValue, type, attr));
+            userVars.push_back(UserVar(paramValue, paramType, attr));
         }
     }
     return userVars.size() > 0;
@@ -590,6 +601,13 @@ void CqShaderExecEnv::SO_texture3d(IqShaderData* ptc,
         return;
     }
 
+    /// Compute transformations
+    CqMatrix positionTrans;
+    getRenderContext()->matSpaceToSpace("current", coordSystem.c_str(),
+                                        pShader->getTransform(),
+                                        pTransform().get(), 0, positionTrans);
+    CqMatrix normalTrans = normalTransform(positionTrans);
+
     // Grab the standard attributes for computing filter weights
     Partio::ParticleAttribute positionAttr, normalAttr, radiusAttr;
     pointFile->attributeInfo("position", positionAttr);
@@ -602,7 +620,9 @@ void CqShaderExecEnv::SO_texture3d(IqShaderData* ptc,
             continue;
         CqVector3D cqP, cqN;
         position->GetPoint(cqP, igrid);
+        cqP = positionTrans*cqP;
         normal->GetNormal(cqN, igrid);
+        cqN = normalTrans*cqN;
 
         // Using the four nearest neighbours for filtering is roughly the
         // minimum we can get away with for a surface made out of
@@ -693,20 +713,19 @@ void CqShaderExecEnv::SO_texture3d(IqShaderData* ptc,
                     break;
                 case type_color:
                     var->value->SetColor(CqColor(accum[0], accum[1],
-                                               accum[2]), igrid);
+                                                 accum[2]), igrid);
                     break;
                 case type_point:
-                    // TODO: Transformations!
                     var->value->SetPoint(CqVector3D(accum[0], accum[1],
                                                     accum[2]), igrid);
                     break;
                 case type_normal:
                     var->value->SetNormal(CqVector3D(accum[0], accum[1],
-                                                   accum[2]), igrid);
+                                                     accum[2]), igrid);
                     break;
                 case type_vector:
                     var->value->SetVector(CqVector3D(accum[0], accum[1],
-                                                   accum[2]), igrid);
+                                                     accum[2]), igrid);
                     break;
                 case type_matrix:
                     var->value->SetMatrix(CqMatrix(accum), igrid);

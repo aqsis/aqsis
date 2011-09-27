@@ -378,6 +378,18 @@ AQSIS_MATH_SHARE bool isClose(const CqMatrix& m1, const CqMatrix& m2,
 		TqFloat tol = 10*std::numeric_limits<TqFloat>::epsilon());
 
 
+/// Get the vector transformation associated with the point transformation, m
+///
+/// The vector transform is the point transform without the translation part
+/// of m.
+CqMatrix vectorTransform(const CqMatrix& m);
+
+/// Get the normal transformation associated with the point transformation, m
+///
+/// The normal transform is the same as the vector transform for orthogonal
+/// transformations but more complicated in the general case.
+CqMatrix normalTransform(const CqMatrix& m);
+
 //==============================================================================
 // Implementation details
 //==============================================================================
@@ -964,6 +976,24 @@ inline bool  operator!=(const CqMatrix& A, const CqMatrix& B)
 {
 	return !(A==B);
 }
+
+
+inline CqMatrix vectorTransform(const CqMatrix& m)
+{
+	CqMatrix r = m;
+	// Remove the transformation and projection parts of the transform.
+	r[3][0] = r[3][1] = r[3][2] = 0;
+	r[0][3] = r[1][3] = r[2][3] = 0;
+	r[3][3] = 1.0;
+	return r;
+}
+
+
+inline CqMatrix normalTransform(const CqMatrix& m)
+{
+	return vectorTransform(m).Inverse().Transpose();
+}
+
 
 } // namespace Aqsis
 

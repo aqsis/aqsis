@@ -1114,7 +1114,8 @@ void storeZeroResult<RadiosityIntegrator>(IqShaderData* result, int igrid)
 template<typename IntegratorT>
 void CqShaderExecEnv::pointCloudIntegrate(IqShaderData* P, IqShaderData* N,
 										  IqShaderData* result, int cParams,
-										  IqShaderData** apParams)
+										  IqShaderData** apParams,
+										  IqShader* pShader)
 {
 	if(!getRenderContext())
 		return;
@@ -1126,6 +1127,7 @@ void CqShaderExecEnv::pointCloudIntegrate(IqShaderData* P, IqShaderData* N,
 	float maxSolidAngle = 0.03;
 	float coneAngle = M_PI_2;
 	float bias = 0;
+	CqString coordSystem = "world";
 	for(int i = 0; i < cParams; i+=2)
 	{
 		apParams[i]->GetString(paramName, 0);
@@ -1163,15 +1165,26 @@ void CqShaderExecEnv::pointCloudIntegrate(IqShaderData* P, IqShaderData* N,
 				faceRes = std::max(1, static_cast<int>(res));
 			}
 		}
+		else if(paramName == "coordsystem")
+		{
+			if(paramValue->Type() == type_string)
+				paramValue->GetString(coordSystem);
+		}
 		// Interesting arguments which could be implemented:
 		//   "hitsides"    - sidedness culling: "front", "back", "both"
-		//   "coordsystem" - coordinate system of points, default "world"
 		//   "falloff", "falloffmode" - falloff of occlusion with distance
 		//   ... more!
 		//
 		// Other arguments we may not bother with:
 		//   "pointbased"  - we don't support any other method...
 	}
+
+	// Compute transform from current to appropriate space.
+	CqMatrix positionTrans;
+	getRenderContext()->matSpaceToSpace("current", coordSystem.c_str(),
+										pShader->getTransform(),
+										pTransform().get(), 0, positionTrans);
+	CqMatrix normalTrans = normalTransform(positionTrans);
 
 	// TODO: interpolation.  3delight uses Attribute "irradiance"
 	// "shadingrate" to control interpolation; PRMan uses the "maxvariation"
@@ -1244,6 +1257,8 @@ void CqShaderExecEnv::pointCloudIntegrate(IqShaderData* P, IqShaderData* N,
 				else
 					P->GetVector(Pval, igrid);
 				CqVector3D Nval;   N->GetVector(Nval, igrid);
+				Pval = positionTrans * Pval;
+				Nval = normalTrans * Nval;
 				V3f Pval2(Pval.x(), Pval.y(), Pval.z());
 				V3f Nval2(Nval.x(), Nval.y(), Nval.z());
 				// TODO: It may make more sense to scale bias by the current
@@ -1286,7 +1301,8 @@ static void storeIntegratedResult(const OcclusionIntegrator& integrator,
 // occlusion(P,N,samples)
 void CqShaderExecEnv::SO_occlusion_rt( IqShaderData* P, IqShaderData* N, IqShaderData* samples, IqShaderData* Result, IqShader* pShader, int cParams, IqShaderData** apParams )
 {
-	pointCloudIntegrate<OcclusionIntegrator>(P, N, Result, cParams, apParams);
+	pointCloudIntegrate<OcclusionIntegrator>(P, N, Result, cParams, apParams,
+											 pShader);
 }
 
 
@@ -1306,7 +1322,8 @@ void CqShaderExecEnv::SO_indirectdiffuse(IqShaderData* P, IqShaderData* N,
 										 IqShader* pShader, int cParams,
 										 IqShaderData** apParams)
 {
-	pointCloudIntegrate<RadiosityIntegrator>(P, N, Result, cParams, apParams);
+	pointCloudIntegrate<RadiosityIntegrator>(P, N, Result, cParams, apParams,
+											 pShader);
 }
 
 
