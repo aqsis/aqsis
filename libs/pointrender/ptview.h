@@ -47,6 +47,9 @@
 #include "pointcontainer.h"
 #include "interactivecamera.h"
 
+class QActionGroup;
+class QSignalMapper;
+
 namespace Aqsis {
 
 using Imath::V3f;
@@ -78,13 +81,13 @@ class PointArrayModel : public QObject
         /// Return point radii
         const float* r() const { return m_r.get(); }
         /// Return point color, or NULL if no color channel is present
-        const C3f* color() const { return m_col.get(); }
+        const C3f* color() const { return m_color.get(); }
 
         /// Get a list of channel names which look like color channels
         QStringList colorChannels() { return m_colorChannelNames; }
 
         /// Set the channel name which the color() function returns data for
-        void setColorChannel(const QString& name) { }
+        void setColorChannel(const QString& name);
 
         /// Compute the centroid of the P data
         V3f centroid() const;
@@ -99,7 +102,7 @@ class PointArrayModel : public QObject
         boost::shared_array<V3f> m_P;
         boost::shared_array<V3f> m_N;
         boost::shared_array<float> m_r;
-        boost::shared_array<C3f> m_col;
+        boost::shared_array<C3f> m_color;
 };
 
 
@@ -135,6 +138,10 @@ class PointView : public QGLWidget
         /// Set the backgroud color
         void setBackground(QColor col);
         void setVisMode(VisMode mode);
+        void setColorChannel(QString channel);
+
+    signals:
+        void colorChannelsChanged(QStringList channels);
 
     protected:
         // Qt OpenGL callbacks
@@ -198,9 +205,13 @@ class PointViewerMainWindow : public QMainWindow
         void setBackground(const QString& name);
         void chooseBackground();
         void toggleVisMode();
+        void setColorChannels(QStringList channels);
 
     private:
         PointView* m_pointView;
+        QMenu* m_colorMenu;
+        QActionGroup* m_colorMenuGroup;
+        QSignalMapper* m_colorMenuMapper;
 };
 
 

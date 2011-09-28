@@ -134,6 +134,7 @@ bool PointArrayModel::loadPointFile(const QString& fileName)
             tr("Couldn't open file \"%1\"").arg(fileName));
         return false;
     }
+    m_fileName = fileName;
     // Look for the necessary attributes in the file
     Pio::ParticleAttribute positionAttr;
     Pio::ParticleAttribute normalAttr;
@@ -163,11 +164,11 @@ bool PointArrayModel::loadPointFile(const QString& fileName)
     m_r.reset(new float[m_npoints]);
     // Look for likely color channels & allocate space if necessary
     m_colorChannelNames = findColorChannels(ptFile.get());
-    m_col.reset();
+    m_color.reset();
     if(!m_colorChannelNames.empty())
     {
         if(ptFile->attributeInfo(m_colorChannelNames[0].toAscii().constData(), colorAttr))
-            m_col.reset(new C3f[m_npoints]);
+            m_color.reset(new C3f[m_npoints]);
     }
     // Iterate over all particles & pull in the data.
     Pio::ParticleAccessor posAcc(positionAttr);
@@ -178,21 +179,40 @@ bool PointArrayModel::loadPointFile(const QString& fileName)
     pt.addAccessor(posAcc);
     pt.addAccessor(norAcc);
     pt.addAccessor(radiusAcc);
-    if(m_col)
+    if(m_color)
         pt.addAccessor(colorAcc);
     V3f* outP = m_P.get();
     V3f* outN = m_N.get();
     float* outr = m_r.get();
-    C3f* outc = m_col.get();
+    C3f* outc = m_color.get();
     for(; pt != ptFile->end(); ++pt)
     {
         *outP++ = posAcc.data<V3f>(pt);
         *outN++ = norAcc.data<V3f>(pt);
         *outr++ = radiusAcc.data<float>(pt);
-        if(m_col)
+        if(m_color)
             *outc++ = colorAcc.data<C3f>(pt);
     }
     return true;
+}
+
+
+void PointArrayModel::setColorChannel(const QString& name)
+{
+    namespace Pio = Partio;
+    boost::shared_ptr<Pio::ParticlesData> ptFile(
+                Pio::read(m_fileName.toAscii().constData()), releasePartioFile);
+    Pio::ParticleAttribute colorAttr;
+    if(!ptFile->attributeInfo(name.toAscii().constData(), colorAttr)
+       || colorAttr.count != 3 || colorAttr.type != Pio::FLOAT)
+        return;
+    m_color.reset(new C3f[m_npoints]);
+    Pio::ParticleAccessor colorAcc(colorAttr);
+    Pio::ParticlesData::const_iterator pt = ptFile->begin();
+    pt.addAccessor(colorAcc);
+    C3f* outc = m_color.get();
+    for(; pt != ptFile->end(); ++pt, ++outc)
+        *outc = colorAcc.data<C3f>(pt);
 }
 
 
@@ -530,6 +550,7 @@ void PointView::loadPointFiles(const QStringList& fileNames)
     }
     if(m_points.empty())
         return;
+    emit colorChannelsChanged(m_points[0]->colorChannels());
     m_cloudCenter = m_points[0]->centroid();
     m_cursorPos = m_cloudCenter;
     m_camera.setCenter(exr2qt(m_cloudCenter));
@@ -565,6 +586,14 @@ void PointView::setBackground(QColor col)
 void PointView::setVisMode(VisMode mode)
 {
     m_visMode = mode;
+    updateGL();
+}
+
+
+void PointView::setColorChannel(QString channel)
+{
+    for(size_t i = 0; i < m_points.size(); ++i)
+        m_points[i]->setColorChannel(channel);
     updateGL();
 }
 
@@ -956,6 +985,10 @@ void PointView::drawPoints(const PointArrayModel& points, VisMode visMode,
 
 PointViewerMainWindow::PointViewerMainWindow(
         const QStringList& initialPointFileNames)
+    : m_pointView(0),
+    m_colorMenu(0),
+    m_colorMenuGroup(0),
+    m_colorMenuMapper(0)
 {
     setWindowTitle("Aqsis point cloud viewer");
 
@@ -997,6 +1030,9 @@ PointViewerMainWindow::PointViewerMainWindow(
     QAction* backgroundCustom = backMenu->addAction(tr("&Custom"));
     connect(backgroundCustom, SIGNAL(triggered()),
             this, SLOT(chooseBackground()));
+    // Color channel menu
+    m_colorMenu = viewMenu->addMenu(tr("Color &Channel"));
+    m_colorMenuMapper = new QSignalMapper(this);
 
     // Help menu
     QMenu* helpMenu = menuBar()->addMenu(tr("&Help"));
@@ -1007,6 +1043,11 @@ PointViewerMainWindow::PointViewerMainWindow(
     connect(aboutAct, SIGNAL(triggered()), this, SLOT(aboutDialog()));
 
     m_pointView = new PointView(this);
+    connect(m_pointView, SIGNAL(colorChannelsChanged(QStringList)),
+            this, SLOT(setColorChannels(QStringList)));
+    connect(m_colorMenuMapper, SIGNAL(mapped(QString)),
+            m_pointView, SLOT(setColorChannel(QString)));
+
     setCentralWidget(m_pointView);
     if(!initialPointFileNames.empty())
         m_pointView->loadPointFiles(initialPointFileNames);
@@ -1074,6 +1115,27 @@ void PointViewerMainWindow::toggleVisMode()
 {
     m_pointView->setVisMode(m_pointView->visMode() == PointView::Vis_Points ?
                             PointView::Vis_Disks : PointView::Vis_Points);
+}
+
+
+void PointViewerMainWindow::setColorChannels(QStringList channels)
+{
+    // Remove the old set of color channels from the menu
+    delete m_colorMenuGroup;
+    m_colorMenuGroup = new QActionGroup(this);
+    m_colorMenuGroup->setExclusive(true);
+    if(channels.empty())
+        return;
+    // Rebuild the color channel menu with a menu item for each channel
+    for(int i = 0; i < channels.size(); ++i)
+    {
+        QAction* act = m_colorMenuGroup->addAction(channels[i]);
+        act->setCheckable(true);
+        m_colorMenu->addAction(act);
+        m_colorMenuMapper->setMapping(act, channels[i]);
+        connect(act, SIGNAL(triggered()), m_colorMenuMapper, SLOT(map()));
+    }
+    m_colorMenuGroup->actions()[0]->setChecked(true);
 }
 
 
