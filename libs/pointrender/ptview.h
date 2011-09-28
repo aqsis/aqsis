@@ -31,13 +31,18 @@
 #define AQSIS_PTVIEW_H_INCLUDED
 
 #include <cmath>
+#include <vector>
 
 #include <boost/shared_ptr.hpp>
+#include <boost/shared_array.hpp>
 
 #include <QtGui/QMainWindow>
 #include <QtOpenGL/QGLWidget>
 
 #include <OpenEXR/ImathVec.h>
+#include <OpenEXR/ImathColor.h>
+
+#include <Partio.h>
 
 #include "pointcontainer.h"
 #include "interactivecamera.h"
@@ -46,8 +51,56 @@ namespace Aqsis {
 
 using Imath::V3f;
 using Imath::V2f;
+using Imath::C3f;
 
-inline float deg2rad(float d) { return (M_PI/180) * d; }
+
+//------------------------------------------------------------------------------
+/// Container for points to be displayed in the PointView interface
+class PointArrayModel : public QObject
+{
+    Q_OBJECT
+
+    public:
+        PointArrayModel();
+
+        /// Load points from a file
+        bool loadPointFile(const QString& fileName);
+
+        /// Return the number of points
+        size_t size() const { return m_npoints; }
+        /// Return true when there are zero points
+        bool empty() const { return m_npoints == 0; }
+
+        /// Return point position
+        const V3f* P() const { return m_P.get(); }
+        /// Return point normals
+        const V3f* N() const { return m_N.get(); }
+        /// Return point radii
+        const float* r() const { return m_r.get(); }
+        /// Return point color, or NULL if no color channel is present
+        const C3f* color() const { return m_col.get(); }
+
+        /// Get a list of channel names which look like color channels
+        QStringList colorChannels() { return m_colorChannelNames; }
+
+        /// Set the channel name which the color() function returns data for
+        void setColorChannel(const QString& name) { }
+
+        /// Compute the centroid of the P data
+        V3f centroid() const;
+
+    private:
+        /// Look through the channels to find all which look like color data
+        static QStringList findColorChannels(const Partio::ParticlesInfo* ptFile);
+
+        QString m_fileName;
+        QStringList m_colorChannelNames;
+        size_t m_npoints;
+        boost::shared_array<V3f> m_P;
+        boost::shared_array<V3f> m_N;
+        boost::shared_array<float> m_r;
+        boost::shared_array<C3f> m_col;
+};
 
 
 //------------------------------------------------------------------------------
@@ -98,7 +151,7 @@ class PointView : public QGLWidget
     private:
         static void drawAxes();
         void drawCursor(const V3f& P) const;
-        static void drawPoints(const PointArray& points, VisMode visMode,
+        static void drawPoints(const PointArrayModel& points, VisMode visMode,
                                bool useLighting);
 
         /// Mouse-based camera positioning
@@ -117,7 +170,7 @@ class PointView : public QGLWidget
         /// Flag for whether to use OpenGL lighting or not
         bool m_lighting;
         /// Point cloud data
-        boost::shared_ptr<PointArray> m_points;
+        std::vector<boost::shared_ptr<PointArrayModel> > m_points;
         boost::shared_ptr<const PointOctree> m_pointTree;
         V3f m_cloudCenter;
 };

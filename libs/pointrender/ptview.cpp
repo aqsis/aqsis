@@ -72,6 +72,11 @@ inline void glVertex(const Imath::V2f& v)
     glVertex2f(v.x, v.y);
 }
 
+inline void glColor(const Imath::C3f& c)
+{
+    glColor3f(c.x, c.y, c.z);
+}
+
 inline void glLoadMatrix(const Imath::M44f& m)
 {
     glLoadMatrixf((GLfloat*)m[0]);
@@ -103,6 +108,120 @@ inline Imath::M44f qt2exr(const QMatrix4x4& m)
     return mOut;
 }
 
+
+//----------------------------------------------------------------------
+// PointViewArray implementation
+
+static void releasePartioFile(Partio::ParticlesInfo* file)
+{
+    if(file) file->release();
+}
+
+
+PointArrayModel::PointArrayModel()
+    : m_npoints(0)
+{ }
+
+
+bool PointArrayModel::loadPointFile(const QString& fileName)
+{
+    namespace Pio = Partio;
+    boost::shared_ptr<Pio::ParticlesData> ptFile(
+                Pio::read(fileName.toAscii().constData()), releasePartioFile);
+    if(!ptFile)
+    {
+        QMessageBox::critical(0, tr("Error"),
+            tr("Couldn't open file \"%1\"").arg(fileName));
+        return false;
+    }
+    // Look for the necessary attributes in the file
+    Pio::ParticleAttribute positionAttr;
+    Pio::ParticleAttribute normalAttr;
+    Pio::ParticleAttribute radiusAttr;
+    Pio::ParticleAttribute colorAttr;
+    if(!ptFile->attributeInfo("position", positionAttr) ||
+       !ptFile->attributeInfo("normal", normalAttr)   ||
+       !ptFile->attributeInfo("radius", radiusAttr))
+    {
+        QMessageBox::critical(0, tr("Error"),
+            tr("Couldn't find required attribute in \"%1\"").arg(fileName));
+        return false;
+    }
+    // Check types
+    if(positionAttr.type != Pio::VECTOR ||
+       normalAttr.type != Pio::VECTOR ||
+       radiusAttr.type != Pio::FLOAT || radiusAttr.count != 1)
+    {
+        QMessageBox::critical(0, tr("Error"),
+            tr("Point attribute type or size wrong in \"%1\"").arg(fileName));
+        return false;
+    }
+    // Allocate required attributes
+    m_npoints = ptFile->numParticles();
+    m_P.reset(new V3f[m_npoints]);
+    m_N.reset(new V3f[m_npoints]);
+    m_r.reset(new float[m_npoints]);
+    // Look for likely color channels & allocate space if necessary
+    m_colorChannelNames = findColorChannels(ptFile.get());
+    m_col.reset();
+    if(!m_colorChannelNames.empty())
+    {
+        if(ptFile->attributeInfo(m_colorChannelNames[0].toAscii().constData(), colorAttr))
+            m_col.reset(new C3f[m_npoints]);
+    }
+    // Iterate over all particles & pull in the data.
+    Pio::ParticleAccessor posAcc(positionAttr);
+    Pio::ParticleAccessor norAcc(normalAttr);
+    Pio::ParticleAccessor radiusAcc(radiusAttr);
+    Pio::ParticleAccessor colorAcc(colorAttr);
+    Pio::ParticlesData::const_iterator pt = ptFile->begin();
+    pt.addAccessor(posAcc);
+    pt.addAccessor(norAcc);
+    pt.addAccessor(radiusAcc);
+    if(m_col)
+        pt.addAccessor(colorAcc);
+    V3f* outP = m_P.get();
+    V3f* outN = m_N.get();
+    float* outr = m_r.get();
+    C3f* outc = m_col.get();
+    for(; pt != ptFile->end(); ++pt)
+    {
+        *outP++ = posAcc.data<V3f>(pt);
+        *outN++ = norAcc.data<V3f>(pt);
+        *outr++ = radiusAcc.data<float>(pt);
+        if(m_col)
+            *outc++ = colorAcc.data<C3f>(pt);
+    }
+    return true;
+}
+
+
+V3f PointArrayModel::centroid() const
+{
+    V3f sum(0);
+    const V3f* P = m_P.get();
+    for(size_t i = 0; i < m_npoints; ++i, ++P)
+        sum += *P;
+    return (1.0f/m_npoints) * sum;
+}
+
+
+QStringList PointArrayModel::findColorChannels(const Partio::ParticlesInfo* ptFile)
+{
+    QStringList colChans;
+    Partio::ParticleAttribute attr;
+    for(int i = 0; i < ptFile->numAttributes(); ++i)
+    {
+        ptFile->attributeInfo(i, attr);
+        if(attr.type == Partio::FLOAT && attr.count == 3)
+            colChans.push_back(QString::fromStdString(attr.name));
+    }
+    // TODO: Sort by some criterion of "most color-like" channels?
+    return colChans;
+}
+
+
+//----------------------------------------------------------------------
 /// Get max and min of depth buffer, ignoring any depth > FLT_MAX/2
 ///
 /// \param z - depth array
@@ -402,25 +521,23 @@ PointView::PointView(QWidget *parent)
 
 void PointView::loadPointFiles(const QStringList& fileNames)
 {
-    if(fileNames.empty())
-        return;
-    // free up memory before loading new files.
-    m_points.reset(new PointArray());
+    m_points.clear();
     for(int i = 0; i < fileNames.size(); ++i)
     {
-        if(!Aqsis::loadPointFile(*m_points, fileNames[i].toStdString()))
-        {
-            QMessageBox::critical(this, tr("Error"),
-                    tr("Couldn't open point file \"%1\"").arg(fileNames[i]));
-            m_points.reset();
-            return;
-        }
+        boost::shared_ptr<PointArrayModel> points(new PointArrayModel());
+        if(points->loadPointFile(fileNames[i]) && !points->empty())
+            m_points.push_back(points);
     }
-    m_cloudCenter = m_points->centroid();
+    if(m_points.empty())
+        return;
+    m_cloudCenter = m_points[0]->centroid();
     m_cursorPos = m_cloudCenter;
     m_camera.setCenter(exr2qt(m_cloudCenter));
+#if 0
+    // Debug
     m_pointTree.reset(); // free up memory
     m_pointTree = boost::shared_ptr<PointOctree>(new PointOctree(*m_points));
+#endif
     updateGL();
 }
 
@@ -477,22 +594,6 @@ void PointView::resizeGL(int w, int h)
 
 void PointView::paintGL()
 {
-    RadiosityIntegrator integrator(m_probeRes);
-    C3f col(1.0f);
-    if(m_pointTree)
-    {
-        // Get a vector toward the probe position from the camera center
-        QMatrix4x4 viewMatrix = m_camera.viewMatrix();
-        V3f d = (qt2exr(viewMatrix.inverted().
-                        map(viewMatrix.map(exr2qt(m_cursorPos))*1.1)) -
-                 m_cursorPos).normalized();
-        float coneAngle = M_PI;
-        microRasterize(integrator, m_cursorPos, d,
-                       coneAngle,
-                       m_probeMaxSolidAngle, *m_pointTree);
-        col = integrator.radiosity(d, coneAngle);
-    }
-
     //--------------------------------------------------
     // Draw main scene
     // Set camera projection
@@ -511,42 +612,46 @@ void PointView::paintGL()
     // Draw geometry
 
     //drawAxes();
-    if(m_points)
-        drawPoints(*m_points, m_visMode, m_lighting);
+    for(size_t i = 0; i < m_points.size(); ++i)
+        drawPoints(*m_points[i], m_visMode, m_lighting);
 //    if(m_pointTree)
 //        splitNode(m_cursorPos, m_probeMaxSolidAngle, m_pointTree->dataSize(),
 //                  m_pointTree->root());
 
 
-    //--------------------------------------------------
-    glPushAttrib(GL_VIEWPORT_BIT | GL_SCISSOR_BIT | GL_ENABLE_BIT);
-    glPushMatrix();
-    glMatrixMode(GL_PROJECTION);
-    glPushMatrix();
-    glMatrixMode(GL_MODELVIEW);
-    glEnable(GL_SCISSOR_TEST);
+    if(m_pointTree)
+    {
+        RadiosityIntegrator integrator(m_probeRes);
+        // Get a vector toward the probe position from the camera center
+        QMatrix4x4 viewMatrix = m_camera.viewMatrix();
+        V3f d = (qt2exr(viewMatrix.inverted().
+                        map(viewMatrix.map(exr2qt(m_cursorPos))*1.1)) -
+                 m_cursorPos).normalized();
+        float coneAngle = M_PI;
+        microRasterize(integrator, m_cursorPos, d,
+                       coneAngle,
+                       m_probeMaxSolidAngle, *m_pointTree);
+        // Draw image of rendered microbuffer
+        glPushAttrib(GL_VIEWPORT_BIT | GL_SCISSOR_BIT | GL_ENABLE_BIT);
+        glPushMatrix();
+        glMatrixMode(GL_PROJECTION);
+        glPushMatrix();
+        glMatrixMode(GL_MODELVIEW);
+        glEnable(GL_SCISSOR_TEST);
 
-    //--------------------------------------------------
-    // Draw image of rendered microbuffer
-    GLuint miniBufWidth = width()/3;
-    glScissor(width() - miniBufWidth, 0, miniBufWidth, miniBufWidth*3/4);
-    glViewport(width() - miniBufWidth, 0, miniBufWidth, miniBufWidth*3/4);
+        GLuint microBufWidth = width()/3;
+        glScissor(width() - microBufWidth, 0,
+                  microBufWidth, microBufWidth*3/4);
+        glViewport(width() - microBufWidth, 0,
+                   microBufWidth, microBufWidth*3/4);
+        drawMicroBuf(integrator.microBuf());
 
-    drawMicroBuf(integrator.microBuf());
-
-//    glColor(col);
-//    glBegin(GL_QUADS);
-//        glTexCoord2f(0, 0); glVertex2f(0, 0);
-//        glTexCoord2f(1, 0); glVertex2f(1, 0);
-//        glTexCoord2f(1, 1); glVertex2f(1, 1);
-//        glTexCoord2f(0, 1); glVertex2f(0, 1);
-//    glEnd();
-
-    glPopMatrix();
-    glMatrixMode(GL_PROJECTION);
-    glPopMatrix();
-    glMatrixMode(GL_MODELVIEW);
-    glPopAttrib();
+        glPopMatrix();
+        glMatrixMode(GL_PROJECTION);
+        glPopMatrix();
+        glMatrixMode(GL_MODELVIEW);
+        glPopAttrib();
+    }
 
     // Draw overlay stuff, including cursor position.
     drawCursor(m_cursorPos);
@@ -596,26 +701,26 @@ void PointView::keyPressEvent(QKeyEvent *event)
     }
     else if(event->key() == Qt::Key_S)
     {
-        if(!m_points)
-            return;
-        // Snap probe to position of closest point.
-        int ptStride = m_points->stride;
-        int npoints = m_points->data.size()/ptStride;
-        const float* ptData = &m_points->data[0];
+        // Snap probe to position of closest point and center on it
         V3f newPos(0);
         float nearestDist = FLT_MAX;
-        for(int i = 0; i < npoints; ++i)
+        for(size_t j = 0; j < m_points.size(); ++j)
         {
-            const float* data = ptData + i*ptStride;
-            V3f p(data[0], data[1], data[2]);
-            float dist = (m_cursorPos - p).length2();
-            if(dist < nearestDist)
+            if(m_points[j]->empty())
+                continue;
+            const V3f* P = m_points[j]->P();
+            for(size_t i = 0, iend = m_points[j]->size(); i < iend; ++i, ++P)
             {
-                nearestDist = dist;
-                newPos = p;
+                float dist = (m_cursorPos - *P).length2();
+                if(dist < nearestDist)
+                {
+                    nearestDist = dist;
+                    newPos = *P;
+                }
             }
         }
         m_cursorPos = newPos;
+        m_camera.setCenter(exr2qt(newPos));
         updateGL();
     }
     else
@@ -720,13 +825,11 @@ void PointView::drawCursor(const V3f& p) const
 
 
 /// Draw point cloud using OpenGL
-void PointView::drawPoints(const PointArray& points, VisMode visMode,
+void PointView::drawPoints(const PointArrayModel& points, VisMode visMode,
                            bool useLighting)
 {
-    int ptStride = points.stride;
-    int npoints = points.data.size()/ptStride;
-    const float* ptData = &points.data[0];
-
+    if(points.empty())
+        return;
     switch(visMode)
     {
         case Vis_Points:
@@ -744,10 +847,17 @@ void PointView::drawPoints(const PointArray& points, VisMode visMode,
             glPointParameterf(GL_POINT_SIZE_MAX, 100);
             // Draw all points at once using vertex arrays.
             glEnableClientState(GL_VERTEX_ARRAY);
-            glEnableClientState(GL_COLOR_ARRAY);
-            glVertexPointer(3, GL_FLOAT, ptStride*sizeof(float), ptData);
-            glColorPointer(3, GL_FLOAT, ptStride*sizeof(float), ptData+7);
-            glDrawArrays(GL_POINTS, 0, npoints);
+            glVertexPointer(3, GL_FLOAT, 3*sizeof(float),
+                            reinterpret_cast<const float*>(points.P()));
+            const float* col = reinterpret_cast<const float*>(points.color());
+            if(col)
+            {
+                glEnableClientState(GL_COLOR_ARRAY);
+                glColorPointer(3, GL_FLOAT, 3*sizeof(float), col);
+            }
+            glDrawArrays(GL_POINTS, 0, points.size());
+            glDisableClientState(GL_VERTEX_ARRAY);
+            glDisableClientState(GL_COLOR_ARRAY);
         }
         break;
         case Vis_Disks:
@@ -809,24 +919,24 @@ void PointView::drawPoints(const PointArray& points, VisMode visMode,
             // perhaps just compile into a display list?
             if(useLighting)
                 glEnable(GL_LIGHTING);
-            for(int i = 0; i < npoints; ++i)
+            const V3f* P = points.P();
+            const V3f* N = points.N();
+            const float* r = points.r();
+            const C3f* col = points.color();
+            for(size_t i = 0; i < points.size(); ++i, ++P, ++N, ++r)
             {
-                const float* data = ptData + i*ptStride;
-                V3f p(data[0], data[1], data[2]);
-                V3f n(data[3], data[4], data[5]);
-                float r = M_SQRT2*data[6];
-                glColor3f(data[7], data[8], data[9]);
+                glColor(col ? *col++ : C3f(1));
                 glPushMatrix();
                 // Translate disk to point location and scale
-                glTranslate(p);
-                glScalef(r,r,r);
+                glTranslate(*P);
+                glScalef(*r, *r, *r);
                 // Transform the disk normal (0,0,1) into the correct normal
                 // direction for the current point.  The appropriate transform
                 // is a rotation about a direction perpendicular to both
                 // normals:
-                V3f v = diskNormal % n;
+                V3f v = diskNormal % *N;
                 // via the angle given by the dot product:
-                float angle = rad2deg(acosf(diskNormal^n));
+                float angle = rad2deg(acosf(diskNormal^*N));
                 glRotatef(angle, v.x, v.y, v.z);
                 // Instance the disk
                 glCallList(disk);
