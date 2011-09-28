@@ -139,6 +139,7 @@ class PointView : public QGLWidget
         void setBackground(QColor col);
         void setVisMode(VisMode mode);
         void setColorChannel(QString channel);
+        void toggleDrawAxes();
 
     signals:
         void colorChannelsChanged(QStringList channels);
@@ -174,6 +175,7 @@ class PointView : public QGLWidget
         QColor m_backgroundColor;
         /// Type of visualization
         VisMode m_visMode;
+        bool m_drawAxes;
         /// Flag for whether to use OpenGL lighting or not
         bool m_lighting;
         /// Point cloud data

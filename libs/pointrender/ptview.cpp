@@ -527,6 +527,7 @@ PointView::PointView(QWidget *parent)
     m_probeMaxSolidAngle(0),
     m_backgroundColor(0, 0, 0),
     m_visMode(Vis_Points),
+    m_drawAxes(false),
     m_lighting(false),
     m_points(),
     m_pointTree(),
@@ -590,6 +591,12 @@ void PointView::setVisMode(VisMode mode)
 }
 
 
+void PointView::toggleDrawAxes()
+{
+    m_drawAxes = !m_drawAxes;
+}
+
+
 void PointView::setColorChannel(QString channel)
 {
     for(size_t i = 0; i < m_points.size(); ++i)
@@ -640,7 +647,8 @@ void PointView::paintGL()
 
     // Draw geometry
 
-    //drawAxes();
+    if(m_drawAxes)
+        drawAxes();
     for(size_t i = 0; i < m_points.size(); ++i)
         drawPoints(*m_points[i], m_visMode, m_lighting);
 //    if(m_pointTree)
@@ -1009,6 +1017,8 @@ PointViewerMainWindow::PointViewerMainWindow(
     viewAsDisks->setShortcut(tr("v"));
     viewAsDisks->setCheckable(true);
     connect(viewAsDisks, SIGNAL(triggered()), this, SLOT(toggleVisMode()));
+    QAction* drawAxes = viewMenu->addAction(tr("Draw &Axes"));
+    drawAxes->setCheckable(true);
     // Background sub-menu
     QMenu* backMenu = viewMenu->addMenu(tr("Set &Background"));
     QSignalMapper* mapper = new QSignalMapper(this);
@@ -1047,6 +1057,8 @@ PointViewerMainWindow::PointViewerMainWindow(
             this, SLOT(setColorChannels(QStringList)));
     connect(m_colorMenuMapper, SIGNAL(mapped(QString)),
             m_pointView, SLOT(setColorChannel(QString)));
+    connect(drawAxes, SIGNAL(triggered()),
+            m_pointView, SLOT(toggleDrawAxes()));
 
     setCentralWidget(m_pointView);
     if(!initialPointFileNames.empty())
