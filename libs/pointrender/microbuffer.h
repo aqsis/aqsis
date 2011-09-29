@@ -35,6 +35,7 @@
 
 #include <cfloat>
 #include <cmath>
+#include <cstring>
 
 #include <boost/scoped_array.hpp>
 
@@ -103,13 +104,17 @@ class MicroBuf
             Face_begin = Face_xp
         };
 
-        MicroBuf(int faceRes, int nchans = 1)
+        /// faceRes gives face resolution.  Faces are square.  nchans gives
+        /// the number of channels in each pixel, and defaultPix gives the
+        /// values of the channels which will be used when reset() is called.
+        MicroBuf(int faceRes, int nchans, const float* defaultPix)
             : m_res(faceRes),
             m_nchans(nchans),
             m_faceSize(nchans*faceRes*faceRes),
             m_pixels()
         {
             m_pixels.reset(new float[m_faceSize*Face_end]);
+            m_defaultPixels.reset(new float[m_faceSize*Face_end]);
             m_directions.reset(new V3f[Face_end*faceRes*faceRes]);
             m_pixelSizes.reset(new float[m_faceSize]);
             // Cache direction vectors
@@ -132,20 +137,17 @@ class MicroBuf
                 float v = (0.5f + iv)/faceRes*2.0f - 1.0f;
                 m_pixelSizes[iv*m_res + iu] = 1.0f/V3f(u,v,1).length2();
             }
+            float* pix = m_defaultPixels.get();
+            for(int i = 0, iend = size(); i < iend; ++i, pix += m_nchans)
+                for(int c = 0; c < m_nchans; ++c)
+                    pix[c] = defaultPix[c];
         }
 
         /// Reset buffer to default (non-rendered) state.
-        ///
-        /// \param defaultPix - reset every pixel in the buffer to the channels
-        ///                     given in the defaultPix array
-        void reset(const float* defaultPix)
+        void reset()
         {
-            for(int i = 0, iend = size(); i < iend; ++i)
-            {
-                float* pix = &m_pixels[m_nchans*i];
-                for(int c = 0; c < m_nchans; ++c)
-                    pix[c] = defaultPix[c];
-            }
+            memcpy(m_pixels.get(), m_defaultPixels.get(),
+                   sizeof(float)*size()*m_nchans);
         }
 
         /// Get raw data store for face
@@ -324,6 +326,7 @@ class MicroBuf
         int m_faceSize;
         /// Pixel face storage
         boost::scoped_array<float> m_pixels;
+        boost::scoped_array<float> m_defaultPixels;
         /// Storage for pixel ray directions
         boost::scoped_array<V3f> m_directions;
         /// Pixels on a unit cube are not all equal in angular size
@@ -343,7 +346,7 @@ class OcclusionIntegrator
         /// Create integrator with given resolution of the environment map
         /// faces.
         OcclusionIntegrator(int faceRes)
-            : m_buf(faceRes, 1),
+            : m_buf(faceRes, 1, defaultPixel()),
             m_face(0)
         {
             clear();
@@ -370,8 +373,7 @@ class OcclusionIntegrator
         /// Reset buffer to default state
         void clear()
         {
-            float defaultPixel[1] = {0};
-            m_buf.reset(defaultPixel);
+            m_buf.reset();
         };
 
         /// Set extra data (eg, radiosity) associated with the current point
@@ -446,6 +448,12 @@ class OcclusionIntegrator
         }
 
     private:
+        static float* defaultPixel()
+        {
+            static float def[1] = {0};
+            return def;
+        }
+
         MicroBuf m_buf;
         float* m_face;
 };
@@ -459,7 +467,7 @@ class RadiosityIntegrator
         /// Create integrator with given resolution of the environment map
         /// faces.
         RadiosityIntegrator(int faceRes)
-            : m_buf(faceRes, 5),
+            : m_buf(faceRes, 5, defaultPixel()),
             m_face(0),
             m_currRadiosity(0)
         {
@@ -487,9 +495,7 @@ class RadiosityIntegrator
         /// Reset buffer to default state
         void clear()
         {
-            // depth, foreground_coverage, foreground_rgb, background_rgb
-            float defaultPixel[] = {FLT_MAX, 0, 0, 0, 0, 0, 0, 0};
-            m_buf.reset(defaultPixel);
+            m_buf.reset();
         };
 
         /// Set extra data (eg, radiosity) associated with the current point
@@ -581,6 +587,13 @@ class RadiosityIntegrator
         }
 
     private:
+        static float* defaultPixel()
+        {
+            // depth, foreground_coverage, foreground_rgb, background_rgb
+            static float def[] = {FLT_MAX, 0, 0, 0, 0, 0, 0, 0};
+            return def;
+        }
+
         MicroBuf m_buf;
         float* m_face;
         C3f m_currRadiosity;
