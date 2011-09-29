@@ -343,6 +343,8 @@ class ${procName} : public CachedRequest
         }
 };'''
 
+customImplementations = set(['Procedural'])
+
 memberTypeMap = {
     'RtString': 'CachedString',
     'RtToken': 'CachedString',
@@ -363,6 +365,8 @@ def getMemberType(arg):
 for proc in riXml.findall('Procedures/Procedure'):
     if proc.findall('Rib'):
         procName = proc.findtext('Name')
+        if procName in customImplementations:
+            continue
         argsXml = [a for a in proc.findall('Arguments/Argument')
                    if not a.findall('RibValue')]
         formals = [formalArg(a) for a in argsXml]
@@ -2003,27 +2007,6 @@ class Blobby : public CachedRequest
         }
 };
 
-class Procedural : public CachedRequest
-{
-    private:
-        RtPointer m_data;
-        CachedFloatTuple<6> m_bound;
-        RtProcSubdivFunc m_refineproc;
-        RtProcFreeFunc m_freeproc;
-    public:
-        Procedural(RtPointer data, RtConstBound bound, RtProcSubdivFunc refineproc, RtProcFreeFunc freeproc)
-            : m_data(data)
-            , m_bound(bound)
-            , m_refineproc(refineproc)
-            , m_freeproc(freeproc)
-        { }
-
-        virtual void reCall(Ri::Renderer& context) const
-        {
-            context.Procedural(m_data, m_bound, m_refineproc, m_freeproc);
-        }
-};
-
 class Geometry : public CachedRequest
 {
     private:
@@ -2333,6 +2316,42 @@ class ArchiveEnd : public CachedRequest
         }
 };
 //[[[end]]]
+
+
+// Special case implementation of cached Procedurals.
+//
+// The reason this is special is the need to carefully manage the lifetime of
+// the procedural data.  In particular, we need to avoid deleting the data
+// until the destructor is called so that reCall() will work multiple times.
+class Procedural : public CachedRequest
+{
+    private:
+        RtPointer m_data;
+        CachedFloatTuple<6> m_bound;
+        RtProcSubdivFunc m_refineproc;
+        RtProcFreeFunc m_freeproc;
+
+        static void doNothingFreeProc(void* ptr) {}
+
+    public:
+        Procedural(RtPointer data, RtConstBound bound, RtProcSubdivFunc refineproc, RtProcFreeFunc freeproc)
+            : m_data(data)
+            , m_bound(bound)
+            , m_refineproc(refineproc)
+            , m_freeproc(freeproc)
+        { }
+
+        ~Procedural()
+        {
+            m_freeproc(m_data);
+        }
+
+        virtual void reCall(Ri::Renderer& context) const
+        {
+            context.Procedural(m_data, m_bound, m_refineproc, &doNothingFreeProc);
+        }
+};
+
 
 } // namespace RiCache
 
