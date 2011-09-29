@@ -1128,6 +1128,7 @@ void CqShaderExecEnv::pointCloudIntegrate(IqShaderData* P, IqShaderData* N,
 	float coneAngle = M_PI_2;
 	float bias = 0;
 	CqString coordSystem = "world";
+	IqShaderData* occlusionResult = 0;
 	for(int i = 0; i < cParams; i+=2)
 	{
 		apParams[i]->GetString(paramName, 0);
@@ -1169,6 +1170,11 @@ void CqShaderExecEnv::pointCloudIntegrate(IqShaderData* P, IqShaderData* N,
 		{
 			if(paramValue->Type() == type_string)
 				paramValue->GetString(coordSystem);
+		}
+		else if(paramName == "occlusion")
+		{
+			if(paramValue->Type() == type_float)
+				occlusionResult = paramValue;
 		}
 		// Interesting arguments which could be implemented:
 		//   "hitsides"    - sidedness culling: "front", "back", "both"
@@ -1269,7 +1275,8 @@ void CqShaderExecEnv::pointCloudIntegrate(IqShaderData* P, IqShaderData* N,
 				integrator.clear();
 				microRasterize(integrator, Pval2, Nval2, coneAngle,
 							   maxSolidAngle, *pointTree);
-				storeIntegratedResult(integrator, Nval2, coneAngle, result, igrid);
+				storeIntegratedResult(integrator, Nval2, coneAngle, result,
+									  occlusionResult, igrid);
 			}
 		}
 		}
@@ -1293,7 +1300,8 @@ void CqShaderExecEnv::pointCloudIntegrate(IqShaderData* P, IqShaderData* N,
 //----------------------------------------------------------------------
 static void storeIntegratedResult(const OcclusionIntegrator& integrator,
 								  const V3f& N, float coneAngle,
-								  IqShaderData* result, int igrid)
+								  IqShaderData* result,
+								  IqShaderData* /*occlusionResult*/, int igrid)
 {
 	result->SetFloat(integrator.occlusion(N, coneAngle), igrid);
 }
@@ -1310,10 +1318,14 @@ void CqShaderExecEnv::SO_occlusion_rt( IqShaderData* P, IqShaderData* N, IqShade
 // indirectdiffuse(P, N, samples, ...)
 static void storeIntegratedResult(const RadiosityIntegrator& integrator,
 								  const V3f& N, float coneAngle,
-								  IqShaderData* result, int igrid)
+								  IqShaderData* result,
+								  IqShaderData* occlusionResult, int igrid)
 {
-	C3f col = integrator.radiosity(N, coneAngle);
+	float occ = 0;
+	C3f col = integrator.radiosity(N, coneAngle, &occ);
 	result->SetColor(CqColor(col.x, col.y, col.z), igrid);
+	if(occlusionResult)
+		occlusionResult->SetFloat(occ, igrid);
 }
 
 void CqShaderExecEnv::SO_indirectdiffuse(IqShaderData* P, IqShaderData* N,

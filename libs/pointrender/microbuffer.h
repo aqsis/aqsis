@@ -420,7 +420,7 @@ class OcclusionIntegrator
         float occlusion(V3f N, float coneAngle) const
         {
             // Integrate over face to get occlusion.
-            float illum = 0;
+            float occ = 0;
             float totWeight = 0;
             float cosConeAngle = std::cos(coneAngle);
             for(int f = MicroBuf::Face_begin; f < MicroBuf::Face_end; ++f)
@@ -435,15 +435,14 @@ class OcclusionIntegrator
                     {
                         d *= m_buf.pixelSize(iu, iv);
                         // Accumulate light coming from infinity.
-                        illum += d*(1.0f - std::min(1.0f, face[0]));
+                        occ += d*std::min(1.0f, face[0]);
                         totWeight += d;
                     }
                 }
             }
-            if(totWeight == 0)
-                return 0;
-            illum /= totWeight;
-            return 1 - illum;
+            if(totWeight != 0)
+                occ /= totWeight;
+            return occ;
         }
 
     private:
@@ -542,13 +541,17 @@ class RadiosityIntegrator
         /// radians, the usual cos(theta) weighting is adjusted to
         /// (cos(theta) - cos(coneAngle)) so that it falls continuously to
         /// zero when theta == coneAngle
-        C3f radiosity(V3f N, float coneAngle) const
+        ///
+        /// If occlusion is non-null, the amount of occlusion will also be
+        /// computed and stored.
+        C3f radiosity(V3f N, float coneAngle, float* occlusion = 0) const
         {
             // Integrate incoming light with cosine weighting to get outgoing
             // radiosity
             C3f rad(0);
             float totWeight = 0;
             float cosConeAngle = std::cos(coneAngle);
+            float occ = 0;
             for(int f = MicroBuf::Face_begin; f < MicroBuf::Face_end; ++f)
             {
                 const float* face = m_buf.face(f);
@@ -562,13 +565,19 @@ class RadiosityIntegrator
                         d *= m_buf.pixelSize(iu, iv);
                         C3f& radiosity = *(C3f*)(face + 2);
                         rad += d*radiosity;
+                        occ += d*face[1];
                         totWeight += d;
                     }
                 }
             }
-            if(totWeight == 0)
-                return C3f(0);
-            return 1.0f/totWeight * rad;
+            if(totWeight != 0)
+            {
+                occ /= totWeight;
+                rad = (1.0f/totWeight) * rad;
+            }
+            if(occlusion)
+                *occlusion = occ;
+            return rad;
         }
 
     private:
