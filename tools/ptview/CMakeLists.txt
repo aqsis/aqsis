@@ -1,27 +1,27 @@
-project(pointrender)
+project(ptview)
 
 find_package(OpenGL)
 
-if(AQSIS_USE_OPENEXR AND QT_FOUND AND OPENGL_FOUND)
+if(QT_FOUND AND OPENGL_FOUND)
 	include_directories(${AQSIS_OPENEXR_INCLUDE_DIR} "${AQSIS_OPENEXR_INCLUDE_DIR}/OpenEXR" ${QT_INCLUDES}
 						${OPENGL_INCLUDE_DIR})
 
-	qt4_wrap_cpp(moc_srcs ptview.h interactivecamera.h)
+	include_subproject(pointrender)
 
-	include_subproject(partio)
-
+	qt4_wrap_cpp(moc_srcs
+		ptview.h
+		${aqsis_all_SOURCE_DIR}/include/aqsis/util/interactivecamera.h
+	)
 	set(srcs
+		${pointrender_srcs}
 		${moc_srcs}
-		${partio_srcs}
 		ptview.cpp
-		microbuffer.cpp
-		pointcontainer.cpp
 	)
 
 	aqsis_add_executable(ptview ${srcs} GUIAPP
 		LINK_LIBRARIES  ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY}
 			${QT_QTOPENGL_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY}
-			${OPENGL_gl_LIBRARY} ${partio_libs} aqsis_tex)
+			${OPENGL_gl_LIBRARY} ${pointrender_libs} aqsis_util)
 
 	aqsis_install_targets(ptview)
 endif()

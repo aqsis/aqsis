@@ -44,8 +44,9 @@
 
 #include <Partio.h>
 
+#include <aqsis/util/interactivecamera.h>
+
 #include "pointcontainer.h"
-#include "interactivecamera.h"
 
 class QActionGroup;
 class QSignalMapper;

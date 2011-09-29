@@ -265,6 +265,7 @@ include_directories(
 # Thirdparty libs
 declare_subproject(thirdparty/tinyxml)
 declare_subproject(thirdparty/partio)
+declare_subproject(libs/pointrender)
 if(AQSIS_USE_PDIFF)
   add_subdirectory(thirdparty/pdiff)
 endif()
@@ -281,7 +282,6 @@ add_subdirectory(libs/shadervm)
 add_subdirectory(libs/slxargs)
 add_subdirectory(libs/ri2rib)
 add_subdirectory(libs/core)
-add_subdirectory(libs/pointrender)
 
 # Build executable tools
 add_subdirectory(tools/aqsl)
@@ -292,6 +292,7 @@ add_subdirectory(tools/teqser)
 if(AQSIS_USE_QT)
 	add_subdirectory(tools/eqsl)
 	add_subdirectory(tools/piqsl)
+	add_subdirectory(tools/ptview)
 endif()
 
 # Build displays
