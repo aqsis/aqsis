@@ -256,6 +256,12 @@ static void renderDiskExact(IntegratorT& integrator, V3f p, V3f n, float r)
 }
 
 
+/// Rasterize disk into the given integrator
+///
+/// N is the normal of the culling cone, with cone angle specified by
+/// cosConeAngle and sinConeAngle.  The position of the disk with respect to
+/// the centre of the microbuffer is p, n is the normal of the disk and r is
+/// the disk radius.
 template<typename IntegratorT>
 void renderDisk(IntegratorT& integrator, V3f N, V3f p, V3f n, float r,
                 float cosConeAngle, float sinConeAngle)

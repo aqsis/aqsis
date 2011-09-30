@@ -557,8 +557,10 @@ void PointView::loadPointFiles(const QStringList& fileNames)
     m_camera.setCenter(exr2qt(m_cloudCenter));
 #if 0
     // Debug
+    PointArray a;
+    loadPointFile(a, fileNames[0].toStdString());
     m_pointTree.reset(); // free up memory
-    m_pointTree = boost::shared_ptr<PointOctree>(new PointOctree(*m_points));
+    m_pointTree = boost::shared_ptr<PointOctree>(new PointOctree(a));
 #endif
     updateGL();
 }
@@ -963,6 +965,16 @@ void PointView::drawPoints(const PointArrayModel& points, VisMode visMode,
             for(size_t i = 0; i < points.size(); ++i, ++P, ++N, ++r)
             {
                 glColor(col ? *col++ : C3f(1));
+                if(N->length2() == 0)
+                {
+                    // For zero-length normals, we don't know the disk
+                    // orientation, so draw as a point instead.
+                    glPointSize(1);
+                    glBegin(GL_POINTS);
+                        glVertex(*P);
+                    glEnd();
+                    continue;
+                }
                 glPushMatrix();
                 // Translate disk to point location and scale
                 glTranslate(*P);
@@ -970,11 +982,16 @@ void PointView::drawPoints(const PointArrayModel& points, VisMode visMode,
                 // Transform the disk normal (0,0,1) into the correct normal
                 // direction for the current point.  The appropriate transform
                 // is a rotation about a direction perpendicular to both
-                // normals:
+                // normals,
                 V3f v = diskNormal % *N;
-                // via the angle given by the dot product:
-                float angle = rad2deg(acosf(diskNormal^*N));
-                glRotatef(angle, v.x, v.y, v.z);
+                if(v.length2() > 1e-10)
+                {
+                    // And via the angle given by the dot product.  (If the
+                    // length of v is very small we don't do the rotation for
+                    // numerical stability.)
+                    float angle = rad2deg(acosf(diskNormal.dot(*N)));
+                    glRotatef(angle, v.x, v.y, v.z);
+                }
                 // Instance the disk
                 glCallList(disk);
                 glPopMatrix();
