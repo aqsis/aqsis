@@ -79,8 +79,8 @@ inline bool sphereOutsideCone(V3f p, float plen2, float r,
     // cone.
     if(x < 0)
         return false;
-    // Special case - if sphere angle and cone angle add to pi, the sphere and
-    // cone must intersect.
+    // Special case - if sphere angle and cone angle add to >= 180 degrees, the
+    // sphere and cone must intersect.
     if(cosConeAngle < 0 && x < plen2*cosConeAngle*cosConeAngle)
         return false;
     // General case
@@ -274,9 +274,6 @@ void renderDisk(IntegratorT& integrator, V3f N, V3f p, V3f n, float r,
     if(dot_pn > 0)
         return;
     float plen2 = p.length2();
-    // Cull points which lie outside the cone of interest.
-    if(sphereOutsideCone(p, plen2, r, N, cosConeAngle, sinConeAngle))
-        return;
     float plen = sqrtf(plen2);
     // If solid angle of bounding sphere is greater than exactRenderAngle,
     // resolve the visibility exactly rather than using a cheap approx.
@@ -452,7 +449,6 @@ static void renderNode(IntegratorT& integrator, V3f P, V3f N, float cosConeAngle
         // Examine node bound and cull if possible
         // TODO: Reinvestigate using (node->aggP - P) with spherical harmonics
         V3f c = node->center - P;
-        // TODO: Is this check somewhat redundent with the one inside renderDisk?
         if(sphereOutsideCone(c, c.length2(), node->boundRadius, N,
                              cosConeAngle, sinConeAngle))
             return;
