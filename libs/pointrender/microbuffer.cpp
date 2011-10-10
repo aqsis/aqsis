@@ -436,94 +436,101 @@ void microRasterize(IntegratorT& integrator, V3f P, V3f N, float coneAngle,
 }
 
 
-/// Recursively render point hierarchy into microbuffer.
-///
-/// TODO: Check whether making this into an iterative traversal makes it
-/// faster.
+/// Render point hierarchy into microbuffer.
 template<typename IntegratorT>
 static void renderNode(IntegratorT& integrator, V3f P, V3f N, float cosConeAngle,
                        float sinConeAngle, float maxSolidAngle, int dataSize,
                        const PointOctree::Node* node)
 {
-    {
-        // Examine node bound and cull if possible
-        // TODO: Reinvestigate using (node->aggP - P) with spherical harmonics
-        V3f c = node->center - P;
-        if(sphereOutsideCone(c, c.length2(), node->boundRadius, N,
-                             cosConeAngle, sinConeAngle))
-            return;
-    }
-    float r = node->aggR;
-    V3f p = node->aggP - P;
-    float plen2 = p.length2();
-    // Examine solid angle of interior node bounding sphere to see whether we
-    // can render it directly or not.
+    // This is an iterative traversal of the point hierarchy, since it's
+    // slightly faster than a recursive traversal.
     //
-    // TODO: Would be nice to use dot(node->aggN, p.normalized()) in the solid
-    // angle estimation.  However, we get bad artifacts if we do this naively.
-    // Perhaps with spherical harmoics it'll be better.
-    float solidAngle = M_PI*r*r / plen2;
-    if(solidAngle < maxSolidAngle)
+    // The max required size for the explicit stack should be < 200, since
+    // tree depth shouldn't be > 24, and we have a max of 8 children per node.
+    const PointOctree::Node* nodeStack[200];
+    nodeStack[0] = node;
+    int stackSize = 1;
+    while(stackSize > 0)
     {
-        integrator.setPointData(reinterpret_cast<const float*>(&node->aggCol));
-        renderDisk(integrator, N, p, node->aggN, r, cosConeAngle, sinConeAngle);
-    }
-    else
-    {
-        // If we get here, the solid angle of the current node was too large
-        // so we must consider the children of the node.
-        //
-        // The render order is sorted so that points are rendered front to
-        // back.  This greatly improves the correctness of the hider.
-        //
-        // FIXME: The sorting procedure gets things wrong sometimes!  The
-        // problem is that points may stick outside the bounds of their octree
-        // nodes.  Probably we need to record all the points, sort, and
-        // finally render them to get this right.
-        if(node->npoints != 0)
+        node = nodeStack[--stackSize];
         {
-            // Leaf node: simply render each child point.
-            std::pair<float, int> childOrder[8];
-            assert(node->npoints <= 8);
-            for(int i = 0; i < node->npoints; ++i)
-            {
-                const float* data = &node->data[i*dataSize];
-                V3f p = V3f(data[0], data[1], data[2]) - P;
-                childOrder[i].first = p.length2();
-                childOrder[i].second = i;
-            }
-            std::sort(childOrder, childOrder + node->npoints);
-            for(int i = 0; i < node->npoints; ++i)
-            {
-                const float* data = &node->data[childOrder[i].second*dataSize];
-                V3f p = V3f(data[0], data[1], data[2]) - P;
-                V3f n = V3f(data[3], data[4], data[5]);
-                float r = data[6];
-                integrator.setPointData(data+7);
-                renderDisk(integrator, N, p, n, r, cosConeAngle, sinConeAngle);
-            }
-            return;
+            // Examine node bound and cull if possible
+            // TODO: Reinvestigate using (node->aggP - P) with spherical harmonics
+            V3f c = node->center - P;
+            if(sphereOutsideCone(c, c.length2(), node->boundRadius, N,
+                                cosConeAngle, sinConeAngle))
+                continue;
+        }
+        float r = node->aggR;
+        V3f p = node->aggP - P;
+        float plen2 = p.length2();
+        // Examine solid angle of interior node bounding sphere to see whether we
+        // can render it directly or not.
+        //
+        // TODO: Would be nice to use dot(node->aggN, p.normalized()) in the solid
+        // angle estimation.  However, we get bad artifacts if we do this naively.
+        // Perhaps with spherical harmoics it'll be better.
+        float solidAngle = M_PI*r*r / plen2;
+        if(solidAngle < maxSolidAngle)
+        {
+            integrator.setPointData(reinterpret_cast<const float*>(&node->aggCol));
+            renderDisk(integrator, N, p, node->aggN, r, cosConeAngle, sinConeAngle);
         }
         else
         {
-            // Interior node: render children.
-            std::pair<float, PointOctree::Node*> children[8];
-            int nchildren = 0;
-            for(int i = 0; i < 8; ++i)
+            // If we get here, the solid angle of the current node was too large
+            // so we must consider the children of the node.
+            //
+            // The render order is sorted so that points are rendered front to
+            // back.  This greatly improves the correctness of the hider.
+            //
+            // FIXME: The sorting procedure gets things wrong sometimes!  The
+            // problem is that points may stick outside the bounds of their octree
+            // nodes.  Probably we need to record all the points, sort, and
+            // finally render them to get this right.
+            if(node->npoints != 0)
             {
-                PointOctree::Node* child = node->children[i];
-                if(!child)
-                    continue;
-                children[nchildren].first = (child->center - P).length2();
-                children[nchildren].second = child;
-                ++nchildren;
+                // Leaf node: simply render each child point.
+                std::pair<float, int> childOrder[8];
+                assert(node->npoints <= 8);
+                for(int i = 0; i < node->npoints; ++i)
+                {
+                    const float* data = &node->data[i*dataSize];
+                    V3f p = V3f(data[0], data[1], data[2]) - P;
+                    childOrder[i].first = p.length2();
+                    childOrder[i].second = i;
+                }
+                std::sort(childOrder, childOrder + node->npoints);
+                for(int i = 0; i < node->npoints; ++i)
+                {
+                    const float* data = &node->data[childOrder[i].second*dataSize];
+                    V3f p = V3f(data[0], data[1], data[2]) - P;
+                    V3f n = V3f(data[3], data[4], data[5]);
+                    float r = data[6];
+                    integrator.setPointData(data+7);
+                    renderDisk(integrator, N, p, n, r, cosConeAngle, sinConeAngle);
+                }
+                continue;
             }
-            std::sort(children, children + nchildren);
-            // Interior node: render each non-null child.
-            for(int i = 0; i < nchildren; ++i)
+            else
             {
-                renderNode(integrator, P, N, cosConeAngle, sinConeAngle,
-                           maxSolidAngle, dataSize, children[i].second);
+                // Interior node: render children.
+                std::pair<float, const PointOctree::Node*> children[8];
+                int nchildren = 0;
+                for(int i = 0; i < 8; ++i)
+                {
+                    PointOctree::Node* child = node->children[i];
+                    if(!child)
+                        continue;
+                    children[nchildren].first = (child->center - P).length2();
+                    children[nchildren].second = child;
+                    ++nchildren;
+                }
+                std::sort(children, children + nchildren);
+                // Interior node: render each non-null child.  Nodes we want to
+                // render first must go onto the stack last.
+                for(int i = nchildren-1; i >= 0; --i)
+                    nodeStack[stackSize++] = children[i].second;
             }
         }
     }
