@@ -54,8 +54,6 @@ inline float dot(V3f a, V3f b)
 
 /// An axis-aligned cube environment buffer.
 ///
-/// Just stores depth (z) for now (TODO)
-///
 /// Each face has a coordinate system where the centres of the boundary pixels
 /// lie just _inside_ the boundary.  That is, the positions of the pixel point
 /// samples are at x_i = (1/2 + i/N) for i = 0 to N-1.
@@ -608,54 +606,12 @@ class RadiosityIntegrator
 /// \param N - normal for light probe (should be normalized)
 /// \param coneAngle - defines cone about N: coneAngle = max angle of interest
 ///                    between N and the incoming light.
-/// \param points - point cloud to render
-template<typename IntegratorT>
-void microRasterize(IntegratorT& integrator, V3f P, V3f N, float coneAngle,
-                    const PointArray& points);
-
-
-/// Render points into a micro environment buffer.
-///
-/// \param integrator - integrator for incoming geometry/lighting information
-/// \param P - position of light probe
-/// \param N - normal for light probe (should be normalized)
-/// \param coneAngle - defines cone about N: coneAngle = max angle of interest
-///                    between N and the incoming light.
 /// \param maxSolidAngle - Maximum solid angle allowed for points in interior
 ///                    tree nodes.
 /// \param points - point cloud to render
 template<typename IntegratorT>
 void microRasterize(IntegratorT& integrator, V3f P, V3f N, float coneAngle,
                     float maxSolidAngle, const PointOctree& points);
-
-
-/// Visualize sources of light in occlusion calculation (for debugging)
-void occlWeight(MicroBuf& depthBuf, const V3f& N);
-
-
-/// Bake occlusion from point array back into point array.
-void bakeOcclusion(PointArray& points, int faceRes);
-
-
-/// Bake occlusion from point hierarchy tree into point cloud.
-///
-/// \param points - output array of surfels
-/// \param tree - hierarchical point-based representation of scene
-/// \param faceRes - resolution of microbuffer to use
-/// \param maxSolidAngle - Maximum solid angle allowed for points in interior
-///                        tree nodes.
-void bakeOcclusion(PointArray& points, const PointOctree& tree, int faceRes,
-                   float maxSolidAngle);
-
-/// Bake radiosity from point hierarchy into point cloud.
-///
-/// \param points - output array of surfels
-/// \param tree - hierarchical point-based representation of scene
-/// \param faceRes - resolution of microbuffer to use
-/// \param maxSolidAngle - Maximum solid angle allowed for points in interior
-///                        tree nodes.
-void bakeRadiosity(PointArray& points, const PointOctree& tree, int faceRes,
-                   float maxSolidAngle);
 
 
 } // namespace Aqsis

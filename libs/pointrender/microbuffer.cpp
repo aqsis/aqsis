@@ -415,27 +415,6 @@ void renderDisk(IntegratorT& integrator, V3f N, V3f p, V3f n, float r,
 }
 
 
-template<typename IntegratorT>
-void microRasterize(IntegratorT& integrator, V3f P, V3f N, float coneAngle,
-                    const PointArray& points)
-{
-    float cosConeAngle = cos(coneAngle);
-    float sinConeAngle = sin(coneAngle);
-    for(int pIdx = 0, npoints = points.size(); pIdx < npoints; ++pIdx)
-    {
-        const float* data = &points.data[pIdx*points.stride];
-        // position of current point relative to shading point
-        V3f p = V3f(data[0], data[1], data[2]) - P;
-        // normal of current point
-        V3f n = V3f(data[3], data[4], data[5]);
-        // radius of point
-        float r = data[6];
-        integrator.setPointData(data+7);
-        renderDisk(integrator, N, p, n, r, cosConeAngle, sinConeAngle);
-    }
-}
-
-
 /// Render point hierarchy into microbuffer.
 template<typename IntegratorT>
 static void renderNode(IntegratorT& integrator, V3f P, V3f N, float cosConeAngle,
@@ -545,90 +524,6 @@ void microRasterize(IntegratorT& integrator, V3f P, V3f N, float coneAngle,
     float sinConeAngle = sin(coneAngle);
     renderNode(integrator, P, N, cosConeAngle, sinConeAngle,
                maxSolidAngle, points.dataSize(), points.root());
-}
-
-
-void occlWeight(MicroBuf& depthBuf, const V3f& N)
-{
-    for(int f = MicroBuf::Face_begin; f < MicroBuf::Face_end; ++f)
-    {
-        float* face = depthBuf.face(f);
-        for(int iv = 0; iv < depthBuf.res(); ++iv)
-        for(int iu = 0; iu < depthBuf.res(); ++iu, face += 2)
-        {
-            float d = dot(depthBuf.rayDirection(f, iu, iv), N);
-            if(d > 0)
-                face[1] = d*(1.0f - face[1]);
-            else
-                face[1] = 0;
-        }
-    }
-}
-
-
-void bakeOcclusion(PointArray& points, int faceRes)
-{
-    const float eps = 0.1;
-    OcclusionIntegrator integrator(faceRes);
-    for(int pIdx = 0, npoints = points.size(); pIdx < npoints; ++pIdx)
-    {
-        if(pIdx % 100 == 0)
-            std::cout << 100.0f*pIdx/points.size() << "%    \r" << std::flush;
-        float* data = &points.data[pIdx*points.stride];
-        // normal of current point
-        V3f N = V3f(data[3], data[4], data[5]);
-        // position of current point relative to shading point
-        V3f P = V3f(data[0], data[1], data[2]);
-        float r = data[6];
-        integrator.clear();
-        microRasterize(integrator, P + N*r*eps, N, M_PI_2, points);
-        data[7] = data[8] = data[9] = 1 - integrator.occlusion(N, M_PI_2);
-    }
-}
-
-
-void bakeOcclusion(PointArray& points, const PointOctree& tree, int faceRes,
-                   float maxSolidAngle)
-{
-    // FIXME: Code duplication with bakeOcclusion above.
-    const float eps = 0.1;
-    OcclusionIntegrator integrator(faceRes);
-    for(int pIdx = 0, npoints = points.size(); pIdx < npoints; ++pIdx)
-    {
-        if(pIdx % 400 == 0)
-            std::cout << 100.0f*pIdx/points.size() << "%    \r" << std::flush;
-        float* data = &points.data[pIdx*points.stride];
-        // normal of current point
-        V3f N = V3f(data[3], data[4], data[5]);
-        // position of current point relative to shading point
-        V3f P = V3f(data[0], data[1], data[2]);
-        float r = data[6];
-        integrator.clear();
-        microRasterize(integrator, P + N*r*eps, N, M_PI_2, maxSolidAngle, tree);
-        data[7] = data[8] = data[9] = 1 - integrator.occlusion(N, M_PI_2);
-    }
-}
-
-
-void bakeRadiosity(PointArray& points, const PointOctree& tree, int faceRes,
-                   float maxSolidAngle)
-{
-    const float eps = 0.1;
-    RadiosityIntegrator integrator(faceRes);
-    for(int pIdx = 0, npoints = points.size(); pIdx < npoints; ++pIdx)
-    {
-        if(pIdx % 400 == 0)
-            std::cout << 100.0f*pIdx/points.size() << "%    \r" << std::flush;
-        float* data = &points.data[pIdx*points.stride];
-        // normal of current point
-        V3f N = V3f(data[3], data[4], data[5]);
-        // position of current point relative to shading point
-        V3f P = V3f(data[0], data[1], data[2]);
-        float r = data[6];
-        integrator.clear();
-        microRasterize(integrator, P + N*r*eps, N, M_PI_2, maxSolidAngle, tree);
-        *reinterpret_cast<C3f*>(data+7) = integrator.radiosity(N, M_PI_2);
-    }
 }
 
 
