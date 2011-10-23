@@ -13,6 +13,5 @@ Welcome to Aqsis
 .. toctree::
 
 	features
-	whats_new
 	legal
 

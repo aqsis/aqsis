@@ -11,12 +11,13 @@ The Aqsis User Manual
 Contents:
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 3
 
     welcome
     user_guide/index
-    program_guide/index
-    tutorials/index
+    reference_guide/index
+
+..    tutorials/index
 
 Indices and tables
 ==================

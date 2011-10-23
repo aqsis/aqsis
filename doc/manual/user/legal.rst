@@ -2,9 +2,9 @@
 
 .. _legal:
 
-=====
-Legal
-=====
+============================
+License and Acknowledgements
+============================
 
 Software License
 ----------------

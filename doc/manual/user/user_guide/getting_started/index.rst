@@ -1,6 +1,6 @@
-***************
-Getting Started
-***************
+******************************
+Installation & Getting Started
+******************************
 
 .. index:: support
 
