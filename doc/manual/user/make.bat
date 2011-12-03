@@ -26,6 +26,8 @@ if "%1" == "help" (
 	echo.  devhelp    to make HTML files and a Devhelp project
 	echo.  epub       to make an epub
 	echo.  latex      to make LaTeX files, you can set PAPER=a4 or PAPER=letter
+	echo.  latexpdf   to make LaTeX files and run them through pdflatex 
+  echo.                (requires GNU Make on the PATH)
 	echo.  text       to make text files
 	echo.  man        to make manual pages
 	echo.  changes    to make an overview over all changed/added/deprecated items
@@ -113,6 +115,20 @@ if "%1" == "latex" (
 	echo.
 	echo.Build finished; the LaTeX files are in %BUILDDIR%/latex.
 	goto end
+)
+
+if "%1" == "latexpdf" (
+	%SPHINXBUILD% -b latex %ALLSPHINXOPTS% %BUILDDIR%/latex
+	echo. Running LaTeX files through pdflatex...
+	call make.exe -C %BUILDDIR%/latex all-pdf
+  IF ERRORLEVEL 1 goto error
+	echo.
+	echo. pdflatex finished; the PDF files are in %BUILDDIR%/latex.
+	goto end
+:error
+  echo.
+  echo. make failed, are you sure make.exe is on the PATH?
+  goto end
 )
 
 if "%1" == "text" (
