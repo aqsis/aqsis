@@ -73,10 +73,10 @@ class float4
         STRONG_INLINE float4(float a, float b, float c, float d) { m_vec = _mm_setr_ps(a,b,c,d); }
 
         // float4, float4 arithmetic
-        STRONG_INLINE friend float4 operator+(float4 rhs, float4 lhs) { return float4 (_mm_add_ps (lhs.m_vec, rhs.m_vec)); }
-        STRONG_INLINE friend float4 operator-(float4 rhs, float4 lhs) { return float4 (_mm_sub_ps (lhs.m_vec, rhs.m_vec)); }
-        STRONG_INLINE friend float4 operator*(float4 rhs, float4 lhs) { return float4 (_mm_mul_ps (lhs.m_vec, rhs.m_vec)); }
-        STRONG_INLINE friend float4 operator/(float4 rhs, float4 lhs) { return float4 (_mm_div_ps (lhs.m_vec, rhs.m_vec)); }
+        STRONG_INLINE friend float4 operator+(float4 lhs, float4 rhs) { return float4 (_mm_add_ps (lhs.m_vec, rhs.m_vec)); }
+        STRONG_INLINE friend float4 operator-(float4 lhs, float4 rhs) { return float4 (_mm_sub_ps (lhs.m_vec, rhs.m_vec)); }
+        STRONG_INLINE friend float4 operator*(float4 lhs, float4 rhs) { return float4 (_mm_mul_ps (lhs.m_vec, rhs.m_vec)); }
+        STRONG_INLINE friend float4 operator/(float4 lhs, float4 rhs) { return float4 (_mm_div_ps (lhs.m_vec, rhs.m_vec)); }
 
         // float4, float arithmetic
         STRONG_INLINE friend float4 operator+(float4 lhs, float rhs) { return float4 (_mm_add_ps (lhs.m_vec, _mm_set1_ps(rhs))); }
@@ -104,9 +104,6 @@ class float4
         STRONG_INLINE float4& operator*=(float4 rhs) { m_vec = m_vec * rhs.m_vec; return *this; }
         STRONG_INLINE float4& operator/=(float4 rhs) { m_vec = m_vec / rhs.m_vec; return *this; }
 
-        // indexing
-        STRONG_INLINE float operator[](int i) const { return reinterpret_cast<const float*>(&m_vec)[i]; }
-
         // raw access to underlying data
         STRONG_INLINE __m128 get() const { return m_vec; }
 
@@ -115,6 +112,46 @@ class float4
         STRONG_INLINE static float4 loadu(const float* f) { return float4(_mm_loadu_ps(f)); }
         STRONG_INLINE static void store(float* f, float4 rhs) { _mm_store_ps(f, rhs.m_vec); }
         STRONG_INLINE static void storeu(float* f, float4 rhs) { _mm_storeu_ps(f, rhs.m_vec); }
+
+        // indexing
+        STRONG_INLINE float operator[](int i) const
+        {
+            float res[4];
+            storeu(res, m_vec);
+            return res[i];
+        }
+
+        // powers
+        STRONG_INLINE friend float4 pow(float4 a, float4 b)
+        {
+            float af[4];
+            float bf[4];
+            storeu(af, a.m_vec);
+            storeu(bf, b.m_vec);
+            return float4(pow(af[0], bf[0]), pow(af[1], bf[1]),
+                          pow(af[2], bf[2]), pow(af[3], bf[3]));
+        }
+
+        STRONG_INLINE friend float4 exp(float4 a)
+        {
+            float af[4];
+            storeu(af, a.m_vec);
+            return float4(exp(af[0]), exp(af[1]), exp(af[2]), exp(af[3]));
+        }
+
+        STRONG_INLINE friend float4 sqrt(float4 a)
+        {
+            return float4(_mm_sqrt_ps(a.m_vec));
+        }
+
+        STRONG_INLINE friend float4 abs(float4 a)
+        {
+            union {
+                __m128 f;
+                unsigned int u[4]; // int better be 32 bits wide
+            } signMask = {{0x7FFFFFFF, 0x7FFFFFFF, 0x7FFFFFFF, 0x7FFFFFFF}};
+            return float4(_mm_and_ps(signMask.f, a.m_vec));
+        }
 
         friend float4 min(float4 a, float4 b) { return float4(_mm_min_ps(a.m_vec, b.m_vec)); }
         friend float4 max(float4 a, float4 b) { return float4(_mm_max_ps(a.m_vec, b.m_vec)); }
