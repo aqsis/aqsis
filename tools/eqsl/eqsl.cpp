@@ -34,7 +34,7 @@
 
 #include <cstdlib>
 #include <functional>
-#ifndef AQSIS_SYSTEM_WIN32
+#if defined AQSIS_SYSTEM_WIN32 && !defined AQSIS_COMPILER_GCC
 #   include <signal.h>
 #   include <sys/wait.h>
 #   include <sys/types.h>
@@ -169,7 +169,7 @@ void EqslMainWindow::renderFile()
     renderEngineArgsBundle.push_back("-nocolor");
 
 // Call relevant commandline
-#ifdef AQSIS_SYSTEM_WIN32
+#if defined AQSIS_SYSTEM_WIN32 && !defined AQSIS_COMPILER_GCC
     char acPath[256];
     char root[256];
     if( GetModuleFileName( NULL, acPath, 256 ) != 0)
@@ -234,7 +234,7 @@ void EqslMainWindow::compileShader()
     std::string shaderCompilerFile = selectedFiles[0].toStdString();
 
 // Call relevant commandline
-#ifdef AQSIS_SYSTEM_WIN32
+#if defined AQSIS_SYSTEM_WIN32 && !defined AQSIS_COMPILER_GCC
     char acPath[256];
     char root[256];
     if( GetModuleFileName( NULL, acPath, 256 ) != 0)
@@ -281,7 +281,7 @@ void EqslMainWindow::compileShader()
 void EqslMainWindow::openFramebuffer()
 {
     // Call relevant commandline
-#ifdef AQSIS_SYSTEM_WIN32
+#if defined AQSIS_SYSTEM_WIN32 && !defined AQSIS_COMPILER_GCC
     char acPath[256];
     char root[256];
     if( GetModuleFileName( NULL, acPath, 256 ) != 0)
@@ -307,7 +307,7 @@ void EqslMainWindow::openFramebuffer()
     std::string renderViewer = "piqsl";
     std::string commandLine = renderViewer + " ";
     program.append(renderViewer);
-#ifndef AQSIS_SYSTEM_WIN32
+#ifdef AQSIS_COMPILER_GCC
     std::vector<std::string> args;
     Aqsis::CqExecute tool(program, args, m_currentDirectory);
     Aqsis::CqExecute::TqCallback outputStdOut = std::bind1st(

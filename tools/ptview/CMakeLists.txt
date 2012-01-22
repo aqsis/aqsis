@@ -25,7 +25,7 @@ if(QT_FOUND AND OPENGL_FOUND)
 	aqsis_add_executable(ptview ${srcs} GUIAPP
 		LINK_LIBRARIES  ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY}
 			${QT_QTOPENGL_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY}
-			${OPENGL_gl_LIBRARY} ${pointrender_libs} aqsis_util)
+			${OPENGL_gl_LIBRARY} ${pointrender_libs} aqsis_util pthread)
 
 	aqsis_install_targets(ptview)
 endif()

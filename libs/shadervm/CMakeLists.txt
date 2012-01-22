@@ -33,7 +33,7 @@ aqsis_add_library(aqsis_shadervm ${shadervm_srcs} ${shadervm_hdrs}
 	${shaderexecenv_srcs} ${shaderexecenv_hdrs} ${pointrender_srcs}
 	COMPILE_DEFINITIONS AQSIS_SHADERVM_EXPORTS
 	LINK_LIBRARIES aqsis_math aqsis_util aqsis_tex ${Boost_REGEX_LIBRARY}
-		${pointrender_libs}
+		${pointrender_libs} pthread
 )
 
 aqsis_install_targets(aqsis_shadervm)

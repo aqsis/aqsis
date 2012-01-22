@@ -59,6 +59,8 @@ PiqslMainWindow::PiqslMainWindow(const QString& socketInterface,
     m_currentLibraryName()
 {
     setWindowTitle("piqsl");
+	
+	Aqsis::CqSocket::initialiseSockets();
 
     // File menu
     QMenu* fileMenu = menuBar()->addMenu(tr("&File"));

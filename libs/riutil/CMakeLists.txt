@@ -46,7 +46,7 @@ source_group("Header Files" FILES ${riutil_hdrs})
 aqsis_add_library(aqsis_riutil ${riutil_srcs} ${riutil_hdrs}
 	TEST_SOURCES ${riutil_test_srcs}
 	COMPILE_DEFINITIONS AQSIS_RIUTIL_EXPORTS USE_GZIPPED_RIB
-	LINK_LIBRARIES aqsis_util ${Boost_IOSTREAMS_LIBRARY} ${Boost_ZLIB_LIBRARY}
+	LINK_LIBRARIES aqsis_util ${Boost_IOSTREAMS_LIBRARY} ${AQSIS_ZLIB_LIBRARIES}
 )
 
 aqsis_install_targets(aqsis_riutil)

@@ -70,6 +70,7 @@ bool CqSocket::initialiseSockets()
 	{
 		/* Tell the user that we could not find a usable */
 		/* WinSock DLL.                                  */
+		Aqsis::log() << error << "Error initializing sockets, code: " << err << std::endl;
 		return(false);
 	}
 	 
