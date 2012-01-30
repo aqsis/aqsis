@@ -106,7 +106,7 @@ enum EqRenderMode
  */
 
 class CqRenderer;
-extern CqRenderer* pCurrRenderer;
+AQSIS_CORE_SHARE extern CqRenderer* pCurrRenderer;
 
 class CqRenderer : public IqRenderer
 {

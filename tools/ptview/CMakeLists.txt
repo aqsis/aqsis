@@ -22,10 +22,15 @@ if(QT_FOUND AND OPENGL_FOUND)
 		set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS")
 	endif()
 	
-	aqsis_add_executable(ptview ${srcs} GUIAPP
-		LINK_LIBRARIES  ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY}
+	set(ptview_link_libraries ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY}
 			${QT_QTOPENGL_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY}
-			${OPENGL_gl_LIBRARY} ${pointrender_libs} aqsis_util pthread)
+			${OPENGL_gl_LIBRARY} ${pointrender_libs} aqsis_util)
+			
+	if(MINGW)
+		list(APPEND ptview_link_libraries pthread)
+	endif()
+	aqsis_add_executable(ptview ${srcs} GUIAPP
+		LINK_LIBRARIES  ${ptview_link_libraries})
 
 	aqsis_install_targets(ptview)
 endif()

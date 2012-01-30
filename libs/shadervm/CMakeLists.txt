@@ -29,11 +29,16 @@ source_group("Header Files" FILES ${shadervm_hdrs})
 add_subproject(shaderexecenv)
 include_subproject(pointrender)
 
+set(shadervm_link_libraries aqsis_math aqsis_util aqsis_tex ${Boost_REGEX_LIBRARY} ${pointrender_libs})
+if(MINGW)
+ list(APPEND shadervm_link_libraries pthread)
+endif()
+
+
 aqsis_add_library(aqsis_shadervm ${shadervm_srcs} ${shadervm_hdrs}
 	${shaderexecenv_srcs} ${shaderexecenv_hdrs} ${pointrender_srcs}
 	COMPILE_DEFINITIONS AQSIS_SHADERVM_EXPORTS
-	LINK_LIBRARIES aqsis_math aqsis_util aqsis_tex ${Boost_REGEX_LIBRARY}
-		${pointrender_libs} pthread
+	LINK_LIBRARIES ${shadervm_link_libraries}
 )
 
 aqsis_install_targets(aqsis_shadervm)
