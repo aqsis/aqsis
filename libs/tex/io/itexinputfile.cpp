@@ -42,6 +42,7 @@
 #include <aqsis/util/logging.h>
 #include "magicnumber.h"
 #include "tiffinputfile.h"
+#include "pnginputfile.h"
 #include "zinputfile.h"
 
 namespace Aqsis {
@@ -86,6 +87,10 @@ boost::shared_ptr<IqTexInputFile> openInputFile(
 				break;
 			case ImageFile_AqsisZfile:
 				file.reset(new CqZInputFile(fileName));
+                break;
+            case ImageFile_Png:
+                file.reset(new CqPngInputFile(fileName));
+                break;
 			default:
 				break;
 		}

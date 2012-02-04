@@ -6,6 +6,7 @@ set(io_srcs
 	texfileheader.cpp
 	tiffdirhandle.cpp
 	tiffinputfile.cpp
+	pnginputfile.cpp
 	tiffoutputfile.cpp
 	tifftest_examples.cpp
 	tiledanyinputfile.cpp
@@ -23,6 +24,7 @@ set(io_hdrs
 	tiffdirhandle.h
 	tifffile_test.h
 	tiffinputfile.h
+	pnginputfile.h
 	tiffoutputfile.h
 	tiledanyinputfile.h
 	tiledtiffinputfile.h
@@ -36,11 +38,16 @@ set(io_test_srcs
 	texfileheader_test.cpp
 	tiffdirhandle_test.cpp
 	tiffinputfile_test.cpp
+	pnginputfile_test.cpp
 )
 make_absolute(io_test_srcs ${io_SOURCE_DIR})
 
 
 # Setup stuff for linking with external libs
 include_directories(${AQSIS_TIFF_INCLUDE_DIR})
-set(io_linklibs ${AQSIS_TIFF_LIBRARIES} ${AQSIS_TIFFXX_LIBRARIES})
+set(io_linklibs
+    ${AQSIS_TIFF_LIBRARIES}
+    ${AQSIS_TIFFXX_LIBRARIES}
+    ${AQSIS_PNG_LIBRARIES}
+)
 

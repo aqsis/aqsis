@@ -62,6 +62,7 @@ mark_as_advanced(AQSIS_MAIN_CONFIG_NAME)
 # Required libs
 # -------------
 find_package(TIFF)
+find_package(PNG)
 find_package(ZLIB)
 
 # Find boost.

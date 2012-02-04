@@ -95,6 +95,14 @@ EqImageFileType guessFileType(std::istream& inStream)
 	{
 		return ImageFile_Exr;
 	}
+	else if( magicNum.size() >= 4 &&
+            magicNum[0] == (char)0x89 &&
+            magicNum[1] == 'P' &&
+            magicNum[2] == 'N' &&
+            magicNum[3] == 'G')
+    {
+        return ImageFile_Png;
+    }
 	else if( magicNum.size() >= 16
 		&& std::equal(magicNum.begin(), magicNum.begin()+15, "Aqsis bake file") )
 	{

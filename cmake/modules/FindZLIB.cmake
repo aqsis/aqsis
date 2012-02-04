@@ -1,4 +1,4 @@
-# Custom Aqsis specific version of FindTIFF
+# Custom Aqsis specific version of FindZLIB
 SET(AQSIS_ZLIB_FOUND 0)
 
 SET(AQSIS_ZLIB_INCLUDE_SEARCHPATH)
@@ -12,7 +12,7 @@ IF(WIN32)
 			SET(AQSIS_ZLIB_LIBRARY_NAMES ${AQSIS_ZLIB_LIBRARY_NAMES} zlibstat)
 		ELSEIF(MSVC AND MSVC90)
 			SET(AQSIS_ZLIB_LIBRARIES_DIR ${AQSIS_WIN32LIBS}/zlib/lib/vc9_sp1 CACHE PATH "Semi-colon separated list of paths to search for zlib libraries")
-			SET(AQSIS_ZLIB_LIBRARY_NAMES ${AQSIS_ZLIB_LIBRARY_NAMES} zlibstat)		
+			SET(AQSIS_ZLIB_LIBRARY_NAMES ${AQSIS_ZLIB_LIBRARY_NAMES} zlibstat)
 		ELSE(MSVC AND MSVC80)
 			IF(MINGW)
 				SET(AQSIS_ZLIB_LIBRARIES_DIR ${AQSIS_WIN32LIBS}/zlib/lib/mingw CACHE PATH "Semi-colon separated list of paths to search for zlib libraries")
@@ -35,7 +35,7 @@ FIND_PATH(AQSIS_ZLIB_INCLUDE_DIR
 			)
 
 FIND_LIBRARY(AQSIS_ZLIB_LIBRARIES
-			NAMES ${AQSIS_ZLIB_LIBRARY_NAMES}	
+			NAMES ${AQSIS_ZLIB_LIBRARY_NAMES}
 			PATHS ${AQSIS_ZLIB_LIBRARIES_DIR}
 			DOC "Location of the zlib library"
 			)
