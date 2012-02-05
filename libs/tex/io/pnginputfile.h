@@ -45,7 +45,6 @@
 #include <png.h>
 
 #include <boost/shared_ptr.hpp>
-
 #include <aqsis/tex/io/itexinputfile.h>
 
 namespace Aqsis {

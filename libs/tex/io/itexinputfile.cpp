@@ -42,7 +42,9 @@
 #include <aqsis/util/logging.h>
 #include "magicnumber.h"
 #include "tiffinputfile.h"
-#include "pnginputfile.h"
+#ifdef AQSIS_USE_PNG
+#	include "pnginputfile.h"
+#endif
 #include "zinputfile.h"
 
 namespace Aqsis {
@@ -87,10 +89,16 @@ boost::shared_ptr<IqTexInputFile> openInputFile(
 				break;
 			case ImageFile_AqsisZfile:
 				file.reset(new CqZInputFile(fileName));
-                break;
-            case ImageFile_Png:
-                file.reset(new CqPngInputFile(fileName));
-                break;
+				break;
+			case ImageFile_Png:
+#				ifdef AQSIS_USE_PNG
+				file.reset(new CqPngInputFile(fileName));
+#				else
+				AQSIS_THROW_XQERROR(XqInvalidFile, EqE_Unimplement,
+						"Cannot open file \"" << fileName << "\""
+						": Aqsis was compiled without PNG support");
+#				endif
+				break;
 			default:
 				break;
 		}

@@ -6,7 +6,6 @@ set(io_srcs
 	texfileheader.cpp
 	tiffdirhandle.cpp
 	tiffinputfile.cpp
-	pnginputfile.cpp
 	tiffoutputfile.cpp
 	tifftest_examples.cpp
 	tiledanyinputfile.cpp
@@ -15,6 +14,9 @@ set(io_srcs
 )
 if(AQSIS_USE_OPENEXR)
     list(APPEND io_srcs exrinputfile.cpp)
+endif()
+if(AQSIS_USE_PNG)
+	list(APPEND io_srcs pnginputfile.cpp)
 endif()
 make_absolute(io_srcs ${io_SOURCE_DIR})
 
@@ -38,8 +40,10 @@ set(io_test_srcs
 	texfileheader_test.cpp
 	tiffdirhandle_test.cpp
 	tiffinputfile_test.cpp
-	pnginputfile_test.cpp
 )
+if(AQSIS_USE_PNG)
+	list(APPEND io_test_srcs pnginputfile_test.cpp)
+endif()
 make_absolute(io_test_srcs ${io_SOURCE_DIR})
 
 
@@ -48,6 +52,8 @@ include_directories(${AQSIS_TIFF_INCLUDE_DIR})
 set(io_linklibs
     ${AQSIS_TIFF_LIBRARIES}
     ${AQSIS_TIFFXX_LIBRARIES}
-    ${AQSIS_PNG_LIBRARIES}
 )
+if(AQSIS_USE_PNG)
+	list(APPEND io_linklibs ${AQSIS_PNG_LIBRARIES})
+endif()
 

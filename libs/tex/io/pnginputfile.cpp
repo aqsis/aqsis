@@ -52,7 +52,7 @@ class CPNGReader
 
 public:
     CPNGReader(const boostfs::path& fileName)
-    : m_fileHandle(::fopen(fileName.c_str(), "rb"))
+    : m_fileHandle(::fopen(native(fileName).c_str(), "rb"))
     , m_PNGHandle(NULL)
     , m_infoPtr(NULL)
 
@@ -147,7 +147,7 @@ private:
             m_ImageBuff = imagePtr;
             m_ImageBuffPtr = (png_bytepp)::calloc(rowCnt, sizeof(png_bytep));
 
-            for (int i=0; i != rowCnt; ++i, imagePtr += bytesPerRow)
+            for (size_t i=0; i != rowCnt; ++i, imagePtr += bytesPerRow)
             {
                 m_ImageBuffPtr[i] = imagePtr;
             }
@@ -278,8 +278,6 @@ void CqPngInputFile::readPixelsImpl(TqUint8* buffer, TqInt startLine,
 
     const size_t destBytesPerPixel(getNrOfChannels() * sizeof(uint8_t));
     const size_t destBytesPerLine(destBytesPerPixel * getWidth());
-    const size_t srcBytesPerLine(getRowBytes());
-    const size_t srcChannels(srcBytesPerLine / getWidth());
 
     TqUint8* destBuff(buffer);
 
@@ -288,7 +286,7 @@ void CqPngInputFile::readPixelsImpl(TqUint8* buffer, TqInt startLine,
         copyRGBPixel :         // If the number of channels is 3 then use copyRGBPixel(...)
         copyRGBAPremultiPixel; // If the number of channels is 4 then use copyRGBAPremultiPixel(...)
 
-    for (size_t lineIdx = 0; lineIdx != numScanlines; ++lineIdx, destBuff += destBytesPerLine)
+    for (int lineIdx = 0; lineIdx != numScanlines; ++lineIdx, destBuff += destBytesPerLine)
     {
         const TqUint8* srcBuff(getRowPtr(lineIdx));
         assert(srcBuff);

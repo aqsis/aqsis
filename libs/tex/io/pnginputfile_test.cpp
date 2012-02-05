@@ -41,9 +41,11 @@
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/auto_unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
-#include <sstream>
+#include <boost/filesystem.hpp>
+#include <fstream>
 
 #include <aqsis/tex/buffers/texturebuffer.h>
+#include <aqsis/util/tinyformat.h>
 
 /* This is a dump of a png image which is 7 pixels wide and 6 pixels height.
  * The image consists of three color components (RGB) and _no_ alpha channel.
@@ -123,45 +125,38 @@ BOOST_AUTO_TEST_SUITE(pnginputfile_tests)
  */
 class CTempBinDataAsFile
 {
-    char* m_Filename;
+    std::string m_fileName;
 
 public:
     CTempBinDataAsFile(const void* inData, size_t inDataSize)
-    : m_Filename((char*)::malloc(64))
     {
-        ::strcpy(m_Filename, "/tmp/aqsis_tmpfile_XXXXX");
-        char* tmpFilename = ::mktemp(m_Filename);
-        assert(tmpFilename);
-        if (tmpFilename)
+        // Horrible but hopefully portable alternative to mktemp.  Could use
+        // tmpnam() if it wasn't so horrible, or boost::filesystem::unique_file
+        // if it was supported in v2 :(
+        for(int i = 0;; ++i)
         {
-            FILE* fileHd = ::fopen(m_Filename, "wb");
-            assert(fileHd);
-            if (fileHd)
+            m_fileName = tfm::format("aqsis_tmpfile_%05d", i);
+            if(!boost::filesystem::exists(m_fileName))
             {
-                int rc = ::fwrite(inData, 1, inDataSize, fileHd);
-                assert(rc == inDataSize);
-
-                ::fclose(fileHd);
+                std::ofstream file(m_fileName.c_str(),
+                                   std::ios::out | std::ios::binary);
+                BOOST_REQUIRE(file);
+                file.write(reinterpret_cast<const char*>(inData), inDataSize);
+                break;
             }
-        }
-        else
-        {
-            ::free(m_Filename);
-            m_Filename = NULL;
         }
     }
 
     ~CTempBinDataAsFile()
     {
-        ::unlink(m_Filename);
-        ::free(m_Filename);
+        boost::filesystem::remove(m_fileName);
     }
 
     const char* getFileName() const
     {
-        return m_Filename;
+        return m_fileName.c_str();
     }
-}; // class CTempBinDataAsFile
+};
 
 /** This test utilizes the PNG image in order to load and parse a given PNG
  *  image which is has the size 7 x 6 pixels and contains of the three

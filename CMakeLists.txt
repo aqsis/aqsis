@@ -28,6 +28,7 @@ option(AQSIS_USE_TIMERS "Enable performance timers" ON)
 option(AQSIS_USE_PDIFF "Build the external pdiff perceptual image difference utility" OFF)
 option(AQSIS_USE_QT "Build the aqsis GUI components which rely on the Qt libraries" ON)
 option(AQSIS_USE_OPENEXR "Build aqsis with support for the OpenEXR image format" ON)
+option(AQSIS_USE_PNG "Build aqsis with support for reading PNG image files" ON)
 option(AQSIS_USE_EXTERNAL_TINYXML "Try to find and use an external tinyxml library" OFF)
 mark_as_advanced(AQSIS_USE_PDIFF AQSIS_USE_EXTERNAL_TINYXML)
 
@@ -62,7 +63,6 @@ mark_as_advanced(AQSIS_MAIN_CONFIG_NAME)
 # Required libs
 # -------------
 find_package(TIFF)
-find_package(PNG)
 find_package(ZLIB)
 
 # Find boost.
@@ -118,11 +118,19 @@ if(AQSIS_USE_OPENEXR)
 	find_package(OpenEXR)
 
 	if(NOT AQSIS_OPENEXR_FOUND)
-		message("** Cannot find OpenEXR - aqsis will be build without support for the OpenEXR image format")
+		message("** Cannot find OpenEXR - aqsis will be built without support for the OpenEXR image format")
 		set(AQSIS_USE_OPENEXR OFF)
 	endif()
 endif()
 
+if(AQSIS_USE_PNG)
+	find_package(PNG)
+
+	if(NOT AQSIS_PNG_FOUND)
+		message("** Cannot find PNG - aqsis will be built without support for the PNG image format")
+		set(AQSIS_USE_PNG OFF)
+	endif()
+endif()
 
 ## find tinyxml.  If not found we use the version distributed with the aqsis
 ## source.

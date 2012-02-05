@@ -24,6 +24,10 @@ if(AQSIS_USE_OPENEXR)
     add_definitions(-DUSE_OPENEXR)
 	list(APPEND linklibs ${AQSIS_OPENEXR_LIBRARIES})
 endif()
+if(AQSIS_USE_PNG)
+	include_directories(${AQSIS_PNG_INCLUDE_DIR})
+	add_definitions(-DAQSIS_USE_PNG)
+endif()
 list(APPEND linklibs ${AQSIS_ZLIB_LIBRARIES})
 
 aqsis_add_library(aqsis_tex ${tex_srcs} ${tex_hdrs}
