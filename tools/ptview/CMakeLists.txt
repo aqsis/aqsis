@@ -29,6 +29,10 @@ if(QT_FOUND AND OPENGL_FOUND)
 	if(MINGW)
 		list(APPEND ptview_link_libraries pthread)
 	endif()
+	if(WIN32)
+		list(APPEND ptview_link_libraries ${QT_QTMAIN_LIBRARY})
+	endif()
+		
 	aqsis_add_executable(ptview ${srcs} GUIAPP
 		LINK_LIBRARIES  ${ptview_link_libraries})
 
