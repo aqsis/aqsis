@@ -40,6 +40,7 @@
 
 #include <boost/program_options.hpp>
 
+#define NOMINMAX
 #include <OpenEXR/ImathVec.h>
 #include <OpenEXR/ImathMatrix.h>
 
@@ -618,7 +619,7 @@ QSize PointView::sizeHint() const
 
 void PointView::initializeGL()
 {
-    glEnable(GL_MULTISAMPLE);
+    //glEnable(GL_MULTISAMPLE);
 }
 
 
@@ -880,10 +881,10 @@ void PointView::drawPoints(const PointArrayModel& points, VisMode visMode,
             glColor3f(1,1,1);
             // Set distance attenuation for points, following the usual 1/z
             // law.
-            GLfloat attenParams[3] = {0, 0, 1};
-            glPointParameterfv(GL_POINT_DISTANCE_ATTENUATION, attenParams);
-            glPointParameterf(GL_POINT_SIZE_MIN, 0);
-            glPointParameterf(GL_POINT_SIZE_MAX, 100);
+            //GLfloat attenParams[3] = {0, 0, 1};
+            //glPointParameterfv(GL_POINT_DISTANCE_ATTENUATION, attenParams);
+            //glPointParameterf(GL_POINT_SIZE_MIN, 0);
+            //glPointParameterf(GL_POINT_SIZE_MAX, 100);
             // Draw all points at once using vertex arrays.
             glEnableClientState(GL_VERTEX_ARRAY);
             glVertexPointer(3, GL_FLOAT, 3*sizeof(float),
@@ -924,7 +925,7 @@ void PointView::drawPoints(const PointArrayModel& points, VisMode visMode,
                 // TODO: Why doesn't this work?? (handedness problems?)
                 //glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
                 // rescaling of normals
-                glEnable(GL_RESCALE_NORMAL);
+                //glEnable(GL_RESCALE_NORMAL);
             }
             //glCullFace(GL_BACK);
             //glEnable(GL_CULL_FACE);

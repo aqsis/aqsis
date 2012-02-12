@@ -18,5 +18,9 @@ make_absolute(partio_srcs ${partio_SOURCE_DIR})
 
 include_directories(${partio_SOURCE_DIR}/src/src/lib)
 add_definitions(-DPARTIO_USE_ZLIB)
+if(WIN32)
+  add_definitions(-DPARTIO_WIN32)
+endif()
 
+include_directories(${AQSIS_ZLIB_INCLUDE_DIR})
 set(partio_libs ${AQSIS_ZLIB_LIBRARIES})

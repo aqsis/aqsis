@@ -31,6 +31,7 @@
 
 #include <OpenEXR/ImathFun.h>
 
+#include <boost/math/special_functions/sign.hpp>
 
 namespace Aqsis {
 
@@ -86,7 +87,7 @@ inline bool sphereOutsideCone(V3f p, float plen2, float r,
     // General case
     float lhs = x*cosConeAngle*cosConeAngle;
     float rhs = dot(p, n) + r*sinConeAngle;
-    return copysignf(lhs, cosConeAngle) > copysignf(rhs*rhs, rhs);
+    return boost::math::copysign(lhs, cosConeAngle) > boost::math::copysign(rhs*rhs, rhs);
 }
 
 

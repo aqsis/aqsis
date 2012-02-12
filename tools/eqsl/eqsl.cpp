@@ -42,6 +42,10 @@
 #ifdef AQSIS_SYSTEM_MACOSX
 #   include <Carbon/Carbon.h>
 #endif
+#ifdef AQSIS_SYSTEM_WIN32
+#define NOMINMAX
+#   include <windows.h>
+#endif
 
 #include <QtGui/QApplication>
 #include <QtGui/QFileDialog>
