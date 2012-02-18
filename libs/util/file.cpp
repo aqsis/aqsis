@@ -272,7 +272,7 @@ std::vector<std::string> cliGlob(const std::string& pattern)
 std::string native(const boostfs::path& path)
 {
 #if BOOST_FILESYSTEM_VERSION == 3
-	return path.native();
+	return path.string();
 #elif BOOST_FILESYSTEM_VERSION == 2
 	return path.file_string();
 #endif
@@ -282,7 +282,7 @@ std::string native(const boostfs::path& path)
 std::string filename(const boostfs::path& path)
 {
 #if BOOST_FILESYSTEM_VERSION == 3
-	return path.filename().native();
+	return path.filename().string();
 #elif BOOST_FILESYSTEM_VERSION == 2
 	return path.leaf();
 #endif
