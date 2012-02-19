@@ -175,7 +175,7 @@ MACRO(add_rslshaders RSL_TARGET)
 		else()
 			file(TO_NATIVE_PATH "${aqsis_util_location}" aqsis_util_path)
 			file(TO_NATIVE_PATH "${aqsis_slcomp_location}" aqsis_slcomp_path)
-			set(shared_lib_path "${aqsis_util_path}" "${aqsis_slcomp_path}")
+      set(shared_lib_path "${Boost_LIBRARY_DIRS}")
 			get_target_property(aqsl_command ${RSL_COMPILER} LOCATION)
 			add_custom_command(
 				OUTPUT ${RSL_SHADER}
@@ -186,6 +186,7 @@ MACRO(add_rslshaders RSL_TARGET)
 										 -DRSL_SOURCE="${RSL_SOURCE}"
 										 -Dutil_path="${aqsis_util_path}"
 										 -Dslcomp_path="${aqsis_slcomp_path}"
+										 -Dshared_lib_path="${shared_lib_path}"
 										 -P ${CMAKE_SOURCE_DIR}/cmake/aqslcompile.cmake
 				DEPENDS ${RSL_SHADER_DEPENDS}
 				COMMENT "Compiling RSL shader ${RSL_SHADER}"
