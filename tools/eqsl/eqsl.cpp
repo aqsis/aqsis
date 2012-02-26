@@ -34,7 +34,7 @@
 
 #include <cstdlib>
 #include <functional>
-#if defined AQSIS_SYSTEM_WIN32 && !defined AQSIS_COMPILER_GCC
+#if !defined AQSIS_SYSTEM_WIN32
 #   include <signal.h>
 #   include <sys/wait.h>
 #   include <sys/types.h>
