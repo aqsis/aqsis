@@ -102,3 +102,20 @@ set(CPACK_SOURCE_IGNORE_FILES
 	)
 
 include(CPack)
+
+# This is a bit of a hack.
+# The fixup_bundle macro will 'fixup' all exes and dlls in the specified folder, 
+# but you must specify an executable as a start point. I tried doing it for each
+# executable, but it then 'fixes' up every executable each time, which is time 
+# consuming and results in the same thing. 
+# By moving it here, we guarantee it happens after the files are installed, as this
+# is add_subdirectory'd last, and I arbitrarily choose piqsl, as if QT is enabled,
+# all QT apps are build anyway at the moment.
+if(AQSIS_USE_QT)
+  set(DIRS "${QT_BINARY_DIR}")
+  set(APPS "\${CMAKE_INSTALL_PREFIX}/${BINDIR}/piqsl${CMAKE_EXECUTABLE_SUFFIX}")
+  INSTALL(CODE "
+    include(BundleUtilities)
+    fixup_bundle(\"${APPS}\"   \"\"   \"${DIRS}\")
+    " COMPONENT main)
+endif()
