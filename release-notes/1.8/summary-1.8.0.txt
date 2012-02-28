@@ -1,0 +1,79 @@
+Summary of changes in aqsis-1.8.0 
+
+
+Major features
+--------------
+
+* Move to BSD licensing for all new code.
+   - Partially complete; ri2rib functionality is now BSD.
+
+* Point-based global illumination (Chris Foster)
+   - Point-based ambient occlusion via occlusion() shadeop
+   - Point-based color bleeding via indirectdiffuse() shadeop
+   - ptview GUI for point clouds
+   - bake3d() and texture3d() shadeop support
+   - Attribute for non raster-oriented dicing
+   - Attribute "cull" "int backfacing" "int hidden"
+   - Point cloud IO using PartIO from Disney
+
+* RIB and API enhancements (Chris Foster)
+   - New and fast RIB parser, with precise syntax error reporting
+   - BSD licensed libri2rib
+   - miqser archive interpolation and RI validation
+   - Produce valid RIB stream of commands seen by the renderer using -echoapi,
+     including procedural expansions.
+   - Extensive RI validation, including lenghts of all arrays
+   - Reinstate support for command line frame selection (-frames, -framelist)
+   - ArchiveBegin / ArchiveEnd for in-memory caching of RIB archives
+   - RiContext() / RiGetContext() now supported for core renderer lib
+   - RiBegin("something.rib") can be used to produce RIB via the core
+     renderer lib.
+   - Make RIB conditional handling suck slightly less
+
+* Use Qt for all GUI tools (Chris Foster)
+   - Thumbnails for rendered images in piqsl
+   - Modern non-ugly widgets!
+   - 64-bit OSX support
+
+* Sphynx for documentation (Paul Gregory / Leon Atkinson)
+
+
+Features and improvements
+-------------------------
+
+   * Implement multi-map style point light shadows (Paul Gregory)
+   * MinGW support (Paul Gregory / Bart Janssens)
+   * Updated SLO interface to match other renderer APIs (Malcolm Humphries)
+   * AqsisConfig.cmake for linking before install (Timothy Shead)
+   * Memory optimizations (Chris Foster)
+   * PNG reading support in aqsis_tex (Peter Dusel)
+
+
+Deprecations
+------------
+
+   * Removed legacy framebuffer
+   * Remove aqsis-specific RiPreWorldFunction and RiPreRenderFunction
+
+
+Bug Fixes
+---------
+
+   * Fix slxargs to report shader variable storage types (Chris Foster)
+   * Bugfix 2907180: The '@' expansion doesn't work on MacOSX (Chris Foster)
+   * Light handle names are preserved by miqser and libri2rib (Chris Foster)
+   * Bugfix 2999529: Floats slightly truncated in .slx files (Chris Foster)
+   * Bugfix 2978546: "SHADEOP_TABLE" missing C extern tag (Chris Foster)
+   * Bugfix 2925557: Pisql locks up if you zoom in too far. (Chris Foster)
+   * Bugfix 2892116: Non-errors reported loudly when using a DSO
+shadeop (Paul Gregory)
+   * Fix bad vector/normal transform from shader space (Chris Foster)
+   * Fix corruption of shader default params by primvars (Chris Foster)
+   * Bugfix 3345371: transparent grids crash motion blurred
+primitives (Jonathan Merritt)
+   * Bugfix 3338304: PatchMesh fails to render under motion blur
+(Jonathan Merritt)
+   * Bugfix 3295033: Fails to compile with Boost 1.46 (Chris Foster)
+   * Tag rendered TIFF files with resolution unit of none (Chris Foster)
+   * fix for part of bug #3288739 (Paul Gregory)
+
