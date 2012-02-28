@@ -47,7 +47,7 @@ elseif(APPLE)
 	set(CPACK_GENERATOR "Bundle")
 	set(CPACK_SOURCE_GENERATOR "TGZ")
 	# Custom OS X Bundle
-	add_subdirectory(macosx/bundle)
+	#add_subdirectory(macosx/bundle)
 
 elseif(UNIX)
 	set(CPACK_SOURCE_PACKAGE_FILE_NAME
@@ -112,7 +112,7 @@ include(CPack)
 # is add_subdirectory'd last, and I arbitrarily choose piqsl, as if QT is enabled,
 # all QT apps are build anyway at the moment.
 if(AQSIS_USE_QT)
-  set(DIRS "${QT_BINARY_DIR}")
+  set(DIRS "${QT_BINARY_DIR}" "${Boost_LIBRARY_DIRS}")
   set(APPS "\${CMAKE_INSTALL_PREFIX}/${BINDIR}/piqsl${CMAKE_EXECUTABLE_SUFFIX}")
   INSTALL(CODE "
     include(BundleUtilities)
