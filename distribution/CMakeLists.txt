@@ -111,11 +111,21 @@ include(CPack)
 # By moving it here, we guarantee it happens after the files are installed, as this
 # is add_subdirectory'd last, and I arbitrarily choose piqsl, as if QT is enabled,
 # all QT apps are build anyway at the moment.
-if(AQSIS_USE_QT)
-  set(DIRS "${QT_BINARY_DIR}" "${Boost_LIBRARY_DIRS}")
-  set(APPS "\${CMAKE_INSTALL_PREFIX}/${BINDIR}/piqsl${CMAKE_EXECUTABLE_SUFFIX}")
-  INSTALL(CODE "
-    include(BundleUtilities)
-    fixup_bundle(\"${APPS}\"   \"\"   \"${DIRS}\")
-    " COMPONENT main)
-endif()
+get_directory_property(display_DISPLAYLIB DIRECTORY ../tools/displays DEFINITION file_display_name)
+get_directory_property(d_exr_DISPLAYLIB DIRECTORY ../tools/displays DEFINITION exr_display_name)
+get_directory_property(d_bmp_DISPLAYLIB DIRECTORY ../tools/displays DEFINITION bmp_display_name)
+get_directory_property(d_xpm_DISPLAYLIB DIRECTORY ../tools/displays DEFINITION xpm_display_name)
+get_directory_property(piqsl_DISPLAYLIB DIRECTORY ../tools/displays DEFINITION piqsl_display_name)
+set(DIRS "${QT_BINARY_DIR}" "${Boost_LIBRARY_DIRS}")
+set(APPS "\${CMAKE_INSTALL_PREFIX}/${BINDIR}/piqsl${CMAKE_EXECUTABLE_SUFFIX}")
+set(PLUGINS "\${CMAKE_INSTALL_PREFIX}/${PLUGINDIR}/${display_DISPLAYLIB}"
+						"\${CMAKE_INSTALL_PREFIX}/${PLUGINDIR}/${d_exr_DISPLAYLIB}"
+						"\${CMAKE_INSTALL_PREFIX}/${PLUGINDIR}/${d_bmp_DISPLAYLIB}"
+						"\${CMAKE_INSTALL_PREFIX}/${PLUGINDIR}/${d_xpm_DISPLAYLIB}"
+						"\${CMAKE_INSTALL_PREFIX}/${PLUGINDIR}/${piqsl_DISPLAYLIB}"
+						)
+
+INSTALL(CODE "
+	include(BundleUtilities)
+	fixup_bundle(\"${APPS}\"   \"${PLUGINS}\"   \"${DIRS}\")
+	" COMPONENT main)
