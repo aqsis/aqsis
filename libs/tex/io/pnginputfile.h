@@ -123,11 +123,11 @@ public:
             TqInt numScanlines) const;
 
 private:
-    uint8_t getNrOfChannels() const;
-    uint32_t getRowBytes() const;
+    TqUint8 getNrOfChannels() const;
+    TqUint32 getRowBytes() const;
 
-    uint32_t getWidth() const;
-    uint32_t getHeight() const;
+    TqUint32 getWidth() const;
+    TqUint32 getHeight() const;
 
     const TqUint8* const getRowPtr(size_t inRowIndex) const;
 };

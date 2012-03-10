@@ -72,22 +72,22 @@ public:
         ::png_destroy_read_struct(&m_PNGHandle, (png_infopp)&m_infoPtr,(png_infopp)NULL);
     }
 
-    int32_t getWidth() const
+    TqInt32 getWidth() const
     {
         return isValid() ? ::png_get_image_width(m_PNGHandle, m_infoPtr) : -1;
     }
 
-    int32_t getHeight() const
+    TqInt32 getHeight() const
     {
         return isValid() ? ::png_get_image_height(m_PNGHandle, m_infoPtr) : -1;
     }
 
-    int8_t getNrOfChannels() const
+    TqInt8 getNrOfChannels() const
     {
         return isValid() ? ::png_get_channels(m_PNGHandle, m_infoPtr) : 0;
     }
 
-    int32_t getRowBytes() const
+    TqInt32 getRowBytes() const
     {
         return isValid() ? ::png_get_rowbytes(m_PNGHandle, m_infoPtr) : 0;
     }
@@ -217,7 +217,7 @@ CqPngInputFile::CqPngInputFile(const boostfs::path& fileName)
         // set the channels
         channelList.clear();
 
-        const uint8_t nrOfChannels ( m_PNGReader->getNrOfChannels() );
+        const TqUint8 nrOfChannels ( m_PNGReader->getNrOfChannels() );
 
         static const char* channelStructure[] = {"r","g","b","a"};
 
@@ -276,7 +276,7 @@ void CqPngInputFile::readPixelsImpl(TqUint8* buffer, TqInt startLine,
 {
     assert(buffer);
 
-    const size_t destBytesPerPixel(getNrOfChannels() * sizeof(uint8_t));
+    const size_t destBytesPerPixel(getNrOfChannels() * sizeof(TqUint8));
     const size_t destBytesPerLine(destBytesPerPixel * getWidth());
 
     TqUint8* destBuff(buffer);
@@ -304,22 +304,22 @@ const TqUint8* const CqPngInputFile::getRowPtr(size_t inRowIndex) const
     return m_PNGReader->getRowPtr(inRowIndex);
 }
 
-uint8_t CqPngInputFile::getNrOfChannels() const
+TqUint8 CqPngInputFile::getNrOfChannels() const
 {
     return m_PNGReader->getNrOfChannels();
 }
 
-uint32_t CqPngInputFile::getRowBytes() const
+TqUint32 CqPngInputFile::getRowBytes() const
 {
     return m_PNGReader->getRowBytes();
 }
 
-uint32_t CqPngInputFile::getWidth() const
+TqUint32 CqPngInputFile::getWidth() const
 {
     return m_PNGReader->getWidth();
 }
 
-uint32_t CqPngInputFile::getHeight() const
+TqUint32 CqPngInputFile::getHeight() const
 {
     return m_PNGReader->getHeight();
 }
