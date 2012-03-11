@@ -116,16 +116,19 @@ get_directory_property(d_exr_DISPLAYLIB DIRECTORY ../tools/displays DEFINITION e
 get_directory_property(d_bmp_DISPLAYLIB DIRECTORY ../tools/displays DEFINITION bmp_display_name)
 get_directory_property(d_xpm_DISPLAYLIB DIRECTORY ../tools/displays DEFINITION xpm_display_name)
 get_directory_property(piqsl_DISPLAYLIB DIRECTORY ../tools/displays DEFINITION piqsl_display_name)
-set(DIRS "${QT_BINARY_DIR}" "${Boost_LIBRARY_DIRS}")
-set(APPS "\${CMAKE_INSTALL_PREFIX}/${BINDIR}/piqsl${CMAKE_EXECUTABLE_SUFFIX}")
-set(PLUGINS "\${CMAKE_INSTALL_PREFIX}/${PLUGINDIR}/${display_DISPLAYLIB}"
-						"\${CMAKE_INSTALL_PREFIX}/${PLUGINDIR}/${d_exr_DISPLAYLIB}"
-						"\${CMAKE_INSTALL_PREFIX}/${PLUGINDIR}/${d_bmp_DISPLAYLIB}"
-						"\${CMAKE_INSTALL_PREFIX}/${PLUGINDIR}/${d_xpm_DISPLAYLIB}"
-						"\${CMAKE_INSTALL_PREFIX}/${PLUGINDIR}/${piqsl_DISPLAYLIB}"
-						)
 
-INSTALL(CODE "
-	include(BundleUtilities)
-	fixup_bundle(\"${APPS}\"   \"${PLUGINS}\"   \"${DIRS}\")
-	" COMPONENT main)
+if(APPLE OR WIN32)
+	set(DIRS "${QT_BINARY_DIR}" "${Boost_LIBRARY_DIRS}")
+	set(APPS "\${CMAKE_INSTALL_PREFIX}/${BINDIR}/piqsl${CMAKE_EXECUTABLE_SUFFIX}")
+	set(PLUGINS "\${CMAKE_INSTALL_PREFIX}/${PLUGINDIR}/${display_DISPLAYLIB}"
+							"\${CMAKE_INSTALL_PREFIX}/${PLUGINDIR}/${d_exr_DISPLAYLIB}"
+							"\${CMAKE_INSTALL_PREFIX}/${PLUGINDIR}/${d_bmp_DISPLAYLIB}"
+							"\${CMAKE_INSTALL_PREFIX}/${PLUGINDIR}/${d_xpm_DISPLAYLIB}"
+							"\${CMAKE_INSTALL_PREFIX}/${PLUGINDIR}/${piqsl_DISPLAYLIB}"
+							)
+
+	INSTALL(CODE "
+		include(BundleUtilities)
+		fixup_bundle(\"${APPS}\"   \"${PLUGINS}\"   \"${DIRS}\")
+		" COMPONENT main)
+endif()
