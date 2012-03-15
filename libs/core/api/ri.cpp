@@ -4220,6 +4220,11 @@ RtVoid RiDeformation(RtToken name, PARAMETERLIST)
 	Aqsis::log() << warning << "RiDeformation not supported" << std::endl;
 }
 
+RtVoid RiDeformationV(RtToken name, RtInt n, RtToken tokens[], RtPointer parms[])
+{
+	Aqsis::log() << warning << "RiDeformationV not supported" << std::endl;
+}
+
 RtVoid RiMakeBump(RtString imagefile, RtString bumpfile, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, PARAMETERLIST)
 {
 	Aqsis::log() << warning << "RiMakeBump not supported" << std::endl;
