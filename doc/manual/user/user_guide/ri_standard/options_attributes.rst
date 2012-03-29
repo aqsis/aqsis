@@ -50,11 +50,20 @@ Searchpath Options
 Aqsis locates the various external assets required during rendering via a
 standard Option called "searchpath". The "searchpath" Option has a number of
 string values that tell Aqsis where to look for various asset types. The string
-value for each of these specifies a list of search paths separated by a colon.
+value for each of these specifies a list of search paths separated by colons or
+semicolons.
 
-The special search path character "&" represents the previous value of the
-option. This is only available in "searchpath" options. Using this character
-you can append or prepend paths to the default path list, i.e::
+There are several characters which have special meanings in searchpath options:
+
+* The character & expands to the previous value of the path
+* The character @ expands to the corresponding default path (for example, @
+  in the "shader" searchpath will expand to the value of the "defaultshader"
+  searchpath.)
+* The character % is used to delimit environment variables: ``%MY_PATH%``
+  will expand to the value of the environment variable ``MY_PATH``.
+
+As an example, by using the & character you can append a custom path to the
+current search path for shaders using the RIB fragment::
 
   Option "searchpath" "shader" ["/my/shaders:&"]
 
