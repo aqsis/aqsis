@@ -38,10 +38,15 @@
 
 #include	<map>
 #include	<algorithm>
+#include <float.h>
 
+#include <QTimer>
+
+#include        <boost/archive/iterators/binary_from_base64.hpp>
 #include	<boost/archive/iterators/base64_from_binary.hpp>
 #include	<boost/archive/iterators/transform_width.hpp>
 #include	<boost/archive/iterators/insert_linebreaks.hpp>
+#include        <boost/archive/iterators/remove_whitespace.hpp>
 #include	<boost/format.hpp>
 #include	<boost/filesystem.hpp>
 
@@ -54,6 +59,54 @@
 
 namespace Aqsis {
 
+namespace {
+struct NameMaps
+{
+    std::map<std::string, TqInt> nameToType;
+    std::map<TqInt, std::string> typeToName;
+
+    NameMaps()
+    {
+// Macros to initialise the type/name name/type maps.
+#	define	INIT_TYPE_NAME_MAPS(name) \
+	nameToType[#name] = name; \
+	typeToName[name] = #name;
+	// Fill in the typenames maps
+	INIT_TYPE_NAME_MAPS(PkDspyFloat32);
+	INIT_TYPE_NAME_MAPS(PkDspyUnsigned32);
+	INIT_TYPE_NAME_MAPS(PkDspySigned32);
+	INIT_TYPE_NAME_MAPS(PkDspyUnsigned16);
+	INIT_TYPE_NAME_MAPS(PkDspySigned16);
+	INIT_TYPE_NAME_MAPS(PkDspyUnsigned8);
+	INIT_TYPE_NAME_MAPS(PkDspySigned8);
+	INIT_TYPE_NAME_MAPS(PkDspyString);
+	INIT_TYPE_NAME_MAPS(PkDspyMatrix);
+#	undef INIT_TYPE_NAME_MAPS
+
+    }
+};
+}
+
+static NameMaps g_maps;
+
+typedef
+    boost::archive::iterators::transform_width<   // retrieve 6 bit integers from a sequence of 8 bit bytes
+        boost::archive::iterators::binary_from_base64<    // convert binary values ot base64 characters
+            boost::archive::iterators::remove_whitespace<
+                std::string::const_iterator
+            >
+        >,
+        8,
+        6
+    >
+base64_binary; // compose all the above operations in to a new iterator
+
+void CqDisplayServerImage::setSocket(QTcpSocket* socket)
+{
+  this->socket = socket;
+  connect(socket, SIGNAL(readyRead()), this, SLOT(processMessage()));
+}
+
 //---------------------------------------------------------------------
 /** Close the socket this client is associated with.
  */
@@ -61,7 +114,6 @@ void CqDisplayServerImage::close()
 {
 	// Recompute the effective near and far clipping
 	updateClippingRange();
-	m_socket.close();
 }
 
 
@@ -127,44 +179,216 @@ typedef
     > 
     base64_text; // compose all the above operations in to a new iterator
 
-#if 0
-TiXmlElement* CqDisplayServerImage::serialiseToXML()
-{
-	TiXmlElement* imageXML = new TiXmlElement("Image");
+    void CqDisplayServerImage::processMessage()
+    {
+        QByteArray msg;
+    
+        if (socket->state() != QAbstractSocket::ConnectedState)
+            return;
 
-	TiXmlElement* typeXML = new TiXmlElement("Type");
-	TiXmlText* typeText = new TiXmlText("managed");
-	typeXML->LinkEndChild(typeText);
-	imageXML->LinkEndChild(typeXML);
+        const int bytesAvailable = socket->bytesAvailable();
 
-	TiXmlElement* nameXML = new TiXmlElement("Name");
-	TiXmlText* nameText = new TiXmlText(name());
-	nameXML->LinkEndChild(nameText);
-	imageXML->LinkEndChild(nameXML);
+        int bytesRead = 1;
+        char c;
+        socket->getChar(&c);
+        while (c != '\0') {
+            msg.append(c);
+            if (!socket->getChar(&c))
+	        break;
+            bytesRead++;
+        }
 
-	if(filename().empty())
-	{
-		TiXmlElement* dataXML = new TiXmlElement("Bitmap");
-		std::stringstream base64Data;
-		size_t dataLen = m_displayData.width() * m_displayData.height() * numChannels() * sizeof(TqUchar);
-		std::copy(	base64_text(BOOST_MAKE_PFTO_WRAPPER(m_displayData->rawData())), 
-					base64_text(BOOST_MAKE_PFTO_WRAPPER(m_displayData->rawData() + dataLen)), 
-					std::ostream_iterator<char>(base64Data));
-		TiXmlText* dataTextXML = new TiXmlText(base64Data.str());
-		dataTextXML->SetCDATA(true);
-		dataXML->LinkEndChild(dataTextXML);
-		imageXML->LinkEndChild(dataXML);
-	}
-	else
-	{
-		TiXmlElement* filenameXML = new TiXmlElement("Filename");
-		TiXmlText* filenameText = new TiXmlText(filename());
-		filenameXML->LinkEndChild(filenameText);
-		imageXML->LinkEndChild(filenameXML);
-	}
+        if (bytesAvailable > bytesRead) // grab another chunk in half-a-second
+            QTimer::singleShot(200, this, SLOT(processMessage()));
 
-	return(imageXML);
-}
-#endif
+            // Parse the XML message sent.
+            TiXmlDocument xmlMsg;
+            xmlMsg.Parse(msg.data());
+            // Get the root element, which is the base type of the message.
+            TiXmlElement* root = xmlMsg.RootElement();
+
+            if(root)
+            {
+                // Process the message based on its type.
+                if(root->ValueStr().compare("Open") == 0)
+                {
+                    // Extract image dimensions, etc.
+                    int xres = 640, yres = 480;
+                    int xorigin = 0, yorigin = 0;
+                    int xFrameSize = 0, yFrameSize = 0;
+                    double clipNear = 0, clipFar = FLT_MAX;
+                    const char* fname = "ri.pic";
+                    CqChannelList channelList;
+
+                    TiXmlElement* child = root->FirstChildElement("Dimensions");
+                    if(child)
+                    {
+                        child->Attribute("width", &xres);
+                        child->Attribute("height", &yres);
+                    }
+
+                    child = root->FirstChildElement("Name");
+                    if(child)
+                    {
+                        const char* name = child->GetText();
+                        if (name != NULL)
+                            fname = name;
+                    }
+                    // Process the parameters
+                    child = root->FirstChildElement("Parameters");
+                    if(child)
+                    {
+                        TiXmlElement* param = child->FirstChildElement("IntsParameter");
+                        while(param)
+                        {
+                            const char* name = param->Attribute("name");
+                            if(std::string("origin").compare(name) == 0)
+                            {
+                                TiXmlElement* values = param->FirstChildElement("Values");
+                                if(values)
+                                {
+                                    TiXmlElement* value = values->FirstChildElement("Int");
+                                    value->Attribute("value", &xorigin);
+                                    value = value->NextSiblingElement("Int");
+                                    value->Attribute("value", &yorigin);
+                                }
+                            }
+                            else if(std::string("OriginalSize").compare(name) == 0)
+                            {
+                                TiXmlElement* values = param->FirstChildElement("Values");
+                                if(values)
+                                {
+                                    TiXmlElement* value = values->FirstChildElement("Int");
+                                    value->Attribute("value", &xFrameSize);
+                                    value = value->NextSiblingElement("Int");
+                                    value->Attribute("value", &yFrameSize);
+                                }
+                            }
+                            param = param->NextSiblingElement("IntsParameter");
+                        }
+                        param = child->FirstChildElement("FloatsParameter");
+                        while(param)
+                        {
+                            const char* name = param->Attribute("name");
+                            if(name == std::string("near"))
+                            {
+                                TiXmlElement* value = param->FirstChildElement("Values")
+                                    ->FirstChildElement("Float");
+                                value->Attribute("value", &clipNear);
+                            }
+                            else if(name == std::string("far"))
+                            {
+                                TiXmlElement* value = param->FirstChildElement("Values")
+                                    ->FirstChildElement("Float");
+                                value->Attribute("value", &clipFar);
+                            }
+                            param = param->NextSiblingElement("FloatsParameter");
+                        }
+                    }
+                    child = root->FirstChildElement("Formats");
+                    if(child)
+                    {
+                        TiXmlElement* format = child->FirstChildElement("Format");
+                        while(format)
+                        {
+                            // Read the format type from the node.
+                            const char* typeName = format->GetText();
+                            const char* formatName = format->Attribute("name");
+                            TqInt typeID = PkDspyUnsigned8;
+                            std::map<std::string, TqInt>::iterator type;
+                            if((type = g_maps.nameToType.find(typeName)) != g_maps.nameToType.end())
+                                typeID = type->second;
+                            channelList.addChannel(SqChannelInfo(formatName, chanFormatFromPkDspy(typeID)));
+
+                            format = format->NextSiblingElement("Format");
+                        }
+                        // Ensure that the formats are in the right order.
+                        channelList.reorderChannels();
+                        // Send the reorganised formats back.
+                        TiXmlDocument doc("formats.xml");
+                        TiXmlDeclaration* decl = new TiXmlDeclaration("1.0","","yes");
+                        TiXmlElement* formatsXML = new TiXmlElement("Formats");
+                        for(CqChannelList::const_iterator ichan = channelList.begin();
+                                ichan != channelList.end(); ++ichan)
+                        {
+                            TiXmlElement* formatv = new TiXmlElement("Format");
+                            formatv->SetAttribute("name", ichan->name);
+                            TiXmlText* formatText = new TiXmlText(g_maps.typeToName[pkDspyFromChanFormat(ichan->type)]);
+                            formatv->LinkEndChild(formatText);
+                            formatsXML->LinkEndChild(formatv);
+                        }
+                        doc.LinkEndChild(decl);
+                        doc.LinkEndChild(formatsXML);
+
+			std::stringstream message;
+			message << doc << "\0";
+
+			socket->write(message.str().c_str(), strlen(message.str().c_str()) + 1);
+			socket->waitForBytesWritten();
+                    }
+                    setName(fname);
+                    initialize(xres, yres, xorigin, yorigin, xFrameSize, yFrameSize,
+			       clipNear, clipFar, channelList);
+                }
+                else if(root->ValueStr().compare("Data") == 0)
+                {
+                    TiXmlElement* dimensionsXML = root->FirstChildElement("Dimensions");
+                    if(dimensionsXML)
+                    {
+                        int xmin, ymin, xmaxplus1, ymaxplus1, elementSize;
+                        dimensionsXML->Attribute("xmin", &xmin);
+                        dimensionsXML->Attribute("ymin", &ymin);
+                        dimensionsXML->Attribute("xmaxplus1", &xmaxplus1);
+                        dimensionsXML->Attribute("ymaxplus1", &ymaxplus1);
+                        dimensionsXML->Attribute("elementsize", &elementSize);
+
+                        TiXmlElement* bucketDataXML = root->FirstChildElement("BucketData");
+                        if(bucketDataXML)
+                        {
+                            TiXmlText* dataText = static_cast<TiXmlText*>(bucketDataXML->FirstChild());
+                            if(dataText)
+                            {
+                                int bucketlinelen = elementSize * (xmaxplus1 - xmin);
+                                int count = bucketlinelen * (ymaxplus1 - ymin);
+                                std::string data = dataText->Value();
+                                std::vector<unsigned char> binaryData;
+                                binaryData.reserve(count);
+                                base64_binary ti_begin = base64_binary(BOOST_MAKE_PFTO_WRAPPER(data.begin()));
+                                std::size_t padding = 2 - count % 3;
+                                while(--count > 0)
+                                {
+                                    binaryData.push_back(static_cast<char>(*ti_begin));
+                                    ++ti_begin;
+                                }
+                                binaryData.push_back(static_cast<char>(*ti_begin));
+                                if(padding > 1)
+                                    ++ti_begin;
+                                if(padding > 2)
+                                    ++ti_begin;
+                                acceptData(xmin, xmaxplus1, ymin, ymaxplus1, elementSize, &binaryData[0]);
+                            }
+                        }
+                    }
+                }
+                else if(root->ValueStr().compare("Close") == 0)
+                {
+                    // Send and acknowledge.
+                    TiXmlDocument doc("ack.xml");
+                    TiXmlDeclaration* decl = new TiXmlDeclaration("1.0","","yes");
+                    TiXmlElement* formatsXML = new TiXmlElement("Acknowledge");
+                    doc.LinkEndChild(decl);
+                    doc.LinkEndChild(formatsXML);
+
+		    std::stringstream message;
+		    message << doc;
+
+		    socket->write(message.str().c_str(), strlen(message.str().c_str()) + 1);
+		    socket->waitForBytesWritten();
+                    close();
+                }
+            }
+    }
+
+
 
 } // namespace Aqsis

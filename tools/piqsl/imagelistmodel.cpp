@@ -54,294 +54,32 @@
 
 namespace Aqsis {
 
-namespace {
-struct NameMaps
-{
-    std::map<std::string, TqInt> nameToType;
-    std::map<TqInt, std::string> typeToName;
-
-    NameMaps()
-    {
-// Macros to initialise the type/name name/type maps.
-#	define	INIT_TYPE_NAME_MAPS(name) \
-	nameToType[#name] = name; \
-	typeToName[name] = #name;
-	// Fill in the typenames maps
-	INIT_TYPE_NAME_MAPS(PkDspyFloat32);
-	INIT_TYPE_NAME_MAPS(PkDspyUnsigned32);
-	INIT_TYPE_NAME_MAPS(PkDspySigned32);
-	INIT_TYPE_NAME_MAPS(PkDspyUnsigned16);
-	INIT_TYPE_NAME_MAPS(PkDspySigned16);
-	INIT_TYPE_NAME_MAPS(PkDspyUnsigned8);
-	INIT_TYPE_NAME_MAPS(PkDspySigned8);
-	INIT_TYPE_NAME_MAPS(PkDspyString);
-	INIT_TYPE_NAME_MAPS(PkDspyMatrix);
-#	undef INIT_TYPE_NAME_MAPS
-
-    }
-};
-}
-
-static NameMaps g_maps;
-
-
-typedef
-    boost::archive::iterators::transform_width<   // retrieve 6 bit integers from a sequence of 8 bit bytes
-        boost::archive::iterators::binary_from_base64<    // convert binary values ot base64 characters
-            boost::archive::iterators::remove_whitespace<
-                std::string::const_iterator
-            >
-        >,
-        8,
-        6
-    >
-base64_binary; // compose all the above operations in to a new iterator
-
-boost::mutex g_XMLMutex;
-
-class SocketDataHandler
-{
-    public:
-        SocketDataHandler(boost::shared_ptr<CqDisplayServerImage> thisClient) : m_client(thisClient), m_done(false)
-        {}
-
-        void operator()()
-        {
-            handleData();
-        }
-
-        void handleData()
-        {
-            std::stringstream buffer;
-            int count;
-
-            // Read a message
-            while(!m_done)
-            {
-                count = m_client->socket().recvData(buffer);
-                if(count <= 0)
-                    break;
-                // Readbuf should now contain a complete message
-                processMessage(buffer);
-                buffer.str("");
-                buffer.clear();
-            }
-        }
-
-        int sendXMLMessage(TiXmlDocument& msg)
-        {
-            std::stringstream message;
-            message << msg;
-
-            return( m_client->socket().sendData( message.str() ) );
-        }
-
-        void processMessage(std::stringstream& msg)
-        {
-            boost::mutex::scoped_lock lock(g_XMLMutex);
-            // Parse the XML message sent.
-            TiXmlDocument xmlMsg;
-            xmlMsg.Parse(msg.str().c_str());
-            // Get the root element, which is the base type of the message.
-            TiXmlElement* root = xmlMsg.RootElement();
-
-            if(root)
-            {
-                // Process the message based on its type.
-                if(root->ValueStr().compare("Open") == 0)
-                {
-                    // Extract image dimensions, etc.
-                    int xres = 640, yres = 480;
-                    int xorigin = 0, yorigin = 0;
-                    int xFrameSize = 0, yFrameSize = 0;
-                    double clipNear = 0, clipFar = FLT_MAX;
-                    const char* fname = "ri.pic";
-                    CqChannelList channelList;
-
-                    TiXmlElement* child = root->FirstChildElement("Dimensions");
-                    if(child)
-                    {
-                        child->Attribute("width", &xres);
-                        child->Attribute("height", &yres);
-                    }
-
-                    child = root->FirstChildElement("Name");
-                    if(child)
-                    {
-                        const char* name = child->GetText();
-                        if (name != NULL)
-                            fname = name;
-                    }
-                    // Process the parameters
-                    child = root->FirstChildElement("Parameters");
-                    if(child)
-                    {
-                        TiXmlElement* param = child->FirstChildElement("IntsParameter");
-                        while(param)
-                        {
-                            const char* name = param->Attribute("name");
-                            if(std::string("origin").compare(name) == 0)
-                            {
-                                TiXmlElement* values = param->FirstChildElement("Values");
-                                if(values)
-                                {
-                                    TiXmlElement* value = values->FirstChildElement("Int");
-                                    value->Attribute("value", &xorigin);
-                                    value = value->NextSiblingElement("Int");
-                                    value->Attribute("value", &yorigin);
-                                }
-                            }
-                            else if(std::string("OriginalSize").compare(name) == 0)
-                            {
-                                TiXmlElement* values = param->FirstChildElement("Values");
-                                if(values)
-                                {
-                                    TiXmlElement* value = values->FirstChildElement("Int");
-                                    value->Attribute("value", &xFrameSize);
-                                    value = value->NextSiblingElement("Int");
-                                    value->Attribute("value", &yFrameSize);
-                                }
-                            }
-                            param = param->NextSiblingElement("IntsParameter");
-                        }
-                        param = child->FirstChildElement("FloatsParameter");
-                        while(param)
-                        {
-                            const char* name = param->Attribute("name");
-                            if(name == std::string("near"))
-                            {
-                                TiXmlElement* value = param->FirstChildElement("Values")
-                                    ->FirstChildElement("Float");
-                                value->Attribute("value", &clipNear);
-                            }
-                            else if(name == std::string("far"))
-                            {
-                                TiXmlElement* value = param->FirstChildElement("Values")
-                                    ->FirstChildElement("Float");
-                                value->Attribute("value", &clipFar);
-                            }
-                            param = param->NextSiblingElement("FloatsParameter");
-                        }
-                    }
-                    child = root->FirstChildElement("Formats");
-                    if(child)
-                    {
-                        TiXmlElement* format = child->FirstChildElement("Format");
-                        while(format)
-                        {
-                            // Read the format type from the node.
-                            const char* typeName = format->GetText();
-                            const char* formatName = format->Attribute("name");
-                            TqInt typeID = PkDspyUnsigned8;
-                            std::map<std::string, TqInt>::iterator type;
-                            if((type = g_maps.nameToType.find(typeName)) != g_maps.nameToType.end())
-                                typeID = type->second;
-                            channelList.addChannel(SqChannelInfo(formatName, chanFormatFromPkDspy(typeID)));
-
-                            format = format->NextSiblingElement("Format");
-                        }
-                        // Ensure that the formats are in the right order.
-                        channelList.reorderChannels();
-                        // Send the reorganised formats back.
-                        TiXmlDocument doc("formats.xml");
-                        TiXmlDeclaration* decl = new TiXmlDeclaration("1.0","","yes");
-                        TiXmlElement* formatsXML = new TiXmlElement("Formats");
-                        for(CqChannelList::const_iterator ichan = channelList.begin();
-                                ichan != channelList.end(); ++ichan)
-                        {
-                            TiXmlElement* formatv = new TiXmlElement("Format");
-                            formatv->SetAttribute("name", ichan->name);
-                            TiXmlText* formatText = new TiXmlText(g_maps.typeToName[pkDspyFromChanFormat(ichan->type)]);
-                            formatv->LinkEndChild(formatText);
-                            formatsXML->LinkEndChild(formatv);
-                        }
-                        doc.LinkEndChild(decl);
-                        doc.LinkEndChild(formatsXML);
-                        sendXMLMessage(doc);
-                    }
-                    m_client->setName(fname);
-                    m_client->initialize(xres, yres, xorigin, yorigin, xFrameSize, yFrameSize,
-                                         clipNear, clipFar, channelList);
-                }
-                else if(root->ValueStr().compare("Data") == 0)
-                {
-                    TiXmlElement* dimensionsXML = root->FirstChildElement("Dimensions");
-                    if(dimensionsXML)
-                    {
-                        int xmin, ymin, xmaxplus1, ymaxplus1, elementSize;
-                        dimensionsXML->Attribute("xmin", &xmin);
-                        dimensionsXML->Attribute("ymin", &ymin);
-                        dimensionsXML->Attribute("xmaxplus1", &xmaxplus1);
-                        dimensionsXML->Attribute("ymaxplus1", &ymaxplus1);
-                        dimensionsXML->Attribute("elementsize", &elementSize);
-
-                        TiXmlElement* bucketDataXML = root->FirstChildElement("BucketData");
-                        if(bucketDataXML)
-                        {
-                            TiXmlText* dataText = static_cast<TiXmlText*>(bucketDataXML->FirstChild());
-                            if(dataText)
-                            {
-                                int bucketlinelen = elementSize * (xmaxplus1 - xmin);
-                                int count = bucketlinelen * (ymaxplus1 - ymin);
-                                std::string data = dataText->Value();
-                                std::vector<unsigned char> binaryData;
-                                binaryData.reserve(count);
-                                base64_binary ti_begin = base64_binary(BOOST_MAKE_PFTO_WRAPPER(data.begin()));
-                                std::size_t padding = 2 - count % 3;
-                                while(--count > 0)
-                                {
-                                    binaryData.push_back(static_cast<char>(*ti_begin));
-                                    ++ti_begin;
-                                }
-                                binaryData.push_back(static_cast<char>(*ti_begin));
-                                if(padding > 1)
-                                    ++ti_begin;
-                                if(padding > 2)
-                                    ++ti_begin;
-                                m_client->acceptData(xmin, xmaxplus1, ymin, ymaxplus1, elementSize, &binaryData[0]);
-                            }
-                        }
-                    }
-                }
-                else if(root->ValueStr().compare("Close") == 0)
-                {
-                    // Send and acknowledge.
-                    TiXmlDocument doc("ack.xml");
-                    TiXmlDeclaration* decl = new TiXmlDeclaration("1.0","","yes");
-                    TiXmlElement* formatsXML = new TiXmlElement("Acknowledge");
-                    doc.LinkEndChild(decl);
-                    doc.LinkEndChild(formatsXML);
-                    sendXMLMessage(doc);
-                    m_client->close();
-                    m_done = true;
-                }
-            }
-        }
-
-    private:
-        boost::shared_ptr<CqDisplayServerImage> m_client;
-        bool    m_done;
-};
-
-
-
 //------------------------------------------------------------------------------
 
 ImageListModel::ImageListModel(QObject* parent,
                                const QString& socketInterface,
                                int socketPort)
     : QAbstractListModel(parent),
-    m_images(),
-    m_socket(),
-    m_socketNotifier(0)
+    m_images()
 {
-    if(m_socket.prepare(socketInterface.toStdString(), socketPort))
+  if (m_server.listen(QHostAddress(socketInterface), socketPort))
     {
-        m_socketNotifier = new QSocketNotifier(m_socket,
-                                               QSocketNotifier::Read, this);
-        connect(m_socketNotifier, SIGNAL(activated(int)),
-                this, SLOT(handleSocketData(int)));
+      connect(&m_server, SIGNAL(newConnection()), this, SLOT(handleConnection()));
     }
+}
+
+void ImageListModel::handleConnection()
+{
+  QTcpSocket *clientConnection = m_server.nextPendingConnection();
+  QSharedPointer<CqDisplayServerImage> newImage(new CqDisplayServerImage());
+  newImage->setName("Unnamed");
+  newImage->setSocket(clientConnection);
+  
+  beginInsertRows(QModelIndex(), m_images.size(), m_images.size());
+  m_images.append(newImage);
+  endInsertRows();
+  connect(newImage.data(), SIGNAL(updated(int,int,int,int)),
+	  this, SLOT(imageUpdated(int,int,int,int)));
 }
 
 
@@ -354,11 +92,11 @@ void ImageListModel::loadImageFiles(const QStringList& fileNames)
         QString filePath = fileNames[i];
         try
         {
-            boost::shared_ptr<CqImage> newImg(new CqImage());
+            QSharedPointer<CqImage> newImg(new CqImage());
             newImg->loadFromFile(filePath.toStdString().c_str());
             QFileInfo info(filePath);
             newImg->setName(info.fileName().toStdString().c_str());
-            m_images.push_back(newImg);
+            m_images.append(newImg);
         }
         catch(XqInternal& e)
         {
@@ -425,11 +163,11 @@ bool ImageListModel::appendImageLibrary(const QString& fileName)
                         TiXmlElement* fileNameXML = imageXML->FirstChildElement("Filename");
                         if(fileNameXML && fileNameXML->GetText())
                             imageFilename = fileNameXML->GetText();
-                        boost::shared_ptr<CqImage> newImage(new CqImage(imageName));
+                        QSharedPointer<CqImage> newImage(new CqImage(imageName));
                         newImage->loadFromFile(imageFilename);
                         beginInsertRows(QModelIndex(), m_images.size(),
                                         m_images.size());
-                        m_images.push_back(newImage);
+                        m_images.append(newImage);
                         endInsertRows();
                         imageXML = imageXML->NextSiblingElement("Image");
                     }
@@ -508,30 +246,10 @@ bool ImageListModel::insertRows(int position, int rows,
         return false;
     beginInsertRows(QModelIndex(), position, position+rows-1);
     m_images.insert(m_images.begin() + position, rows,
-                    boost::shared_ptr<CqImage>());
+                    QSharedPointer<CqImage>());
     endInsertRows();
     return true;
 }
-
-
-/// Activated when data is waiting to be read on the main socket
-void ImageListModel::handleSocketData(int /*ignored*/)
-{
-    boost::shared_ptr<CqDisplayServerImage> newImage(new CqDisplayServerImage());
-    newImage->setName("Unnamed");
-
-    if(m_socket.accept(newImage->socket()))
-    {
-        m_socketReadThreads.push_back(boost::shared_ptr<boost::thread>(
-                                new boost::thread(SocketDataHandler(newImage))));
-        beginInsertRows(QModelIndex(), m_images.size(), m_images.size());
-        m_images.push_back(newImage);
-        endInsertRows();
-        connect(newImage.get(), SIGNAL(updated(int,int,int,int)),
-                this, SLOT(imageUpdated(int,int,int,int)));
-    }
-}
-
 
 /// Activated when one of the internally held images changed
 void ImageListModel::imageUpdated(int /*x*/, int /*y*/, int /*w*/, int /*h*/)
@@ -541,7 +259,7 @@ void ImageListModel::imageUpdated(int /*x*/, int /*y*/, int /*w*/, int /*h*/)
     // signal.
     for(int i = 0; i < (int)m_images.size(); ++i)
     {
-        if(im == static_cast<QObject*>(m_images[i].get()))
+      if(im == static_cast<QObject*>(m_images[i].data()))
         {
             QModelIndex index = createIndex(i, 0);
             emit dataChanged(index, index);
@@ -550,6 +268,5 @@ void ImageListModel::imageUpdated(int /*x*/, int /*y*/, int /*w*/, int /*h*/)
     }
     assert(0 && "ImageListModel: image row not found");
 }
-
 
 }
