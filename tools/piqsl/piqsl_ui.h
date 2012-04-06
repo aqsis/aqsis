@@ -37,8 +37,6 @@
 
 #include <QtGui/QStyledItemDelegate>
 
-#include <boost/shared_ptr.hpp>
-
 #include "image.h"
 
 class QItemSelectionModel;
@@ -118,7 +116,7 @@ class PiqslImageView : public QWidget
 
         const ImageListModel* m_images;
 
-        boost::shared_ptr<CqImage> m_image;  ///< current image
+        QSharedPointer<CqImage> m_image;  ///< current image
         float m_zoom;     ///< Amount of zoom
         QPointF m_tlPos;  ///< coordinates of image top left
         QPoint m_lastPos; ///< Last position in mouse drag

@@ -32,16 +32,21 @@
 #define AQSIS_IMAGELISTMODEL_H_INCLUDED
 
 #include <QtCore/QAbstractListModel>
+#include <QtCore/QSharedPointer>
+#include <QtNetwork/QTcpServer>
+#include <QtNetwork/QTcpSocket>
+
 
 #include <boost/shared_ptr.hpp>
 #include <boost/thread/thread.hpp>
 
-#include <aqsis/util/socket.h>
 #include "image.h"
 
-class QSocketNotifier;
+//class QSocketNotifier;
 
 namespace Aqsis {
+
+  class ClientListener;
 
 /// Manage a list of images, and accept new images via socket.
 ///
@@ -88,20 +93,19 @@ class ImageListModel : public QAbstractListModel
 #endif
 
     private slots:
-        void handleSocketData(int /*ignored*/);
+	void handleConnection();
 
         void imageUpdated(int x, int y, int w, int h);
 
     private:
-        std::vector<boost::shared_ptr<CqImage> > m_images;
-        CqSocket m_socket;
-        std::vector<boost::shared_ptr<boost::thread> > m_socketReadThreads;
-        QSocketNotifier* m_socketNotifier;
+        QVector<QSharedPointer<CqImage> > m_images;
+	QTcpServer m_server;
+	QVector<QSharedPointer<ClientListener> > m_listeners;
 };
 
 }
 
-Q_DECLARE_METATYPE(boost::shared_ptr<Aqsis::CqImage>)
+Q_DECLARE_METATYPE(QSharedPointer<Aqsis::CqImage>)
 
 
 #endif // AQSIS_IMAGELISTMODEL_H_INCLUDED
