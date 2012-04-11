@@ -87,7 +87,7 @@ public:
  	 * \param ymin		The minimum y value in image coordinates of the bucket.
  	 * \param ymaxplus1	One past the maximum y value in image coordinates of the bucket.
  	 */
-        void acceptData(TqUlong xmin, TqUlong xmaxplus1, TqUlong ymin, TqUlong ymaxplus1, TqInt elementSize, const unsigned char* data);
+    void acceptData(TqUlong xmin, TqUlong xmaxplus1, TqUlong ymin, TqUlong ymaxplus1, TqInt elementSize, const unsigned char* data);
 	
 	/** \brief Save the image as a TIFF file to the given folder.
  	 * Used during saving a book, this ensures that the image, which otherwise is completely transient, existing

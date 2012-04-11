@@ -320,15 +320,15 @@ typedef
                         doc.LinkEndChild(decl);
                         doc.LinkEndChild(formatsXML);
 
-			std::stringstream message;
-			message << doc << "\0";
+						std::stringstream message;
+						message << doc << "\0";
 
-			socket->write(message.str().c_str(), strlen(message.str().c_str()) + 1);
-			socket->waitForBytesWritten();
+						socket->write(message.str().c_str(), strlen(message.str().c_str()) + 1);
+						socket->waitForBytesWritten();
                     }
                     setName(fname);
                     initialize(xres, yres, xorigin, yorigin, xFrameSize, yFrameSize,
-			       clipNear, clipFar, channelList);
+							   clipNear, clipFar, channelList);
                 }
                 else if(root->ValueStr().compare("Data") == 0)
                 {

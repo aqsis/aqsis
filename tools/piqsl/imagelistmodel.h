@@ -46,8 +46,6 @@
 
 namespace Aqsis {
 
-  class ClientListener;
-
 /// Manage a list of images, and accept new images via socket.
 ///
 /// This is a model class for use with Qt's model-view framework.
@@ -93,14 +91,13 @@ class ImageListModel : public QAbstractListModel
 #endif
 
     private slots:
-	void handleConnection();
+        void handleConnection();
 
         void imageUpdated(int x, int y, int w, int h);
 
     private:
         QVector<QSharedPointer<CqImage> > m_images;
 	QTcpServer m_server;
-	QVector<QSharedPointer<ClientListener> > m_listeners;
 };
 
 }
