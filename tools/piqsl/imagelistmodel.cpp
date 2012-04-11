@@ -62,7 +62,7 @@ ImageListModel::ImageListModel(QObject* parent,
     : QAbstractListModel(parent),
     m_images()
 {
-  if (m_server.listen(QHostAddress(socketInterface), socketPort))
+    if (m_server.listen(QHostAddress(socketInterface), socketPort))
     {
       connect(&m_server, SIGNAL(newConnection()), this, SLOT(handleConnection()));
     }
@@ -70,16 +70,16 @@ ImageListModel::ImageListModel(QObject* parent,
 
 void ImageListModel::handleConnection()
 {
-  QTcpSocket *clientConnection = m_server.nextPendingConnection();
-  QSharedPointer<CqDisplayServerImage> newImage(new CqDisplayServerImage());
-  newImage->setName("Unnamed");
-  newImage->setSocket(clientConnection);
+    QTcpSocket *clientConnection = m_server.nextPendingConnection();
+    QSharedPointer<CqDisplayServerImage> newImage(new CqDisplayServerImage());
+    newImage->setName("Unnamed");
+    newImage->setSocket(clientConnection);
   
-  beginInsertRows(QModelIndex(), m_images.size(), m_images.size());
-  m_images.append(newImage);
-  endInsertRows();
-  connect(newImage.data(), SIGNAL(updated(int,int,int,int)),
-	  this, SLOT(imageUpdated(int,int,int,int)));
+    beginInsertRows(QModelIndex(), m_images.size(), m_images.size());
+    m_images.append(newImage);
+    endInsertRows();
+    connect(newImage.data(), SIGNAL(updated(int,int,int,int)),
+			this, SLOT(imageUpdated(int,int,int,int)));
 }
 
 
@@ -259,7 +259,7 @@ void ImageListModel::imageUpdated(int /*x*/, int /*y*/, int /*w*/, int /*h*/)
     // signal.
     for(int i = 0; i < (int)m_images.size(); ++i)
     {
-      if(im == static_cast<QObject*>(m_images[i].data()))
+        if(im == static_cast<QObject*>(m_images[i].data()))
         {
             QModelIndex index = createIndex(i, 0);
             emit dataChanged(index, index);
