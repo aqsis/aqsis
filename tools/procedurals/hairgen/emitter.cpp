@@ -134,6 +134,7 @@ boost::shared_ptr<PrimVars> EmitterMesh::particlesOnFace(int faceIdx)
 			weights[0] = 1 - u - v;
 			weights[1] = u;
 			weights[2] = v;
+			weights[3] = 0.0f;
 		}
 		else
 		{
