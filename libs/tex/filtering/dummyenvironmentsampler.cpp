@@ -94,8 +94,8 @@ TqFloat zGlyph(TqFloat x, TqFloat y)
 // return one when inside a "+"-shaped glyph, zero otherwise.
 TqFloat plusGlyph(TqFloat x, TqFloat y)
 {
-	if(std::fabs(x) < 0.02 && std::fabs(y) < 0.1
-			|| std::fabs(x) < 0.1 && std::fabs(y) < 0.02 )
+	if((std::fabs(x) < 0.02 && std::fabs(y) < 0.1)
+			|| (std::fabs(x) < 0.1 && std::fabs(y) < 0.02) )
 		return 1;
 	return 0;
 }
