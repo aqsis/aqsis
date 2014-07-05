@@ -28,6 +28,7 @@
 //
 // (This is the New BSD license)
 
+#define __ASSERT_MACROS_DEFINE_VERSIONS_WITHOUT_UNDERSCORES 0 
 #include "eqsl.h"
 
 #include <aqsis/aqsis.h>
