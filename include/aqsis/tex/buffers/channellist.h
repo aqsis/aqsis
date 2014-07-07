@@ -42,6 +42,7 @@
 
 #include <iosfwd>
 #include <vector>
+#include <iterator>   /* back_inserter */
 
 #include <boost/format.hpp>
 
