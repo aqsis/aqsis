@@ -46,7 +46,7 @@
 #include	<aqsis/core/iattributes.h>
 
 namespace Aqsis {
-struct IqShader;
+class IqShader;
 class	CqLightsource;
 
 class CqAttributes;

@@ -53,7 +53,7 @@
 
 namespace Aqsis
 {
-struct IqRenderer;
+class IqRenderer;
 extern IqRenderer* QGetRenderContextI();
 }
 

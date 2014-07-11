@@ -40,8 +40,8 @@ namespace Aqsis {
 class CqImagersource;
 class CqRegion;
 class CqString;
-struct IqShader;
-struct IqChannelBuffer;
+class IqShader;
+class IqChannelBuffer;
 
 //----------------------------------------------------------------------
 /** \enum EqDisplayMode
@@ -81,8 +81,9 @@ enum EqCameraFlags
  * Storage for the graphics state options.
  */
 
-struct IqOptions
+class IqOptions
 {
+public:
 	virtual ~IqOptions() {}
 
 	virtual const	TqFloat*	GetFloatOption( const char* strName, const char* strParam ) const = 0;

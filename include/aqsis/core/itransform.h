@@ -16,8 +16,9 @@
 
 namespace Aqsis {
 
-struct IqTransform
+class IqTransform
 {
+public:
 	virtual	~IqTransform()
 	{}
 

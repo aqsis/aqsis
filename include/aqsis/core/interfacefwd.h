@@ -17,23 +17,23 @@
 
 namespace Aqsis {
 
-struct IqAttributes;
+class IqAttributes;
 typedef boost::shared_ptr<IqAttributes> IqAttributesPtr;
 typedef boost::shared_ptr<const IqAttributes> IqConstAttributesPtr;
 
-struct IqSurface;
+class IqSurface;
 typedef boost::shared_ptr<IqSurface> IqSurfacePtr;
 typedef boost::shared_ptr<const IqSurface> IqConstSurfacePtr;
 
-struct IqTransform;
+class IqTransform;
 typedef boost::shared_ptr<IqTransform> IqTransformPtr;
 typedef boost::shared_ptr<const IqTransform> IqConstTransformPtr;
 
-struct IqLightsource;
+class IqLightsource;
 typedef boost::shared_ptr<IqLightsource> IqLightsourcePtr;
 typedef boost::shared_ptr<const IqLightsource> IqConstLightsourcePtr;
 
-struct IqOptions;
+class IqOptions;
 typedef boost::shared_ptr<IqOptions> IqOptionsPtr;
 typedef boost::shared_ptr<const IqOptions> IqConstOptionsPtr;
 

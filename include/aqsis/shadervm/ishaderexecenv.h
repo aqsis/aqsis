@@ -40,8 +40,8 @@
 
 namespace Aqsis {
 
-struct IqShader;
-struct IqRenderer;
+class IqShader;
+class IqRenderer;
 
 // We declare these here for access from shaderexecenv
 typedef void (*DSOMethod)(void*,int,void**);

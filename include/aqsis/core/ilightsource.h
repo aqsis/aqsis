@@ -19,7 +19,7 @@
 
 namespace Aqsis {
 
-struct IqShader;
+class IqShader;
 struct IqShaderData;
 
 //----------------------------------------------------------------------
@@ -27,8 +27,9 @@ struct IqShaderData;
  * Interface definition for access to lightsources.
  */
 
-struct IqLightsource
+class IqLightsource
 {
+public:
 	virtual	~IqLightsource()
 	{}
 

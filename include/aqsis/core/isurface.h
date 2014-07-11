@@ -22,7 +22,7 @@
 namespace Aqsis {
 
 
-struct IqTransform;
+class IqTransform;
 class CqParameter;
 struct IqShaderData;
 class CqSurface;
@@ -34,8 +34,9 @@ class CqBound;
  * Abstract base surface class, which provides interfaces to geometry.  
  */
 
-struct IqSurface
+class IqSurface
 {
+public:
 	virtual	~IqSurface()
 	{}
 	/** Transform this GPrim using the specified matrices.

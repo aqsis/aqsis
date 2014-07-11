@@ -36,11 +36,11 @@
 namespace Aqsis {
 
 struct SqImageSample;
-struct IqRenderer;
+class IqRenderer;
 class CqRegion;
 class CqParameter;
 
-struct IqChannelBuffer
+class IqChannelBuffer
 {
 	public:
 		virtual ~IqChannelBuffer() {}	
@@ -57,7 +57,7 @@ struct IqChannelBuffer
 };
 
 
-struct IqDisplayRequest
+class IqDisplayRequest
 {
 	public:
 		virtual ~IqDisplayRequest() {}
@@ -70,8 +70,9 @@ struct IqDisplayRequest
 		virtual bool isLoaded() const = 0;
 };
 
-struct IqDDManager
+class IqDDManager
 {
+public:
 	virtual ~IqDDManager()
 	{
 	};

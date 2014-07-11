@@ -33,7 +33,7 @@
 
 namespace Aqsis {
 
-class IqParseNode;
+struct IqParseNode;
 
 //----------------------------------------------------------------------
 class IqCodeGen
