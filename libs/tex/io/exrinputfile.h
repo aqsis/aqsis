@@ -48,10 +48,10 @@
 
 #include <aqsis/tex/io/itexinputfile.h>
 
+#include <OpenEXR/ImfInputFile.h>
+
 //------------------------------------------------------------------------------
-namespace Imf {
-	class InputFile;
-}
+
 
 namespace Aqsis {
 
