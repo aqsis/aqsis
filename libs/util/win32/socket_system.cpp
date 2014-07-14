@@ -253,6 +253,12 @@ int	CqSocket::sendData(const std::string& data) const
 	while ( need > 0 )
 	{
 		TqInt n = send( m_socket, data.c_str() + tot, need, 0 );
+		if(n == SOCKET_ERROR)
+		{
+			int err = WSAGetLastError();
+			Aqsis::log() << error << "Error sending to socket " << err << std::endl;
+			return -1;
+		}
 		need -= n;
 		tot += n;
 	}
