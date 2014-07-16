@@ -376,10 +376,9 @@ CqNamedParameterList::CqNamedParameterList( const CqNamedParameterList& From ) :
 		m_strName( From.m_strName ),
 		m_hash( From.m_hash)
 {
-	TqInt i = From.m_aParameters.size();
-	while ( i-- > 0 )
+	for ( std::map<std::string, CqParameter*>::const_iterator i = From.m_aParameters.begin(); i != From.m_aParameters.end(); i++ )
 	{
-		m_aParameters.push_back( From.m_aParameters[ i ] ->Clone() );
+		m_aParameters[i->first] = i->second->Clone();
 	}
 }
 

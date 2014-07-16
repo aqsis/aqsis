@@ -29,7 +29,8 @@
 
 #include	<aqsis/aqsis.h>
 
-#include	<vector>
+#include <vector>
+#include <map>
 
 #include	<boost/shared_ptr.hpp>
 
@@ -1573,8 +1574,8 @@ class CqNamedParameterList
 		CqNamedParameterList( const CqNamedParameterList& From );
 		~CqNamedParameterList()
 		{
-			for ( std::vector<CqParameter*>::iterator i = m_aParameters.begin(); i != m_aParameters.end(); i++ )
-				delete( ( *i ) );
+			for ( std::map<std::string, CqParameter*>::iterator i = m_aParameters.begin(); i != m_aParameters.end(); i++ )
+				delete( i->second );
 		}
 
 #ifdef _DEBUG
@@ -1597,17 +1598,14 @@ class CqNamedParameterList
 		 */
 		void	AddParameter( const CqParameter* pParameter )
 		{
-			for ( std::vector<CqParameter*>::iterator i = m_aParameters.begin(); i != m_aParameters.end(); i++ )
+			std::map<std::string,CqParameter*>::const_iterator f1 = m_aParameters.find(pParameter->strName() );
+
+			if(f1 != m_aParameters.end())
 			{
-				if ( ( *i ) ->hash() == pParameter->hash() )
-				{
-					delete( *i );
-					( *i ) = const_cast<CqParameter*>( pParameter );
-					return ;
-				}
+				delete f1->second;
 			}
-			// If not append it.
-			m_aParameters.push_back( const_cast<CqParameter*>( pParameter ) );
+
+			m_aParameters[pParameter->strName()] = const_cast<CqParameter*>( pParameter );
 		}
 		/** Get a read only pointer to a named parameter.
 		 * \param strName Character pointer pointing to zero terminated parameter name.
@@ -1615,11 +1613,13 @@ class CqNamedParameterList
 		 */
 		const	CqParameter* pParameter( const char* strName ) const
 		{
-			const TqUlong hash = CqString::hash( strName );
-			for ( std::vector<CqParameter*>::const_iterator i = m_aParameters.begin(); i != m_aParameters.end(); i++ )
-				if ( ( *i ) ->hash() == hash )
-					return ( *i );
-			return ( 0 );
+			CqParameter *p = NULL;
+			std::map<std::string,CqParameter*>::const_iterator f1 = m_aParameters.find(strName);
+
+			if(f1 != m_aParameters.end())
+				p = f1->second;
+
+			return p;
 		}
 		/** Get a pointer to a named parameter.
 		 * \param strName Character pointer pointing to zero terminated parameter name.
@@ -1627,11 +1627,13 @@ class CqNamedParameterList
 		 */
 		CqParameter* pParameter( const char* strName )
 		{
-			const TqUlong hash = CqString::hash( strName );
-			for ( std::vector<CqParameter*>::iterator i = m_aParameters.begin(); i != m_aParameters.end(); i++ )
-				if ( ( *i ) ->hash() == hash )
-					return ( *i );
-			return ( 0 );
+			CqParameter *p = NULL;
+			std::map<std::string,CqParameter*>::const_iterator f1 = m_aParameters.find(strName);
+
+			if(f1 != m_aParameters.end())
+				p = f1->second;
+
+			return p;
 		}
 		TqUlong hash()
 		{
@@ -1639,7 +1641,7 @@ class CqNamedParameterList
 		}
 	private:
 		CqString	m_strName;			///< The name of this parameter list.
-		std::vector<CqParameter*>	m_aParameters;		///< A vector of name/value parameters.
+		std::map<std::string, CqParameter*>	m_aParameters;		///< A map of name/value parameters.
 		TqUlong m_hash;
 }
 ;
