@@ -71,7 +71,7 @@ class CqChannelBuffer : public IqChannelBuffer
 		TqInt	m_height;
 		TqInt m_elementSize;
 		std::map<std::string, std::pair<TqInt, TqInt> >	m_channels;
-		TqChannelValues	m_data;
+		TqChannelValues	*m_data;
 };
 
 
@@ -82,12 +82,17 @@ class CqChannelBuffer : public IqChannelBuffer
 inline void CqChannelBuffer::clearChannels()
 {
 	m_channels.clear();
-	m_data.clear();
+	if(m_data)
+		delete [] m_data;
+	m_data = NULL;
 	m_elementSize = 0;
 }
 
-inline CqChannelBuffer::CqChannelBuffer() : m_elementSize(0)
-{}
+inline CqChannelBuffer::CqChannelBuffer()
+: m_elementSize(0),
+  m_data(NULL)
+{
+}
 
 inline TqInt CqChannelBuffer::addChannel(const std::string& name, TqInt size)
 {
@@ -113,19 +118,31 @@ inline TqInt CqChannelBuffer::getChannelIndex(const std::string& name) const
 
 inline void CqChannelBuffer::allocate(TqInt width, TqInt height)
 {
+	TqChannelValues	*old = m_data;
+	int oldsize = m_width*m_height*m_elementSize;
 	m_width = width;
 	m_height = height;
-	m_data.resize(m_width*m_height*m_elementSize);
+
+	m_data = new TqChannelValues[m_width*m_height*m_elementSize];
+	if(m_data)
+	{
+		memset(m_data, 0, m_width*m_height*m_elementSize);
+		if(old)
+		{
+			memcpy(m_data, old, oldsize);
+			delete [] old;
+		}
+	}
 }
 
 inline IqChannelBuffer::TqChannelPtr CqChannelBuffer::operator()(TqInt x, TqInt y, TqInt index)
 {
-	return m_data.begin() + indexOffset(x, y, index);
+	return m_data + indexOffset(x, y, index);
 }
 
 inline IqChannelBuffer::TqConstChannelPtr CqChannelBuffer::operator()(TqInt x, TqInt y, TqInt index) const
 {
-	return m_data.begin() + indexOffset(x, y, index);
+	return m_data + indexOffset(x, y, index);
 }
 
 inline TqInt CqChannelBuffer::width() const

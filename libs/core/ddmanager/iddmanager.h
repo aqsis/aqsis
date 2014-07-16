@@ -49,9 +49,9 @@ class IqChannelBuffer
 		virtual TqInt height() const = 0;
 		virtual TqInt getChannelIndex(const std::string& name) const = 0;
 
-		typedef std::vector<TqFloat> TqChannelValues;
-		typedef TqChannelValues::iterator TqChannelPtr;
-		typedef TqChannelValues::const_iterator TqConstChannelPtr;
+		typedef TqFloat TqChannelValues;
+		typedef TqFloat* TqChannelPtr;
+		typedef TqFloat* TqConstChannelPtr;
 
 		virtual TqConstChannelPtr operator()(TqInt x, TqInt y, TqInt index) const = 0;
 };
