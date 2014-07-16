@@ -36,7 +36,7 @@ namespace Aqsis {
 struct IqParseNode;
 
 //----------------------------------------------------------------------
-class IqCodeGen
+class AQSIS_SLCOMP_SHARE IqCodeGen
 {
 	public:
 		virtual void OutputTree( IqParseNode* pNode, std::string strOutName = "" ) = 0;

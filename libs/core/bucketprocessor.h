@@ -364,7 +364,7 @@ inline TqInt CqSampleIterator::subPixelY() const
 
 inline bool CqSampleIterator::inRegion() const
 {
-	return m_pixel;
+	return m_pixel != NULL;
 }
 
 /// Get the pixel at raster coordinates (pixelX, pixelY) from the processor.

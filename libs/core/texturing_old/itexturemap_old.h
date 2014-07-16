@@ -24,7 +24,7 @@
 
 namespace Aqsis {
 
-class IqShaderData;
+struct IqShaderData;
 class CqString;
 class CqMatrix;
 
