@@ -160,9 +160,7 @@ inline TqInt CqChannelBuffer::indexOffset(TqInt x, TqInt y, TqInt index) const
 	assert(index >= 0 && index < static_cast<TqInt>(m_elementSize));
 	assert(x >= 0 && x < m_width);
 	assert(y >= 0 && y < m_height);
-	TqInt offset = (y*m_width + x)*m_elementSize + index;
-	assert(offset < static_cast<TqInt>(m_data.size()));
-	return offset;
+	return (y*m_width + x)*m_elementSize + index;
 }
 
 //-----------------------------------------------------------------------
