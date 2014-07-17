@@ -201,6 +201,12 @@ set(VERSION_MAJOR 1)
 set(VERSION_MINOR 9)
 set(VERSION_BUILD 0)
 set(SCM_REVISION 0) # "?"
+set(AQSIS_PROJECT_NAME "Aqsis Renderer")
+set(AQSIS_PROJECT_NAME_SHORT "Aqsis")
+set(AQSIS_PROJECT_NAME_BASIC "aqsis")
+set(AQSIS_PROJECT_VENDOR "Aqsis Team")
+set(AQSIS_PROJECT_COPYRIGHT "Copyright (C) 2009-2014, ${AQSIS_PROJECT_VENDOR}.")
+set(AQSIS_PROJECT_COPYRIGHT_OTHER "The RenderMan(R) Interface Procedures and Protocol are Copyright 1988, 1989, 2000, 2005 Pixar. All Rights Reserved.")
 
 
 #-------------------------------------------------------------------------------
