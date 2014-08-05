@@ -22,7 +22,7 @@ set(linklibs ${io_linklibs})
 if(AQSIS_USE_OPENEXR)
     include_directories(${AQSIS_OPENEXR_INCLUDE_DIR} "${AQSIS_OPENEXR_INCLUDE_DIR}/OpenEXR")
     add_definitions(-DUSE_OPENEXR)
-if(WIN32)
+if(WIN32 AND AQSIS_USE_OPENEXR_DLL)
     add_definitions(-DOPENEXR_DLL)
 endif()
 
