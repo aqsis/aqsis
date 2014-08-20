@@ -18,6 +18,7 @@
   Var ADD_TO_PATH_ALL_USERS
   Var ADD_TO_PATH_CURRENT_USER
   Var INSTALL_DESKTOP
+  Var REGISTER_HOME
 
 ;--------------------------------
 ;Include Modern UI
@@ -663,6 +664,10 @@ Section "-Core installation"
   !insertmacro MUI_INSTALLOPTIONS_READ $INSTALL_DESKTOP "NSIS.InstallOptions.ini" "Field 5" "State"
   !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
   
+  ; Environment Variable
+  !insertmacro MUI_INSTALLOPTIONS_READ $REGISTER_HOME "NSIS.InstallOptions.ini" "Field 6" "State"
+  Call EnvironmentHome
+
   ;Create shortcuts
   CreateDirectory "$SMPROGRAMS\$STARTMENU_FOLDER"
 @CPACK_NSIS_CREATE_ICONS@
@@ -804,6 +809,9 @@ Section "Uninstall"
   Delete "$INSTDIR\AddRemove.exe"
 !endif
 
+  ;Remove AQSISHOME Environment Variable
+  DeleteRegValue HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "AQSISHOME"
+
   ;Remove the uninstaller itself.
   Delete "$INSTDIR\Uninstall.exe"
   DeleteRegKey SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\@CPACK_PACKAGE_INSTALL_DIRECTORY@"
@@ -862,6 +870,18 @@ Section "Uninstall"
     Call un.RemoveFromPath
   doNotRemoveFromPath:
 SectionEnd
+
+;--------------------------------
+Function EnvironmentHome
+  ; Update environment variables for all users
+  ${If} $REGISTER_HOME == 1
+
+    DetailPrint "Updating AQSISHOME environment variable, please wait..."
+
+    WriteRegStr HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "AQSISHOME" "$INSTDIR"
+    SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
+  ${EndIf}
+FunctionEnd
 
 ;--------------------------------
 ; determine admin versus local install
