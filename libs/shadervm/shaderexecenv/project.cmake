@@ -1,5 +1,6 @@
 set(shaderexecenv_srcs
 	shadeops_bake3d.cpp
+	shadeops_indirectdiffuse.cpp
 	shadeops_comp.cpp
 	shadeops_deriv.cpp
 	shadeops_dso.cpp
@@ -18,5 +19,4 @@ set(shaderexecenv_hdrs
 	shaderexecenv.h
 )
 make_absolute(shaderexecenv_hdrs ${shaderexecenv_SOURCE_DIR})
-
 include_directories(${shaderexecenv_SOURCE_DIR})

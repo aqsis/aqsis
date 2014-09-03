@@ -30,6 +30,7 @@ option(AQSIS_USE_QT "Build the aqsis GUI components which rely on the Qt librari
 option(AQSIS_USE_OPENEXR "Build aqsis with support for the OpenEXR image format" ON)
 option(AQSIS_USE_OPENEXR_DLL "Build aqsis using OpenEXR DLLs" OFF)
 option(AQSIS_USE_PNG "Build aqsis with support for reading PNG image files" ON)
+option(AQSIS_USE_OPENMP "Build aqsis with support of OpenMP (multi-threading)" ON)
 option(AQSIS_USE_EXTERNAL_TINYXML "Try to find and use an external tinyxml library" OFF)
 mark_as_advanced(AQSIS_USE_PDIFF AQSIS_USE_EXTERNAL_TINYXML AQSIS_USE_OPENEXR_DLL)
 
@@ -133,6 +134,19 @@ if(AQSIS_USE_PNG)
 		message("** Cannot find PNG - aqsis will be built without support for the PNG image format")
 		set(AQSIS_USE_PNG OFF)
 	endif()
+endif()
+
+# find openMP
+if(AQSIS_USE_OPENMP)
+	find_package(OpenMP)
+
+	if (NOT OPENMP_FOUND)
+		message("** Cannot find OpenMP - aqsis will be built without support of OpenMP")
+	else()
+		set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+		set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+	endif()
+
 endif()
 
 ## find tinyxml.  If not found we use the version distributed with the aqsis
@@ -367,4 +381,3 @@ install(FILES ${aqsisrc_name} DESTINATION ${SYSCONFDIR} COMPONENT main)
 set(AQSISCONFIG_PATH ${CMAKE_CURRENT_BINARY_DIR}/AqsisConfig.cmake)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/AqsisConfig.cmake.in ${AQSISCONFIG_PATH})
 export(TARGETS aqsis_core aqsis_math aqsis_shadervm aqsis_tex aqsis_util aqsis_riutil APPEND FILE ${AQSISCONFIG_PATH})
-

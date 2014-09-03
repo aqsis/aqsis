@@ -45,7 +45,10 @@
 #include <OpenEXR/ImathMatrix.h>
 
 #include "ptview.h"
-#include "microbuffer.h"
+#include <MicroBuf.h>
+#include <RadiosityIntegrator.h>
+#include <OcclusionIntegrator.h>
+#include <microbuf_proj_func.h>
 
 #include <aqsis/version.h>
 
@@ -331,7 +334,7 @@ static void drawDisk(V3f p, V3f n, float r)
 
 /// Debug: visualize tree splitting
 static void splitNode(V3f P, float maxSolidAngle, int dataSize,
-                       const PointOctree::Node* node)
+                       const DiffusePointOctree::Node* node)
 {
     // Examine node bound and cull if possible
     float r = node->aggR;
@@ -366,7 +369,7 @@ static void splitNode(V3f P, float maxSolidAngle, int dataSize,
             // Interior node: render each non-null child.
             for(int i = 0; i < 8; ++i)
             {
-                PointOctree::Node* child = node->children[i];
+                DiffusePointOctree::Node* child = node->children[i];
                 if(!child)
                     continue;
                 splitNode(P, maxSolidAngle, dataSize, child);
@@ -471,7 +474,7 @@ static void drawCubeEnvFace(Imath::V2f p, GLubyte* cols, int colsWidth)
 static void drawMicroBuf(const MicroBuf& envBuf)
 {
     // Make new array of texels.
-    int res = envBuf.res();
+    int res = envBuf.getFaceResolution();
     int npix = res*res;
     int faceSize = npix*3;
     boost::scoped_array<GLubyte> colBuf(new GLubyte[faceSize*6]);
@@ -480,24 +483,30 @@ static void drawMicroBuf(const MicroBuf& envBuf)
     {
         float zMin = 0;
         float zMax = 0;
-        depthRange(envBuf.face(MicroBuf::Face_xp), npix*6, envBuf.nchans(),
+        depthRange(envBuf.face(MicroBuf::Face_xp), npix*6, envBuf.getNChans(),
                    zMin, zMax);
-        for(int face = 0; face < 6; ++face)
-            depthToColor(envBuf.face(face), npix, envBuf.nchans(),
+        for(int iface = MicroBuf::Face_begin; iface < MicroBuf::Face_end; ++iface) {
+		MicroBuf::Face face = static_cast<MicroBuf::Face>(iface);
+            depthToColor(envBuf.face(face), npix, envBuf.getNChans(),
                          &colBuf[faceSize*face], zMin, zMax);
+        }
     }
     else if(false)
     {
-        for(int face = 0; face < 6; ++face)
-            coverageToColor(envBuf.face(face), npix, envBuf.nchans(),
+	for(int iface = MicroBuf::Face_begin; iface < MicroBuf::Face_end; ++iface) {
+		MicroBuf::Face face = static_cast<MicroBuf::Face>(iface);
+            coverageToColor(envBuf.face(face), npix, envBuf.getNChans(),
                             &colBuf[faceSize*face]);
+	}
     }
     else
     {
         // Convert float face color into 8-bit color texels for OpenGL
-        for(int face = 0; face < 6; ++face)
-            floatColToColor(envBuf.face(face) + 2, npix, envBuf.nchans(),
+	for(int iface = MicroBuf::Face_begin; iface < MicroBuf::Face_end; ++iface) {
+		MicroBuf::Face face = static_cast<MicroBuf::Face>(iface);
+		floatColToColor(envBuf.face(face) + 2, npix, envBuf.getNChans(),
                             &colBuf[faceSize*face]);
+	}
     }
     // Set up coordinates so we render on a 4x3 grid
     glMatrixMode(GL_PROJECTION);
@@ -561,7 +570,7 @@ void PointView::loadPointFiles(const QStringList& fileNames)
     PointArray a;
     loadPointFile(a, fileNames[0].toStdString());
     m_pointTree.reset(); // free up memory
-    m_pointTree = boost::shared_ptr<PointOctree>(new PointOctree(a));
+    m_pointTree = boost::shared_ptr<DiffusePointOctree>(new DiffusePointOctree(a));
 #endif
     updateGL();
 }
