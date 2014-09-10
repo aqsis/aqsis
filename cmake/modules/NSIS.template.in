@@ -19,6 +19,7 @@
   Var ADD_TO_PATH_CURRENT_USER
   Var INSTALL_DESKTOP
   Var REGISTER_HOME
+  Var REGISTER_MIME
 
 ;--------------------------------
 ;Include Modern UI
@@ -668,6 +669,10 @@ Section "-Core installation"
   !insertmacro MUI_INSTALLOPTIONS_READ $REGISTER_HOME "NSIS.InstallOptions.ini" "Field 6" "State"
   Call EnvironmentHome
 
+  ; Register file extensions
+  !insertmacro MUI_INSTALLOPTIONS_READ $REGISTER_MIME "NSIS.InstallOptions.ini" "Field 7" "State"
+  Call RegisterMIME
+
   ;Create shortcuts
   CreateDirectory "$SMPROGRAMS\$STARTMENU_FOLDER"
 @CPACK_NSIS_CREATE_ICONS@
@@ -880,6 +885,37 @@ Function EnvironmentHome
 
     WriteRegStr HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "AQSISHOME" "$INSTDIR"
     SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
+  ${EndIf}
+FunctionEnd
+
+Function RegisterMIME
+  ${If} $REGISTER_MIME == 1
+    DetailPrint "Updating file associations, please wait..."
+
+    WriteRegStr HKCR ".rib" "" "@AQSIS_PROJECT_NAME_SHORT@.RIB"
+    WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.RIB" "" "${PACKAGE_SHELLEXT_RIB_INFO}"
+    WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.RIB\DefaultIcon" "" "$INSTDIR\bin\eqsl.exe,1"
+    WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.RIB\shell\open" "" "${PACKAGE_SHELLEXT_RIB}"
+    WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.RIB\shell\open\command" "" '"$INSTDIR\bin\aqsis.exe" -progress "%1"'
+
+    ; Compressed RIB (.rib.gz) support needs looking at - Windows seems to have an issue with double extensions !!!
+    WriteRegStr HKCR ".ribz" "" "@AQSIS_PROJECT_NAME_SHORT@.RIBGZ"
+    WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.RIBGZ" "" "${PACKAGE_SHELLEXT_RIBGZ_INFO}"
+    WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.RIBGZ\DefaultIcon" "" "$INSTDIR\bin\eqsl.exe,1"
+    WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.RIBGZ\shell\open" "" "${PACKAGE_SHELLEXT_RIB}"
+    WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.RIBGZ\shell\open\command" "" '"$INSTDIR\bin\aqsis.exe" -progress "%1"'
+
+    WriteRegStr HKCR ".sl" "" "@AQSIS_PROJECT_NAME_SHORT@.SL"
+    WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.SL" "" "${PACKAGE_SHELLEXT_SL_INFO}"
+    WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.SL\DefaultIcon" "" "$INSTDIR\bin\eqsl.exe,1"
+    WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.SL\shell\open" "" "${PACKAGE_SHELLEXT_SL}"
+    WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.SL\shell\open\command" "" '"$INSTDIR\bin\aqsl.exe" "%1"'
+
+    WriteRegStr HKCR ".slx" "" "@AQSIS_PROJECT_NAME_SHORT@.SLX"
+    WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.SLX" "" "${PACKAGE_SHELLEXT_SLX_INFO}"
+    WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.SLX\DefaultIcon" "" "$INSTDIR\bin\eqsl.exe,1"
+    WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.SLX\shell\open" "" "${PACKAGE_SHELLEXT_SLX}"
+    WriteRegStr HKCR "@AQSIS_PROJECT_NAME_SHORT@.SLX\shell\open\command" "" '"$SYSDIR\cmd.exe" "/k" "$INSTDIR\bin\aqsltell.exe" "%1"'
   ${EndIf}
 FunctionEnd
 

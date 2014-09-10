@@ -1,5 +1,5 @@
 [Settings]
-NumFields=6
+NumFields=7
 
 [Field 1]
 Type=label
@@ -54,11 +54,11 @@ Top=90
 Bottom=100
 State=1
 
-;[Field 7]
-;Type=CheckBox
-;Text=Associate files with @CPACK_PACKAGE_NAME@
-;Left=0
-;Right=-1
-;Top=100
-;Bottom=110
-;State=1
+[Field 7]
+Type=CheckBox
+Text=Associate files with @CPACK_PACKAGE_NAME@
+Left=0
+Right=-1
+Top=100
+Bottom=110
+State=1
