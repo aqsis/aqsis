@@ -212,8 +212,8 @@ endif()
 # some packaging variables are set in the platform-specific config files, and
 # these version variables are potentially used there.
 set(VERSION_MAJOR 1)
-set(VERSION_MINOR 9)
-set(VERSION_BUILD 0)
+set(VERSION_MINOR 8)
+set(VERSION_BUILD 3)
 set(SCM_REVISION 0) # "?"
 set(AQSIS_PROJECT_NAME "Aqsis Renderer")
 set(AQSIS_PROJECT_NAME_SHORT "Aqsis")
