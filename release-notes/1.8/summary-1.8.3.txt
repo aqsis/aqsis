@@ -1,0 +1,20 @@
+Summary of changes in aqsis-1.8.3 
+
+
+Major features
+--------------
+   * None
+
+Features and improvements
+-------------------------
+   * Windows filepaths in RIB's files no longer cause errors.
+   * AQSISHOME environment can be set during the install.
+   * Installer to associate extentions.     
+   * Improved Point Renderer.
+
+
+Bug Fixes
+---------
+   * Framebuffer no longer goes into an infinite loop when rendering.
+   * Fix Framebuffer socket error.   
+
