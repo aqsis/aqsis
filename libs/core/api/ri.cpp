@@ -370,7 +370,9 @@ void SetDefaultRiOptions()
 
 	char acPath[256];
 	char root[256];
-	if( GetModuleFileName( NULL, acPath, 256 ) != 0)
+	HMODULE module = GetModuleHandleA("aqsis_core.dll");
+
+	if( GetModuleFileName( module, acPath, 256 ) != 0)
 	{
 		// guaranteed file name of at least one character after path
 		*( strrchr( acPath, '\\' ) ) = '\0';

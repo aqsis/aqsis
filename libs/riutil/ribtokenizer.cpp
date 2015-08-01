@@ -485,55 +485,15 @@ void RibTokenizer::readString(RibInputBuffer& inBuf, RibToken& tok)
 				c = inBuf.get();
 				switch(c)
 				{
-					case 'n':
-						outString += '\n';
-						break;
-					case 'r':
-						outString += '\r';
-						break;
-					case 't':
-						outString += '\t';
-						break;
-					case 'b':
-						outString += '\b';
-						break;
-					case 'f':
-						outString += '\f';
-						break;
-					case '\\':
-						outString += '\\';
-						break;
-					case '0':
-					case '1':
-					case '2':
-					case '3':
-					case '4':
-					case '5':
-					case '6':
-					case '7':
-						{
-							// read in a sequence of (up to) three octal digits
-							unsigned char octalChar = c - '0';
-							c = inBuf.get();
-							for(int i = 0; i < 2 && c >= '0' && c <= '7'; i++ )
-							{
-								octalChar = 8*octalChar + (c - '0');
-								c = inBuf.get();
-							}
-							inBuf.unget();
-							outString += octalChar;
-						}
-						break;
-					case '\r':
-						// discard newlines, including "\r\n" pairs.
-						if(inBuf.get() != '\n')
-							inBuf.unget();
-						break;
-					case '\n':
+					/* Lets do a minimum strip here since it breaks abolute paths
+					 *  on windows. Both Windows and Linux use the '\ ' syntax when
+					 *  a space is placed in a path.
+					 */
+					case ' ':
+						outString += ' ';
 						break;
 					default:
-						// ignore the escape '\' if the following char isn't one of
-						// the above.
+						outString += '\\';
 						outString += c;
 						break;
 				}

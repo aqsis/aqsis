@@ -10,6 +10,7 @@
 
 #include	<algorithm>
 #include	<map>
+#include	<iterator>
 
 #include	"parsenode.h"
 #include	"funcdef.h"

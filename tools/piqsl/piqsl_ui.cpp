@@ -60,8 +60,6 @@ PiqslMainWindow::PiqslMainWindow(const QString& socketInterface,
 {
     setWindowTitle("piqsl");
 	
-	Aqsis::CqSocket::initialiseSockets();
-
     // File menu
     QMenu* fileMenu = menuBar()->addMenu(tr("&File"));
     {
@@ -397,10 +395,10 @@ void PiqslImageView::changeSelectedImage(const QItemSelection& selected,
 void PiqslImageView::setSelectedImage(const QModelIndexList& indexes)
 {
     if(m_image)
-        disconnect(m_image.get(), 0, this, 0);
+        disconnect(m_image.data(), 0, this, 0);
     if(indexes.empty())
     {
-        m_image.reset();
+      //        m_image.reset();
         update();
         return;
     }
@@ -411,7 +409,7 @@ void PiqslImageView::setSelectedImage(const QModelIndexList& indexes)
         prevWidth = m_image->frameWidth();
         prevHeight = m_image->frameHeight();
     }
-    m_image = indexes[0].data().value<boost::shared_ptr<CqImage> >();
+    m_image = indexes[0].data().value<QSharedPointer<CqImage> >();
     if(prevWidth > 0 && m_image->frameWidth() > 0)
     {
         // Keep the center of the image in the same place when switching to an
@@ -421,9 +419,9 @@ void PiqslImageView::setSelectedImage(const QModelIndexList& indexes)
     }
     else
         centerImage();
-    connect(m_image.get(), SIGNAL(updated(int,int,int,int)),
+    connect(m_image.data(), SIGNAL(updated(int,int,int,int)),
             this, SLOT(imageUpdated(int,int,int,int)));
-    connect(m_image.get(), SIGNAL(resized()), this, SLOT(imageResized()));
+    connect(m_image.data(), SIGNAL(resized()), this, SLOT(imageResized()));
     update();
 }
 
@@ -484,8 +482,8 @@ void ImageListDelegate::paint(QPainter* painter,
 {
     if(option.state & QStyle::State_Selected)
         painter->fillRect(option.rect, option.palette.highlight());
-    boost::shared_ptr<Aqsis::CqImage> img =
-        index.data().value<boost::shared_ptr<Aqsis::CqImage> >();
+    QSharedPointer<Aqsis::CqImage> img =
+        index.data().value<QSharedPointer<Aqsis::CqImage> >();
     // Draw thumbnail
     int thumbW = std::min(option.rect.height(), option.rect.width());
     QRect thumbRect(option.rect.left()+1, option.rect.top()+1,

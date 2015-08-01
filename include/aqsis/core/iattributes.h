@@ -30,11 +30,12 @@ enum ShadingInterpolation
 };
 
 
-struct IqLightsource;
-struct IqShader;
+class IqLightsource;
+class IqShader;
 
-struct IqAttributes
+class IqAttributes
 {
+public:
 	virtual ~IqAttributes()
 	{}
 

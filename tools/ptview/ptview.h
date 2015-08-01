@@ -46,7 +46,7 @@
 
 #include <aqsis/util/interactivecamera.h>
 
-#include "pointcontainer.h"
+#include <diffuse/DiffusePointOctree.h>
 
 class QActionGroup;
 class QSignalMapper;
@@ -181,7 +181,7 @@ class PointView : public QGLWidget
         bool m_lighting;
         /// Point cloud data
         std::vector<boost::shared_ptr<PointArrayModel> > m_points;
-        boost::shared_ptr<const PointOctree> m_pointTree;
+        boost::shared_ptr<const DiffusePointOctree> m_pointTree;
         V3f m_cloudCenter;
 };
 

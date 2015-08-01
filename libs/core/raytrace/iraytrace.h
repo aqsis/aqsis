@@ -18,10 +18,11 @@
 
 namespace Aqsis {
 
-struct IqSurface;
+class IqSurface;
 
-struct IqRaytrace
+class IqRaytrace
 {
+public:
 	virtual ~IqRaytrace()
 	{}
 

@@ -29,6 +29,7 @@ namespace Aqsis {
 
 struct IqShaderData
 {
+public:
 	/** \brief Storage type within the shader context
  	 */
 	enum EqStorage

@@ -49,6 +49,8 @@
 #include <aqsis/tex/io/itexinputfile.h>
 #include <OpenExr/ImfInputFile.h>
 
+#include <OpenEXR/ImfInputFile.h>
+
 //------------------------------------------------------------------------------
 
 namespace Aqsis {

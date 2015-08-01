@@ -41,7 +41,6 @@
 #include <algorithm>
 #include <cctype>
 
-#include <OpenEXR/ImfInputFile.h>
 #include <OpenEXR/ImfChannelList.h>
 #include <OpenEXR/ImfFrameBuffer.h>
 #include <OpenEXR/Iex.h>

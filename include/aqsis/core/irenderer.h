@@ -26,8 +26,9 @@ namespace Aqsis {
 struct IqTextureMapOld;
 struct IqTextureCache;
 
-struct IqRenderer
+class IqRenderer
 {
+public:
 	virtual	~IqRenderer()
 	{}
 

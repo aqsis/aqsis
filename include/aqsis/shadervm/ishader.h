@@ -51,9 +51,9 @@ enum EqShaderType
 
 struct IqShaderExecEnv;
 struct IqShaderData;
-struct IqSurface;
+class IqSurface;
 struct IqParameter;
-struct IqRenderer;
+class IqRenderer;
 class CqMatrix;
 class CqString;
 
@@ -72,8 +72,9 @@ AQSIS_DECLARE_XQEXCEPTION(XqBadShader, XqInternal);
 //----------------------------------------------------------------------
 /** \brief Abstract base class from which all shaders must be defined.
  */
-struct AQSIS_SHADERVM_SHARE IqShader
+class AQSIS_SHADERVM_SHARE IqShader
 {
+public:
 	virtual	~IqShader()
 	{}
 	/** Get the shader matrix, the transformation at the time this shader was instantiated.

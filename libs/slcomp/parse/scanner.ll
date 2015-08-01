@@ -16,9 +16,10 @@ using namespace Aqsis;
 #include "parser.hpp"
 
 #ifdef	WIN32
-//extern "C" TqInt isatty(TqInt);
 #ifdef _MSC_VER
 #pragma warning(disable : 4786)
+#define YY_NO_UNISTD_H
+#include <io.h>   // for isatty
 #endif
 #endif
 

@@ -46,7 +46,7 @@
 
 namespace Aqsis {
 
-struct IqShader;
+class IqShader;
 struct IqShaderData;
 
 #define	ZFILE_HEADER		"Aqsis ZFile" AQSIS_VERSION_STR

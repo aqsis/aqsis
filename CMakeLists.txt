@@ -28,9 +28,11 @@ option(AQSIS_USE_TIMERS "Enable performance timers" ON)
 option(AQSIS_USE_PDIFF "Build the external pdiff perceptual image difference utility" OFF)
 option(AQSIS_USE_QT "Build the aqsis GUI components which rely on the Qt libraries" ON)
 option(AQSIS_USE_OPENEXR "Build aqsis with support for the OpenEXR image format" ON)
+option(AQSIS_USE_OPENEXR_DLL "Build aqsis using OpenEXR DLLs" OFF)
 option(AQSIS_USE_PNG "Build aqsis with support for reading PNG image files" ON)
+option(AQSIS_USE_OPENMP "Build aqsis with support of OpenMP (multi-threading)" ON)
 option(AQSIS_USE_EXTERNAL_TINYXML "Try to find and use an external tinyxml library" OFF)
-mark_as_advanced(AQSIS_USE_PDIFF AQSIS_USE_EXTERNAL_TINYXML)
+mark_as_advanced(AQSIS_USE_PDIFF AQSIS_USE_EXTERNAL_TINYXML AQSIS_USE_OPENEXR_DLL)
 
 option(aqsis_enable_testing "Enable unit testing" OFF)
 option(AQSIS_ENABLE_MPDUMP "Enable micropolygon dumping code" OFF)
@@ -134,6 +136,19 @@ if(AQSIS_USE_PNG)
 	endif()
 endif()
 
+# find openMP
+if(AQSIS_USE_OPENMP)
+	find_package(OpenMP)
+
+	if (NOT OPENMP_FOUND)
+		message("** Cannot find OpenMP - aqsis will be built without support of OpenMP")
+	else()
+		set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+		set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+	endif()
+
+endif()
+
 ## find tinyxml.  If not found we use the version distributed with the aqsis
 ## source.
 #if(AQSIS_USE_EXTERNAL_TINYXML)
@@ -197,9 +212,15 @@ endif()
 # some packaging variables are set in the platform-specific config files, and
 # these version variables are potentially used there.
 set(VERSION_MAJOR 1)
-set(VERSION_MINOR 9)
-set(VERSION_BUILD 0)
+set(VERSION_MINOR 8)
+set(VERSION_BUILD 3)
 set(SCM_REVISION 0) # "?"
+set(AQSIS_PROJECT_NAME "Aqsis Renderer")
+set(AQSIS_PROJECT_NAME_SHORT "Aqsis")
+set(AQSIS_PROJECT_NAME_BASIC "aqsis")
+set(AQSIS_PROJECT_VENDOR "Aqsis Team")
+set(AQSIS_PROJECT_COPYRIGHT "Copyright (C) 2009-2014, ${AQSIS_PROJECT_VENDOR}.")
+set(AQSIS_PROJECT_COPYRIGHT_OTHER "The RenderMan(R) Interface Procedures and Protocol are Copyright 1988, 1989, 2000, 2005 Pixar. All Rights Reserved.")
 
 
 #-------------------------------------------------------------------------------
@@ -360,4 +381,3 @@ install(FILES ${aqsisrc_name} DESTINATION ${SYSCONFDIR} COMPONENT main)
 set(AQSISCONFIG_PATH ${CMAKE_CURRENT_BINARY_DIR}/AqsisConfig.cmake)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/AqsisConfig.cmake.in ${AQSISCONFIG_PATH})
 export(TARGETS aqsis_core aqsis_math aqsis_shadervm aqsis_tex aqsis_util aqsis_riutil APPEND FILE ${AQSISCONFIG_PATH})
-

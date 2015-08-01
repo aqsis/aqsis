@@ -36,7 +36,8 @@ set(piqsl_srcs
 include_directories(${QT_INCLUDES})
 
 aqsis_add_executable(piqsl ${piqsl_srcs} ${piqsl_hdrs} GUIAPP
-    LINK_LIBRARIES aqsis_util aqsis_tex ${QT_QTGUI_LIBRARY} ${QT_QTCORE_LIBRARY}
+    LINK_LIBRARIES aqsis_util aqsis_tex ${QT_QTGUI_LIBRARY} 
+        ${QT_QTCORE_LIBRARY} ${QT_QTNETWORK_LIBRARY}
         ${Boost_THREAD_LIBRARY} ${AQSIS_TINYXML_LIBRARY})
 
 aqsis_install_targets(piqsl)

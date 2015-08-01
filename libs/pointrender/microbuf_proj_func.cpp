@@ -27,63 +27,90 @@
 //
 // (This is the New BSD license)
 
-#include "microbuffer.h"
-
 #include <OpenEXR/ImathFun.h>
 
 #include <boost/math/special_functions/sign.hpp>
 
+#include "OcclusionIntegrator.h"
+#include "RadiosityIntegrator.h"
+
+#include "microbuf_proj_func.h"
+
+
 namespace Aqsis {
 
-/// Determine whether a sphere is wholly outside a cone.
-///
-/// This is used to cull disks - the sphere is the bounding sphere of the
-/// disk, and the cone is the cone of incoming light of interest.
-///
-/// Getting an expression which is both correct and efficient (ie, not
-/// involving special functions) is tricky.  The simple version of it is when
-/// the radius is zero, in which case we just need to compute
-///
-///     cosConeAngle > dot(p/plen, N)
-///
-/// In the general case of spheres with nonzero radius the condition to check
-/// is that
-///
-///     coneAngle + boundingSphereAngle < coneNormalToSphereCenterAngle
-///
-/// After some algebra, this reduces to the expression
-///
-///     sqrt(dot(p,p) - r*r)*cosConeAngle - r*sinConeAngle > dot(p, n);
-///
-/// which is valid as long as the sum of the sphere angle and cone angle are
-/// less than pi:
-///
-///     sqrt(1 - r*r/dot(p,p)) < -cosConeAngle
-///
-/// in which case the sphere must intersect the cone.
-///
-/// \param p - center of sphere
-/// \param plen2 - length of p
-/// \param r - sphere radius
-/// \param n - cone normal
-/// \param cosConeAngle - cos(theta) where theta = cone angle from N
-/// \param sinConeAngle - sin(theta)
+using Imath::V3f;
+using Imath::C3f;
+using Aqsis::MicroBuf;
+
+/**
+ * Determine whether a sphere is wholly outside a cone.
+ *
+ * This is used to cull disks - the sphere is the bounding sphere of the
+ * disk, and the cone is the cone of incoming light of interest.
+ *
+ * Getting an expression which is both correct and efficient (i.e., not
+ * involving special functions) is tricky.  The simple version of it is
+ * when the radius is zero, in which case we just need to compute:
+ *
+ * <pre>
+ * cosConeAngle > dot(p/plen2, N)
+ * </pre>
+ *
+ * In the general case of spheres with nonzero radius the condition to check
+ * is that:
+ *
+ * <pre>
+ * coneAngle + boundingSphereAngle < coneNormalToSphereCenterAngle
+ * </pre>
+ *
+ * After some algebra, this reduces to the expression:
+ *
+ * <pre>
+ * sqrt(dot(p,p) - r*r)*cosConeAngle - r*sinConeAngle > dot(p, n);
+ * </pre>
+ *
+ * Which is valid as long as the sum of the sphere angle and cone angle are
+ * less than pi:
+ *
+ * <pre>
+ * sqrt(1 - r*r/dot(p,p)) < -cosConeAngle
+ * </pre>
+ *
+ * In which case the sphere must intersect the cone.
+ *
+ * @param p
+ * 			The center of the sphere.
+ * @param plen2
+ * 			The length of p
+ * @param r
+ * 			The radius of the sphere.
+ * @param n
+ * 			The normal of the cone.
+ * @param cosConeAngle
+ * 			The cosine of the cone angle.
+ * @param sinConeAngle
+ * 			The sine of the cone angle.
+ * @return
+ */
 inline bool sphereOutsideCone(V3f p, float plen2, float r,
-                              V3f n, float cosConeAngle, float sinConeAngle)
-{
-    // The actual expressions used here are an optimized version which does
+                              V3f n, float cosConeAngle, float sinConeAngle) {
+
+    // The actual expressions used here are is an optimized version which does
     // the same thing, but avoids calling sqrt().  This makes a difference
     // when this is the primary culling test and you're iterating over lots of
     // points - you need to reject invalid points as fast as possible.
     float x = plen2 - r*r;
     // special case - if the sphere covers the origin, it must intersect the
     // cone.
-    if(x < 0)
+    if(x < 0) {
         return false;
+    }
     // Special case - if sphere angle and cone angle add to >= 180 degrees, the
     // sphere and cone must intersect.
-    if(cosConeAngle < 0 && x < plen2*cosConeAngle*cosConeAngle)
+    if(cosConeAngle < 0 && x < plen2*cosConeAngle*cosConeAngle) {
         return false;
+    }
     // General case
     float lhs = x*cosConeAngle*cosConeAngle;
     float rhs = dot(p, n) + r*sinConeAngle;
@@ -91,13 +118,29 @@ inline bool sphereOutsideCone(V3f p, float plen2, float r,
 }
 
 
-/// Find real solutions of the quadratic equation a*x^2 + b*x + c = 0.
-///
-/// The equation is assumed to have real-valued solutions; if they are in fact
-/// complex only the real parts are returned.
+/**
+ * Find real solutions of the quadratic equation:
+ *
+ * <pre>
+ * a*x^2 + b*x + c = 0.
+ * </pre>
+ *
+ * The equation is assumed to have real-valued solutions; if they are in fact
+ * complex only the real parts are returned.
+ *
+ * @param a
+ * 			The first coefficient (x**2).
+ * @param b
+ * 			The second coefficient (x).
+ * @param c
+ * 			The constant (1).
+ * @param lowRoot
+ * 			The first solution (lowroot).
+ * @param highRoot
+ * 			The second solution (highroot).
+ */
 inline void solveQuadratic(float a, float b, float c,
-                           float& lowRoot, float& highRoot)
-{
+                           float& lowRoot, float& highRoot) {
     // Avoid NaNs when determinant is negative by clamping to zero.  This is
     // the right thing to do when det would otherwise be zero to within
     // numerical precision.
@@ -109,20 +152,26 @@ inline void solveQuadratic(float a, float b, float c,
 }
 
 
-/// Render a disk into the microbuffer using exact visibility testing
-///
-/// When two surfaces meet at a sharp angle, the visibility of surfels on the
-/// adjacent surface needs to be computed more carefully than with the
-/// approximate square-based rasterization method.  If not, disturbing
-/// artifacts will appear where the surfaces join.
-///
-/// \param microBuf - buffer to render into.
-/// \param p - position of disk center relative to microbuffer
-/// \param n - disk normal
-/// \param r - disk radius
+/**
+ * Render a surfel (disk) onto the microbuffer using exact visibility testing.
+ *
+ * When two surfaces meet at a sharp angle, the visibility of surfels on the
+ * adjacent surface needs to be computed more carefully than with the
+ * approximate square-based rasterization method.  If not, disturbing
+ * artifacts will appear where the surfaces join.
+ *
+ * @param integrator
+ * 			The integrator for incoming geometry/lighting information.
+ * @param p
+ * 			Position of the surfel.
+ * @param n
+ * 			Normal of the surfel.
+ * @param r
+ * 			Radius of the surfel.
+ */
 template<typename IntegratorT>
-static void renderDiskExact(IntegratorT& integrator, V3f p, V3f n, float r)
-{
+static void renderDiskExact(IntegratorT& integrator, V3f p, V3f n, float r) {
+
     int faceRes = integrator.res();
     float plen2 = p.length2();
     if(plen2 == 0) // Sanity check
@@ -130,15 +179,20 @@ static void renderDiskExact(IntegratorT& integrator, V3f p, V3f n, float r)
     // Angle from face normal to edge is acos(1/sqrt(3)).
     static float cosFaceAngle = 1.0f/sqrtf(3);
     static float sinFaceAngle = sqrtf(2.0f/3.0f);
-    for(int iface = 0; iface < 6; ++iface)
-    {
+
+    // iterate over all the faces.
+    for(int iface = MicroBuf::Face_begin; iface < MicroBuf::Face_begin; ++iface) {
+
+	// Cast this back to a Face enum.
+	MicroBuf::Face face = static_cast<MicroBuf::Face>(iface);
+
         // Avoid rendering to the current face if the disk definitely doesn't
         // touch it.  First check the cone angle
-        if(sphereOutsideCone(p, plen2, r, MicroBuf::faceNormal(iface),
+        if(sphereOutsideCone(p, plen2, r, MicroBuf::faceNormal(face),
                              cosFaceAngle, sinFaceAngle))
             continue;
-        float dot_pFaceN = MicroBuf::dotFaceNormal(iface, p);
-        float dot_nFaceN = MicroBuf::dotFaceNormal(iface, n);
+        float dot_pFaceN = MicroBuf::dotFaceNormal(face, p);
+        float dot_nFaceN = MicroBuf::dotFaceNormal(face, n);
         // If the disk is behind the camera and the disk normal is relatively
         // aligned with the face normal (to within the face cone angle), the
         // disk can't contribute to the face and may be culled.
@@ -156,12 +210,12 @@ static void renderDiskExact(IntegratorT& integrator, V3f p, V3f n, float r)
             // Note that all of the tricky rasterization rubbish further down
             // could probably be replaced by the following ray tracing code if
             // I knew a way to compute the tight raster bound.
-            integrator.setFace(iface);
+            integrator.setFace(face);
             for(int iv = 0; iv < faceRes; ++iv)
             for(int iu = 0; iu < faceRes; ++iu)
             {
                 // V = ray through the pixel
-                V3f V = integrator.rayDirection(iface, iu, iv);
+                V3f V = integrator.rayDirection(face, iu, iv);
                 // Signed distance to plane containing disk
                 float t = dot(p, n)/dot(V, n);
                 if(t > 0 && (t*V - p).length2() < r*r)
@@ -197,8 +251,8 @@ static void renderDiskExact(IntegratorT& integrator, V3f p, V3f n, float r)
         float C = plen2 - r*r;
         // Project onto the current face to compute the coefficients a0 through
         // to f0 for q(u,v)
-        V3f pp = MicroBuf::canonicalFaceCoords(iface, p);
-        V3f nn = MicroBuf::canonicalFaceCoords(iface, n);
+        V3f pp = MicroBuf::canonicalFaceCoords(face, p);
+        V3f nn = MicroBuf::canonicalFaceCoords(face, n);
         float a0 = A + B*nn.x*pp.x + C*nn.x*nn.x;
         float b0 = B*(nn.x*pp.y + nn.y*pp.x) + 2*C*nn.x*nn.y;
         float c0 = A + B*nn.y*pp.y + C*nn.y*nn.y;
@@ -240,14 +294,14 @@ static void renderDiskExact(IntegratorT& integrator, V3f p, V3f n, float r)
         // to set up the coefficients of q(iu,iv).  The setup is expensive, but
         // the bound is optimal so it will be worthwhile vs raytracing, unless
         // the raster faces are very small.
-        integrator.setFace(iface);
+        integrator.setFace(face);
         for(int iv = vbegin; iv < vend; ++iv)
         for(int iu = ubegin; iu < uend; ++iu)
         {
             float q = a*(iu*iu) + b*(iu*iv) + c*(iv*iv) + d*iu + e*iv + f;
             if(q < 0)
             {
-                V3f V = integrator.rayDirection(iface, iu, iv);
+                V3f V = integrator.rayDirection(face, iu, iv);
                 // compute distance to hit point
                 float z = dot_pn/dot(V, n);
                 integrator.addSample(iu, iv, z, 1.0f);
@@ -257,12 +311,9 @@ static void renderDiskExact(IntegratorT& integrator, V3f p, V3f n, float r)
 }
 
 
-/// Rasterize disk into the given integrator
-///
-/// N is the normal of the culling cone, with cone angle specified by
-/// cosConeAngle and sinConeAngle.  The position of the disk with respect to
-/// the centre of the microbuffer is p, n is the normal of the disk and r is
-/// the disk radius.
+/**
+ * @see microbuf_proj_func.h
+ */
 template<typename IntegratorT>
 void renderDisk(IntegratorT& integrator, V3f N, V3f p, V3f n, float r,
                 float cosConeAngle, float sinConeAngle)
@@ -287,7 +338,7 @@ void renderDisk(IntegratorT& integrator, V3f N, V3f p, V3f n, float r,
     {
         // Multiplier for radius to make the cracks a bit smaller.  We
         // can't do this too much, or sharp convex edges will be
-        // overoccluded (TODO: Adjust for best results!  Maybe the "too
+        // over occluded (TODO: Adjust for best results!  Maybe the "too
         // large" problem could be worked around using a tracing offset?)
         const float radiusMultiplier = M_SQRT2;
         // Resolve visibility of very close surfels using ray tracing.
@@ -415,19 +466,32 @@ void renderDisk(IntegratorT& integrator, V3f N, V3f p, V3f n, float r,
     }
 }
 
+/**
+ * Explicit instantiation of the renderDisk() method for an  ::OcclusionIntegrator.
+ */
+template void renderDisk<OcclusionIntegrator>(OcclusionIntegrator&,
+		V3f N, V3f p, V3f n, float r, float cosConeAngle, float sinConeAngle);
 
-/// Render point hierarchy into microbuffer.
+/**
+ * Explicit instantiation of the renderDisk() method for an  ::RadiosityIntegrator.
+ */
+template void renderDisk<RadiosityIntegrator>(RadiosityIntegrator&,
+		V3f N, V3f p, V3f n, float r, float cosConeAngle, float sinConeAngle);
+
+/**
+ * @see microbuf_proj_func.h
+ */
 template<typename IntegratorT>
 static void renderNode(IntegratorT& integrator, V3f P, V3f N, float cosConeAngle,
                        float sinConeAngle, float maxSolidAngle, int dataSize,
-                       const PointOctree::Node* node)
+                       const DiffusePointOctree::Node* node)
 {
     // This is an iterative traversal of the point hierarchy, since it's
     // slightly faster than a recursive traversal.
     //
     // The max required size for the explicit stack should be < 200, since
     // tree depth shouldn't be > 24, and we have a max of 8 children per node.
-    const PointOctree::Node* nodeStack[200];
+    const DiffusePointOctree::Node* nodeStack[200];
     nodeStack[0] = node;
     int stackSize = 1;
     while(stackSize > 0)
@@ -472,6 +536,7 @@ static void renderNode(IntegratorT& integrator, V3f P, V3f N, float cosConeAngle
             {
                 // Leaf node: simply render each child point.
                 std::pair<float, int> childOrder[8];
+                // INDIRECT
                 assert(node->npoints <= 8);
                 for(int i = 0; i < node->npoints; ++i)
                 {
@@ -495,11 +560,11 @@ static void renderNode(IntegratorT& integrator, V3f P, V3f N, float cosConeAngle
             else
             {
                 // Interior node: render children.
-                std::pair<float, const PointOctree::Node*> children[8];
+                std::pair<float, const DiffusePointOctree::Node*> children[8];
                 int nchildren = 0;
                 for(int i = 0; i < 8; ++i)
                 {
-                    PointOctree::Node* child = node->children[i];
+                    DiffusePointOctree::Node* child = node->children[i];
                     if(!child)
                         continue;
                     children[nchildren].first = (child->center - P).length2();
@@ -517,9 +582,12 @@ static void renderNode(IntegratorT& integrator, V3f P, V3f N, float cosConeAngle
 }
 
 
+
+
+
 template<typename IntegratorT>
 void microRasterize(IntegratorT& integrator, V3f P, V3f N, float coneAngle,
-                    float maxSolidAngle, const PointOctree& points)
+                    float maxSolidAngle, const DiffusePointOctree& points)
 {
     float cosConeAngle = cos(coneAngle);
     float sinConeAngle = sin(coneAngle);
@@ -528,13 +596,16 @@ void microRasterize(IntegratorT& integrator, V3f P, V3f N, float coneAngle,
 }
 
 
-// Explicit instantiations
+
+/**
+ * Explicit instantiation of the microRasterize() method for an  ::OcclusionIntegrator.
+ */
 template void microRasterize<OcclusionIntegrator>(
-        OcclusionIntegrator&, V3f, V3f, float, float, const PointOctree&);
+        OcclusionIntegrator&, V3f, V3f, float, float, const DiffusePointOctree&);
+
+/**
+ * Explicit instantiation of the microRasterize() method for an  ::RadiosityIntegrator.
+ */
 template void microRasterize<RadiosityIntegrator>(
-        RadiosityIntegrator&, V3f, V3f, float, float, const PointOctree&);
-
-
-} // namespace Aqsis
-
-// vi: set et:
+        RadiosityIntegrator&, V3f, V3f, float, float, const DiffusePointOctree&);
+}

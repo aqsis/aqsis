@@ -254,7 +254,7 @@ class CqSampleOptionExtractor
 			extractUniformAndCacheVarying(paramList, numParams, opts);
 		}
 
-		CqSampleOptionExtractorBase<CqTextureSampleOptions>::extractVarying;
+		using CqSampleOptionExtractorBase<CqTextureSampleOptions>::extractVarying;
 };
 
 

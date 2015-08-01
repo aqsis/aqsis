@@ -1,7 +1,7 @@
 Todo for 1.8:
     * Point cloud viewer tool for users
-        * Move ptview to tools directory
-        * Rename?
+        * Move ptview to tools directory (DONE)
+        * Rename? (PUT OFF)
         * Use point radius from file
         * Algorithm visualization mode, off by default
         * Setting for point color / background color
@@ -25,7 +25,10 @@ Todo:
     * Subsurface scattering integrator
     * Proper point cloud cache management
 
-Done:
+Done by Karsten:
+    *
+
+Done by Chris:
     * Make old core to produce world space point clouds
     * Implement shadeops in shaderVM
     * Render colour into microbuffer for radiosity

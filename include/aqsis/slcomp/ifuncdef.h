@@ -56,7 +56,6 @@ struct SqFuncRef
 
 
 
-struct IqParseNode;
 struct IqFuncDef
 {
 	virtual	TqInt	Type() const = 0;

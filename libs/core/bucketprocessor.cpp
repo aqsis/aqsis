@@ -697,9 +697,10 @@ void CqBucketProcessor::FilterBucket()
 		for ( x = 0; x < endx; x++ )
 		{
 			TqFloat coverage = aCoverages[ i++ ];
+			TqFloat *buffer = m_channelBuffer(x, y, OiIndex);
 
 			// Calculate the alpha as the combination of the opacity and the coverage.
-			TqFloat a = ( m_channelBuffer(x, y, OiIndex)[0] + m_channelBuffer(x, y, OiIndex)[1] + m_channelBuffer(x, y, OiIndex)[2] ) / 3.0f;
+			TqFloat a = ( buffer[0] + buffer[1] + buffer[2] ) / 3.0f;
 			m_channelBuffer(x, y, alphaIndex)[0] = a * coverage;
 			m_channelBuffer(x, y, coverageIndex)[0] = coverage;
 		}
@@ -726,13 +727,15 @@ void CqBucketProcessor::FilterBucket()
 				// == 1 after a call to imager shader in 3delight and BMRT.
 				// Therefore I did not ask for alpha value and set directly the pCols[i]
 				// with imager value. see imagers.cpp
-				m_channelBuffer(x, y, CiIndex)[0] = imager.r();
-				m_channelBuffer(x, y, CiIndex)[1] = imager.g();
-				m_channelBuffer(x, y, CiIndex)[2] = imager.b();
+				TqFloat *buffer = m_channelBuffer(x, y, CiIndex);
+				buffer[0] = imager.r();
+				buffer[1] = imager.g();
+				buffer[2] = imager.b();
 				imager = QGetRenderContext() ->poptCurrent()->GetOpacityImager( x+DisplayRegion().xMin() , y+DisplayRegion().yMin() );
-				m_channelBuffer(x, y, OiIndex)[0] = imager.r();
-				m_channelBuffer(x, y, OiIndex)[1] = imager.g();
-				m_channelBuffer(x, y, OiIndex)[2] = imager.b();
+				buffer = m_channelBuffer(x, y, OiIndex);
+				buffer[0] = imager.r();
+				buffer[1] = imager.g();
+				buffer[2] = imager.b();
 				TqFloat a = ( imager[0] + imager[1] + imager[2] ) / 3.0f;
 				m_channelBuffer(x, y, alphaIndex)[0] = a;
 			}
@@ -783,19 +786,20 @@ void CqBucketProcessor::ExposeBucket()
 	{
 		for ( x = 0; x < endx; x++ )
 		{
+			TqFloat *buffer = m_channelBuffer(x, y, Ci_index);
 			// color=(color*gain)^1/gamma
 			if ( exposegain != 1.0 )
 			{
-				m_channelBuffer(x, y, Ci_index)[0] *= exposegain;
-				m_channelBuffer(x, y, Ci_index)[1] *= exposegain;
-				m_channelBuffer(x, y, Ci_index)[2] *= exposegain;
+				buffer[0] *= exposegain;
+				buffer[1] *= exposegain;
+				buffer[2] *= exposegain;
 			}
 
 			if ( exposegamma != 1.0 )
 			{
-				m_channelBuffer(x, y, Ci_index)[0] = pow(m_channelBuffer(x, y, Ci_index)[0], oneovergamma);
-				m_channelBuffer(x, y, Ci_index)[1] = pow(m_channelBuffer(x, y, Ci_index)[1], oneovergamma);
-				m_channelBuffer(x, y, Ci_index)[2] = pow(m_channelBuffer(x, y, Ci_index)[2], oneovergamma);
+				buffer[0] = pow(buffer[0], oneovergamma);
+				buffer[1] = pow(buffer[1], oneovergamma);
+				buffer[2] = pow(buffer[2], oneovergamma);
 			}
 		}
 	}

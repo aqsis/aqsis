@@ -69,5 +69,8 @@ Special thanks also goes to the following people:
     2007 Eric Nathen Back       RIB MOSAIC support.
     2008 Stephen Regelous       Massive software support.
     2009 Cristin Barghiel       Side Effects Houdini support.
+    2012 Josh Stratton          Bug fixes for pisql.
+    2014 Alistair Leslie-Hughes Minor Improvements.
+    2014 Karsten Daemen         Point Renderer Improvements.
 
 If anyone is missing from this list, please contact: pgregory@aqsis.org

@@ -44,7 +44,8 @@
 #include	<string>
 
 #include	<aqsis/ri/ndspy.h>
-#include	<aqsis/util/socket.h>
+
+#include <QTcpSocket>
 
 #include	"image.h"
 
@@ -71,14 +72,8 @@ public:
     virtual ~CqDisplayServerImage()
 	{}
 
-	/** Get a reference to the socket that is used to communicate with the piqsl display device.
- 	 * \return				A reference to the socket.
- 	 */
-	CqSocket& socket();
-	/** Get a const reference to the socket that is used to communicate with the piqsl display device.
- 	 * \return				A reference to the socket.
- 	 */
-    const CqSocket& socket() const;
+    void setSocket(QTcpSocket* client);
+ 
 
 	/** Close the connection to the piqsl display server.
 	 */
@@ -100,11 +95,6 @@ public:
  	 * \param folder	The folder on disk to store the TIFF file to.
  	 */
 	virtual void serialise(const boost::filesystem::path& folder);
-	/** Create an XML element that represents this image in a library XML file.
- 	 * \return			A pointer to a generated TinyXML element containing all the data to be
- 	 * 					added to the XML file.
- 	 */
-	// virtual TiXmlElement* serialiseToXML();
 
 	/** \brief A helper function to reorder the channels from Aqsis.
 	 * A helper function to reorder the channels that Aqsis sends to ensure that they are in the expected format
@@ -112,20 +102,13 @@ public:
  	 */
 	void reorderChannels();
 
+	public slots:
+	void processMessage();
+
 private:
-    CqSocket	m_socket;			///< Socket of the client.
+
+	QTcpSocket* socket;
 };
-
-// Implementations of inline functions.
-inline CqSocket& CqDisplayServerImage::socket()
-{
-	return ( m_socket );
-}
-
-inline const CqSocket& CqDisplayServerImage::socket() const
-{
-	return ( m_socket );
-}
 
 
 } // namespace Aqsis
