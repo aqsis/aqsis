@@ -1,0 +1,23 @@
+
+    <div class="well">
+        <div class="row">
+            <div class="col-md-3">
+                {% if include.item.header_image %}
+                <img src="{{ site.baseurl }}{{ include.item.header_image }}" alt="{{ include.item.title }}">
+                {% else %}
+                <img src="{{ site.baseurl }}/images/lines-final-150x150.png" alt="{{ include.item.title }}">
+                {% endif %}
+            </div>
+            <div class="col-md-9">
+                <h3><a href="{{ site.baseurl }}{{ include.item.url }}">{{ include.item.title }}</a></h3>
+                {% assign truncatedContent = '' %}
+                {% assign paragraphs = include.item.content | markdownify | split:'</p>' %}
+                {% for paragraph in paragraphs limit: 1 %}
+                    {{ truncatedContent | append: paragraph }}
+                    {{ truncatedContent | append: '</p>' }}
+                {% endfor %}
+                {{ truncatedContent }}
+            </div>
+        </div>
+    </div>
+

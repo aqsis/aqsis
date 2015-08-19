@@ -1,7 +1,7 @@
 ---
 layout: documentation
 title: Rendering a Silo Scene (Basic)
-category: tutorials
+category: tutorial
 order: 20
 ---
 

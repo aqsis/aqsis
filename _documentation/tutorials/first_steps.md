@@ -1,7 +1,7 @@
 ---
 layout: documentation
 title: Your First Steps with Aqsis
-category: tutorials
+category: tutorial
 order: 10
 header_image: /images/simple2-150x150.jpg
 ---
