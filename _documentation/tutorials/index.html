@@ -1,13 +1,17 @@
 ---
-layout: documentation_section
+layout: documentation
 title: Tutorials
-category: tutorials
 section: true
 order: 20
 header_image: /images/aqsis-bundle-150x150.png
 ---
 
-Tutorials
-=========
-
+<p>
 Exercises and training material to support learning the various aspects of Aqsis, including content creation, coding, pipeline integration etc.
+</p>
+
+{% assign tutorials = site.documentation | where: "category", "tutorial" | sort: "order" %}
+{% for item in tutorials %}
+  {% include tutorial.html item=item %}
+{% endfor %}
+
