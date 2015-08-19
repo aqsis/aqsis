@@ -1,0 +1,11 @@
+<a href="{{ site.baseurl }}{{ include.item.url }}">{{ include.item.title }}</a>
+{% if include.item.subcategory %}
+  <ul>
+  {% assign subitems = site.documentation | where: "category", include.item.subcategory | sort: "order"%}
+  {% for subitem in subitems %}
+    <li>
+      {% include toc.html item=subitem %}
+    </li>
+  {% endfor %}
+  </ul>
+{% endif %}
