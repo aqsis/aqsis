@@ -1,0 +1,30 @@
+---
+layout: documentation_index
+title: Documentation
+---
+{% assign sorted_sections = site.documentation | sort: 'order' %}
+{% for section in sorted_sections %}
+  {% if section.section %}
+  <div class="well">
+    <div class="row">
+      <div class="col-md-3">
+        {% if section.header_image %}
+        <img src="{{ site.baseurl }}{{ section.header_image }}" alt="{{ section.title }}">
+        {% else %}
+        <img src="{{ site.baseurl }}/images/lines-final-150x150.png" alt="{{ section.title }}">
+        {% endif %}
+      </div>
+      <div class="col-md-9">
+        <h3><a href="{{ site.baseurl }}{{ section.url }}">{{ section.title }}</a></h3>
+        {% assign truncatedContent = '' %}
+        {% assign paragraphs = section.content | split:'</p>' %}
+        {% for paragraph in paragraphs limit: 1 %}
+            {{ truncatedContent | append: paragraph }}
+            {{ truncatedContent | append: '</p>' }}
+        {% endfor %}
+        {{ truncatedContent }}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+{% endfor %}

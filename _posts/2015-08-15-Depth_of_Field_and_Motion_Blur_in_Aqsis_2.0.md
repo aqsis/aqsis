@@ -1,0 +1,19 @@
+---
+author: Chris Foster
+layout: blog_post
+title: Depth of Field & Motion Blur in Aqsis 2.0
+---
+
+In the last few weeks I’ve been working on getting motion blur and depth of field rendering working in the new aqsis-2.0 rendering core. It more or less works now, so I thought I’d post an update on the progress along with another screencast:
+
+<iframe width="590" height="443" src="https://www.youtube.com/embed/cLwFqdz5gFs" frameborder="0" allowfullscreen></iframe>
+
+The method I’ve chosen to use so far is called “interleaved sampling” as nicely described in [“Data-Parallel Rasterization of Micropolygons with Defocus and Motion Blur”](http://graphics.stanford.edu/papers/mprast/) by Fatahalian et al. Interleaved sampling is quite easy to understand at a basic level: for the motion blur case, it’s very much like rendering a bunch of images – each at a different time during the shutter interval – and then simply averaging them all. (The details of the implementation are a bit more sophisticated for efficiency, but that’s the general idea.)
+
+Obviously if you do this with a small number of time snapshots you’re bound to get strobing artefacts, so there’s some sample jittering which goes on to try to reduce these. The number of strobed images which are rendered are under the control of the user, so they can easily turn this up to improve the quality at the expense of render time. As I say in the screencast, my impression is that the method is quite good for fast low quality sampling, but the other major method (known in the paper linked above as “interval sampling”) may be faster for high quality usage, so I plan to implement it as well for comparison.
+
+An interesting point is that the interval method makes a compromise when both depth of field and motion blur are combined to reduce the runtime. This compromise correlates the time and lens positions and results in exactly the same kind of strobing which is present in the interleaved method.
+
+There’s one original feature in my implementation, which is to investigate good ways of generating reasonably high quality sample distributions for interleaved sampling. At the start of each frame we choose a set T of N time values, and each sample in the image must have a time taken from this set. For efficient bounding during the sampling stage, we arrange the samples into tiles of size N so that each time in the set T is represented exactly once in each tile. So far so good (this is all pretty standard) but the question is, how do we arrange the N samples within the tile so that the resulting sampling noise is small? If they are arranged purely randomly, the noise will be large, and a regular pattern will result in aliasing as usual.
+
+The solution I used is to create a set of 81 (= 3^4) prototype tiles with “coloured corners”. The “colours” here really correspond to a particular sample pattern in each corner, more or less as described in [“An Alternative for Wang Tiles: Colored Edges versus Colored Corners”](http://doi.acm.org/10.1145/1183287.1183296) by A. Lagae and P. Dutre. The tiles are laid out in the image plane using a spatial hash function so that adjacent tiles have sample patterns which match up on the corners and edges. The samples within each tile are laid out using an optimization heuristic which tries to have samples with similar time values far away from each other; this improves the sample stratification within each pixel filter region and reduces the noise. In Lagae and Dutre, they use a Poisson disk distribution within each tile to position the samples, but it’s not obvious how to do something similar in our case because we’re restricted to a fixed set of N times, with associated lens positions in the depth of field case. An additional constraint is that the samples have to be laid out in regular grid strata in screen space for efficient bounding during rasterization.

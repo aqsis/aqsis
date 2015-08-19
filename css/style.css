@@ -1,0 +1,19 @@
+body {
+    padding-top: 70px; /* Required padding for .navbar-fixed-top. Remove if using .navbar-static-top. Change if height of navigation changes. */
+    background-color: #000;
+}
+
+footer {
+    margin: 50px 0;
+}
+
+.container {
+    max-width:960px;
+}
+
+.header-image {
+    margin-bottom: 20px;
+}
+
+.callout { padding: 1em 2em; border: 1px dashed #BBB; background: #FAFAFA; border-radius: 3px; }
+
