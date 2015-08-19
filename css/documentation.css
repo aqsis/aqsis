@@ -22,3 +22,13 @@ table tr.alt td {
     color: #000000;
     background-color: #EAF2D3;
 }
+
+dt {
+    font-weight: bold;
+}
+
+dd {
+    background:none no-repeat left top;
+    padding-left: 50px;
+}
+
