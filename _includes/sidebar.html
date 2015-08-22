@@ -17,7 +17,7 @@
         <div class="row">
             <ul>
                 {% for post in site.posts limit 4 %}
-                <li><a href="#">{{ post.title }}</a>
+                <li><a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a>
                 </li>
                 {% endfor %}
             </ul>
