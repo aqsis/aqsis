@@ -1,6 +1,6 @@
 name: 'Aqsis Renderer'
 tagline: 'Freedom to Dream'
-baseurl: '/aqsis'
+baseurl: ''
 
 collections:
   documentation:
