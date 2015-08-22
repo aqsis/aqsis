@@ -10,13 +10,17 @@
             </div>
             <div class="col-md-9">
                 <h3><a href="{{ site.baseurl }}{{ include.item.url }}">{{ include.item.title }}</a></h3>
-                {% assign truncatedContent = '' %}
-                {% assign paragraphs = include.item.content | markdownify | split:'</p>' %}
-                {% for paragraph in paragraphs limit: 1 %}
-                    {{ truncatedContent | append: paragraph }}
-                    {{ truncatedContent | append: '</p>' }}
-                {% endfor %}
-                {{ truncatedContent }}
+                {% if include.item.meta %}
+                    {{ include.item.meta | markdownify }}
+                {% else %}
+                    {% assign truncatedContent = '' %}
+                    {% assign paragraphs = include.item.content | markdownify | split:'</p>' %}
+                    {% for paragraph in paragraphs limit: 1 %}
+                        {{ truncatedContent | append: paragraph }}
+                        {{ truncatedContent | append: '</p>' }}
+                    {% endfor %}
+                    {{ truncatedContent }}
+                {% endif %}
             </div>
         </div>
     </div>

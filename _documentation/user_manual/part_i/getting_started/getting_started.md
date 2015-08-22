@@ -1,7 +1,7 @@
 ---
 layout: documentation
 title: Getting Started 
-category: user_manual
+category: part_i
 order: 10
 header_image: /images/piqsl-books-150x150.png
 subcategory: getting_started

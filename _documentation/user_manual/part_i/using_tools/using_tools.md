@@ -1,7 +1,7 @@
 ---
 layout: documentation
 title: Using the Aqsis Tool Suite
-category: user_manual
+category: part_i
 order: 20
 subcategory: using_tools
 ---
