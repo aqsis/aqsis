@@ -32,7 +32,8 @@
                             </div>
                             <div class="col-md-9">
                               <h3>{{ image.title }}</h3>
-                              {{ image.text }}
+                              <h4>{{ image.author }}</h4>
+                              {{ image.text | newline_to_br }}
                             </div>
                           </div>
                         </div>

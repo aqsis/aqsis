@@ -4,13 +4,74 @@
   imagefolder: /images/gallery/aqsis_1_x
   images:
   - name: ajax.jpg
+    author: Leon Atkinson
     title: Ajax
     thumb: ajax_thumb.jpg
-    text: A demonstration of lighting
   - name: teapot_nebula.jpg
+    author: Matthias Baas
     title: Teapot Nebula
     thumb: teapot_nebula_thumb.jpg
-    text: Use of procedural particle generation and custom shading.
+    text: |
+      A computer generated nebula image that uses the famous Utah teapot as base shape. The reference for this image has been a photo of the crab nebula.  
+      
+      (created using Python, cgkit and Aqsis)
+  - name: tugboat.jpg
+    author: Vikram K. Mulligan
+    title: Tugboat
+    thumb: tugboat_thumb.jpg
+    text: |
+      This was rendered with Aqsis with some postprocessing in Photoshop. All the detail is done with custom-written surface and displacement shaders; the original model is actually quite simple.  
+      
+      Image copyright (c) 2006 Vikram K. Mulligan.
+  - name: tugboat2.jpg
+    author: Vikram K. Mulligan
+    title: Tugboat II
+    thumb: tugboat2_thumb.jpg
+    text: | 
+      Another "tugboat" rendering. This was rendered with Aqsis with some postprocessing in Photoshop. All the detail is done with custom-written surface and displacement shaders; the original model is actually quite simple. This image appears in Ian Stephenson's Essential Renderman, 2nd edition.  
+      
+      Image copyright (c) 2006 Vikram K. Mulligan.
+  - name: 100patches.png
+    author: yesyesnono
+    title: 100 Patches 2
+    thumb: 100patches_thumb.png
+    text: | 
+      Pixelsampling 4x4 
+      Randomly generated Renderman bicubic patches, Using Processing to output rib files and aqsis to render them. Plastic shader straight out of the box. Illuminated by a spot light.
+  - name: canvas.png
+    author: Leon Atkinson
+    title: Canvas
+    thumb: canvas_thumb.png
+    text: |
+      An example of using an imager shader to apply a post processing effect to the rendered image.
+  - name: microbe.png
+    author: Leon Atkinson
+    title: Microbe
+    thumb: microbe_thumb.png
+    text: |
+      A simple patch surface made interesting by use of surface and displacement shaders, and strong depth of field.
+  - name: tribble.png
+    author: Leon Atkinson
+    title: Tribble
+    thumb: tribble_thumb.png
+    text: |
+      An example of grown hair using a Python script to generate RiCurve primitives, and a custom hair shader.
+  - name: armageddon.png
+    author: Leon Atkinson
+    title: Armageddon
+    thumb: armageddon_thumb.png
+  - name: gemstone_green.png
+    author: Leon Atkinson
+    title: Gemstone Green
+    thumb: gemstone_green_thumb.png
+    text: |
+      Modelled with K3D, rendered with Aqsis.
+  - name: gemstone_red.png
+    author: Leon Atkinson
+    title: Gemstone Green
+    thumb: gemstone_red_thumb.png
+    text: |
+      Modelled with K3D, rendered with Aqsis.
 - id: aqsis_2.x
   title: Aqsis 2.x
   description: Images generated with Aqsis 2.x
