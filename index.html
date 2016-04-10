@@ -10,13 +10,15 @@ title: Aqsis Renderer
                   <p class="lead">
                       by {{ post.author }}
                   </p>
-                  <p><span class="glyphicon glyphicon-time"></span> Posted on {{ post.date | date_to_string }}</p>
+                  <p class="post-date"><span class="glyphicon glyphicon-time"></span> Posted on {{ post.date | date_to_string }}</p>
                   <hr>
                   {% if post.header_image %}
                       <img class="img-responsive" src="{{ site.baseurl }}{{ post.header_image }}" alt="">
                       <hr>
                   {% endif %}
-                  <p>{{ post.excerpt | markdownify }}</p>
+                  <div class="excerpt">
+                      <p>{{ post.excerpt | markdownify }}</p>
+                  </div>
                   <a class="btn btn-primary" href="{{ site.baseurl }}{{ post.url }}">Read More <span class="glyphicon glyphicon-chevron-right"></span></a>
                 {% endfor %}
 

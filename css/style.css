@@ -17,3 +17,10 @@ footer {
 
 .callout { padding: 1em 2em; border: 1px dashed #BBB; background: #FAFAFA; border-radius: 3px; }
 
+.lead {
+    color: rgb(182,182,182);
+}
+
+.excerpt, .post-date {
+    color: rgb(112,112,112);
+}
