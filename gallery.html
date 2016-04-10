@@ -1,0 +1,22 @@
+---
+layout: gallery_index
+title: Gallery
+---
+{% assign sorted_galleries = site.data.galleries | sort: 'order' %}
+{% for gallery in sorted_galleries %}
+  <div class="well">
+    <div class="row">
+      <div class="col-md-3">
+        {% if gallery.header_image %}
+        <img src="{{ site.baseurl }}{{ gallery.header_image }}" alt="{{ gallery.title }}">
+        {% else %}
+        <img src="{{ site.baseurl }}/images/lines-final-150x150.png" alt="{{ gallery.title }}">
+        {% endif %}
+      </div>
+      <div class="col-md-9">
+        <h3><a href="{{ site.baseurl }}/gallery/{{ gallery.id }}">{{ gallery.title }}</a></h3>
+        <p>{{ gallery.description }}</p>
+      </div>
+    </div>
+  </div>
+{% endfor %}

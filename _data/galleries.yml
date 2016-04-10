@@ -1,0 +1,18 @@
+- id: aqsis_1.x
+  title: Aqsis 1.x
+  description: Images generated with Aqsis 1.x
+  imagefolder: /images/gallery/aqsis_1_x
+  images:
+  - name: ajax.jpg
+    title: Ajax
+    thumb: ajax_thumb.jpg
+    text: A demonstration of lighting
+  - name: teapot_nebula.jpg
+    title: Teapot Nebula
+    thumb: teapot_nebula_thumb.jpg
+    text: Use of procedural particle generation and custom shading.
+- id: aqsis_2.x
+  title: Aqsis 2.x
+  description: Images generated with Aqsis 2.x
+  imagefolder: /images/gallery/aqsis_2_x
+  images:

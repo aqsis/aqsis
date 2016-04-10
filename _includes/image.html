@@ -1,0 +1,27 @@
+
+    <div class="well">
+        <div class="row">
+            <div class="col-md-3">
+                {% if include.item.thumb %}
+                <img src="{{ site.baseurl }}{{ include.item.thumb }}" alt="{{ include.item.title }}">
+                {% else %}
+                <img src="{{ site.baseurl }}{{ include.item.image }}" alt="{{ include.item.title }}">
+                {% endif %}
+            </div>
+            <div class="col-md-9">
+                <h3><a href="{{ site.baseurl }}{{ include.item.url }}">{{ include.item.title }}</a></h3>
+                {% if include.item.meta %}
+                    {{ include.item.meta | markdownify }}
+                {% else %}
+                    {% assign truncatedContent = '' %}
+                    {% assign paragraphs = include.item.content | markdownify | split:'</p>' %}
+                    {% for paragraph in paragraphs limit: 1 %}
+                        {{ truncatedContent | append: paragraph }}
+                        {{ truncatedContent | append: '</p>' }}
+                    {% endfor %}
+                    {{ truncatedContent }}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
