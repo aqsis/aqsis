@@ -176,7 +176,7 @@ void CqShadowMapOld::LoadZFile()
 	{
 		std::ifstream file( m_strName.c_str(), std::ios::in | std::ios::binary );
 
-		if ( file != NULL )
+		if ( !file.fail() )
 		{
 			// Save a file type and version marker
 			TqPchar origHeader = tokenCast(ZFILE_HEADER);
