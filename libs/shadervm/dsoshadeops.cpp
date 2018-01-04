@@ -50,7 +50,7 @@ CqDSORepository::strPrototype(CqString *strFuncName, SqDSOExternalCall *pExtCall
 	}
 	else
 	{
-		strProt += "Unkown ";
+		strProt += "Unknown ";
 	};
 
 	strProt += *strFuncName + " ( ";
@@ -71,7 +71,7 @@ CqDSORepository::strPrototype(CqString *strFuncName, SqDSOExternalCall *pExtCall
 		}
 		else
 		{
-			strProt += "Unkown ";
+			strProt += "Unknown ";
 		};
 
 		it++ ;
