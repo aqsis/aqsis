@@ -19,7 +19,7 @@ The following people have contributed to the development of Aqsis Renderer:
                                 aqsltell.
                                 Texture mapping, cache mechanism.
                                 Texture file conversion plugins.
-                                Latlong envionment mapping.
+                                Latlong environment mapping.
                                 Teapot primitive.
                                 Blobby support.
                                 Bunny primitive.
