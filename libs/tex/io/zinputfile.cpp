@@ -105,7 +105,7 @@ void CqZInputFile::readHeader(std::istream& inStream, CqTexFileHeader& header)
 		|| inStream.gcount() != magicNumSize)
 	{
 		AQSIS_THROW_XQERROR(XqBadTexture, EqE_BadFile,
-				"Magic number missmatch in zfile");
+				"Magic number mismatch in zfile");
 	}
 
 	// Read in Aqsis version.  We require this to match the current aqsis version.
