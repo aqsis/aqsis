@@ -42,11 +42,6 @@
 #include <boost/archive/iterators/transform_width.hpp>
 #include <boost/archive/iterators/remove_whitespace.hpp>
 #include <boost/version.hpp>
-#if BOOST_VERSION < 103700
-#   include <boost/pfto.hpp>
-#else
-#   include <boost/serialization/pfto.hpp>
-#endif
 
 
 #include "displayserverimage.h"
