@@ -353,7 +353,7 @@ typedef
                                 std::string data = dataText->Value();
                                 std::vector<unsigned char> binaryData;
                                 binaryData.reserve(count);
-                                base64_binary ti_begin = base64_binary(BOOST_MAKE_PFTO_WRAPPER(data.begin()));
+                                base64_binary ti_begin = base64_binary(data.begin());
                                 std::size_t padding = 2 - count % 3;
                                 while(--count > 0)
                                 {
