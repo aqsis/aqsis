@@ -32,7 +32,7 @@
 #include <algorithm>
 #include <map>
 #include <vector>
-
+#include <cstdlib>
 #include <boost/archive/iterators/base64_from_binary.hpp>
 #include <boost/archive/iterators/transform_width.hpp>
 #include <boost/archive/iterators/insert_linebreaks.hpp>
@@ -395,9 +395,10 @@ extern "C" PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 					const char* typeName = formatNode->GetText();
 					const char* formatName = formatNode->Attribute("name");
 					TqInt typeID = g_mapNameToType[typeName];
+					unsigned int typeIDus=abs(typeID);
 					char* name = new char[strlen(formatName)+1];
 					strcpy(name, formatName);
-					PtDspyDevFormat fmt = {name, typeID};
+					PtDspyDevFormat fmt = {name, typeIDus};
 					outFormat.push_back(fmt);
 					formatNode = formatNode->NextSiblingElement("Format");
 					iformat++;
