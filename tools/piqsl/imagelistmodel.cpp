@@ -35,7 +35,7 @@
 #include <QtCore/QStringList>
 #include <QtCore/QFileInfo>
 #include <QtCore/QSocketNotifier>
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QMessageBox>
 
 #include <boost/thread/mutex.hpp>
 #include <boost/archive/iterators/binary_from_base64.hpp>

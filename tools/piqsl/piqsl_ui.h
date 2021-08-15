@@ -31,11 +31,11 @@
 #ifndef AQSIS_PIQSL_UI_H_INCLUDED
 #define AQSIS_PIQSL_UI_H_INCLUDED
 
-#include <QtGui/QMainWindow>
-#include <QtGui/QWidget>
-#include <QtGui/QListView>
+#include <QtWidgets/QMainWindow>
+#include <QtWidgets/QWidget>
+#include <QtWidgets/QListView>
 
-#include <QtGui/QStyledItemDelegate>
+#include <QtWidgets/QStyledItemDelegate>
 
 #include "image.h"
 

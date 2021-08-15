@@ -48,13 +48,13 @@
 #   include <windows.h>
 #endif
 
-#include <QtGui/QApplication>
-#include <QtGui/QFileDialog>
-#include <QtGui/QMenuBar>
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QFileDialog>
+#include <QtWidgets/QMenuBar>
 #include <QtGui/QMouseEvent>
-#include <QtGui/QMessageBox>
-#include <QtGui/QStatusBar>
-#include <QtGui/QTabWidget>
+#include <QtWidgets/QMessageBox>
+#include <QtWidgets/QStatusBar>
+#include <QtWidgets/QTabWidget>
 
 #include <boost/thread.hpp>
 #include <boost/regex.hpp>

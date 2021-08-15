@@ -31,9 +31,9 @@
 #ifndef AQSIS_EQSL_H_INCLUDED
 #define AQSIS_EQSL_H_INCLUDED
 
-#include <QtGui/QMainWindow>
-#include <QtGui/QTextEdit>
-#include <QtGui/QProgressBar>
+#include <QtWidgets/QMainWindow>
+#include <QtWidgets/QTextEdit>
+#include <QtWidgets/QProgressBar>
 #include <string>
 
 class EqslMainWindow : public QMainWindow
