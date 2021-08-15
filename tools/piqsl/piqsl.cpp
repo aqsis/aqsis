@@ -35,7 +35,7 @@
 
 #include <aqsis/aqsis.h>
 
-#include <QtGui/QApplication>
+#include <QtWidgets/QApplication>
 
 #include <tinyxml.h>
 

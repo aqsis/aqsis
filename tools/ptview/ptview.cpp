@@ -31,12 +31,12 @@
 #define GL_GLEXT_PROTOTYPES
 
 #include <QtCore/QSignalMapper>
-#include <QtGui/QApplication>
+#include <QtWidgets/QApplication>
 #include <QtGui/QKeyEvent>
-#include <QtGui/QMenuBar>
-#include <QtGui/QMessageBox>
-#include <QtGui/QFileDialog>
-#include <QtGui/QColorDialog>
+#include <QtWidgets/QMenuBar>
+#include <QtWidgets/QMessageBox>
+#include <QtWidgets/QFileDialog>
+#include <QtWidgets/QColorDialog>
 
 #include <boost/program_options.hpp>
 
@@ -131,7 +131,7 @@ bool PointArrayModel::loadPointFile(const QString& fileName)
 {
     namespace Pio = Partio;
     boost::shared_ptr<Pio::ParticlesData> ptFile(
-                Pio::read(fileName.toAscii().constData()), releasePartioFile);
+                Pio::read(fileName.toLatin1().constData()), releasePartioFile);
     if(!ptFile)
     {
         QMessageBox::critical(0, tr("Error"),
@@ -171,7 +171,7 @@ bool PointArrayModel::loadPointFile(const QString& fileName)
     m_color.reset();
     if(!m_colorChannelNames.empty())
     {
-        if(ptFile->attributeInfo(m_colorChannelNames[0].toAscii().constData(), colorAttr))
+        if(ptFile->attributeInfo(m_colorChannelNames[0].toLatin1().constData(), colorAttr))
             m_color.reset(new C3f[m_npoints]);
     }
     // Iterate over all particles & pull in the data.
@@ -205,9 +205,9 @@ void PointArrayModel::setColorChannel(const QString& name)
 {
     namespace Pio = Partio;
     boost::shared_ptr<Pio::ParticlesData> ptFile(
-                Pio::read(m_fileName.toAscii().constData()), releasePartioFile);
+                Pio::read(m_fileName.toLatin1().constData()), releasePartioFile);
     Pio::ParticleAttribute colorAttr;
-    if(!ptFile->attributeInfo(name.toAscii().constData(), colorAttr)
+    if(!ptFile->attributeInfo(name.toLatin1().constData(), colorAttr)
        || colorAttr.count != 3 || colorAttr.type != Pio::FLOAT)
         return;
     m_color.reset(new C3f[m_npoints]);
@@ -1209,7 +1209,9 @@ int main(int argc, char *argv[])
     po::variables_map opts;
     po::positional_options_description positionalOpts;
     positionalOpts.add("point_files", -1);
-    po::store(po::command_line_parser(app.argc(), app.argv())
+    // po::store(po::command_line_parser(app.argc(), app.argv())
+    //          .options(optionsDesc).positional(positionalOpts).run(), opts);
+    po::store(po::command_line_parser(argc, argv)
               .options(optionsDesc).positional(positionalOpts).run(), opts);
     po::notify(opts);
 

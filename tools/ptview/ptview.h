@@ -36,7 +36,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/shared_array.hpp>
 
-#include <QtGui/QMainWindow>
+#include <QtWidgets/QMainWindow>
 #include <QtOpenGL/QGLWidget>
 
 #include <OpenEXR/ImathVec.h>

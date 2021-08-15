@@ -109,12 +109,9 @@ link_directories(${Boost_LIBRARY_DIRS})
 
 # GUI libs
 if(AQSIS_USE_QT)
-	find_package(Qt4 4.6.2 COMPONENTS QtCore QtGui QtOpenGL)
-
-	if(NOT QT_FOUND)
-		message("** Qt4 not found - building without aqsis GUI tools")
-		set(AQSIS_USE_QT OFF)
-	endif()
+  find_package(Qt5 COMPONENTS Core Gui Widgets OpenGL Network)
+  set(AQSIS_USE_QT ON)
+  set(QT_FOUND ON)
 endif()
 
 # OpenEXR

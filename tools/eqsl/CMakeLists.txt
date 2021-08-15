@@ -5,7 +5,7 @@ if(NOT Boost_THREAD_FOUND OR NOT Boost_REGEX_FOUND OR NOT QT_FOUND)
 	message(FATAL_ERROR "Eqsl requires boost thread, regex, and Qt4 to build")
 endif()
 
-qt4_wrap_cpp(moc_srcs eqsl.h)
+qt5_wrap_cpp(moc_srcs eqsl.h)
 set(eqsl_srcs
 	eqsl.cpp
 	${moc_srcs}
@@ -21,8 +21,8 @@ endif()
 include_directories(${QT_INCLUDES})
 
 aqsis_add_executable(eqsl ${eqsl_srcs} GUIAPP
-	LINK_LIBRARIES aqsis_util ${QT_QTGUI_LIBRARY} ${QT_QTCORE_LIBRARY}
-		${eqsl_link_libraries}
-		${Boost_THREAD_LIBRARY} ${Boost_REGEX_LIBRARY})
+  LINK_LIBRARIES aqsis_util Qt5::Gui Qt5::Core Qt5::Widgets
+  ${eqsl_link_libraries}
+  ${Boost_THREAD_LIBRARY} ${Boost_REGEX_LIBRARY})
 
 aqsis_install_targets(eqsl)

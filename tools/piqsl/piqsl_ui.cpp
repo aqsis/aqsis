@@ -32,12 +32,12 @@
 
 #include <aqsis/aqsis.h>
 
-#include <QtGui/QFileDialog>
-#include <QtGui/QMenuBar>
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QFileDialog>
+#include <QtWidgets/QMenuBar>
+#include <QtWidgets/QMessageBox>
 #include <QtGui/QMouseEvent>
-#include <QtGui/QSplitter>
-//#include <QtGui/QStringListModel>
+#include <QtWidgets/QSplitter>
+//#include <QtWidgets/QStringListModel>
 
 #include <QtGui/QPainter>
 #include <QtGui/QImage>

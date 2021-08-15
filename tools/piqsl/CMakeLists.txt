@@ -16,7 +16,7 @@ set(piqsl_hdrs
 )
 source_group("Header Files" FILES ${piqsl_hdrs})
 
-qt4_wrap_cpp(moc_srcs
+qt5_wrap_cpp(moc_srcs
     displayserverimage.h
     image.h
     imagelistmodel.h
@@ -36,8 +36,7 @@ set(piqsl_srcs
 include_directories(${QT_INCLUDES})
 
 aqsis_add_executable(piqsl ${piqsl_srcs} ${piqsl_hdrs} GUIAPP
-    LINK_LIBRARIES aqsis_util aqsis_tex ${QT_QTGUI_LIBRARY} 
-        ${QT_QTCORE_LIBRARY} ${QT_QTNETWORK_LIBRARY}
-        ${Boost_THREAD_LIBRARY} ${AQSIS_TINYXML_LIBRARY})
+  LINK_LIBRARIES aqsis_util aqsis_tex Qt5::Gui Qt5::Core Qt5::Network Qt5::Widgets
+  ${Boost_THREAD_LIBRARY} ${AQSIS_TINYXML_LIBRARY})
 
 aqsis_install_targets(piqsl)
