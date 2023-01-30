@@ -1,3 +1,0 @@
-[submodule "thirdparty/partio/src"]
-	path = thirdparty/partio/src
-	url = git://github.com/wdas/partio.git
