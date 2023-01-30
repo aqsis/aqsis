@@ -1,6 +1,6 @@
 include_subproject(dspyutil)
 
-include_directories(${AQSIS_OPENEXR_INCLUDE_DIR} "${AQSIS_OPENEXR_INCLUDE_DIR}/OpenEXR")
+include_directories(BEFORE ${AQSIS_OPENEXR_INCLUDE_DIR} "${AQSIS_OPENEXR_INCLUDE_DIR}/OpenEXR")
 
 if(WIN32 AND AQSIS_USE_OPENEXR_DLL)
     add_definitions(-DOPENEXR_DLL)

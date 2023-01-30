@@ -217,7 +217,7 @@ static RtFilterFunc CalculateFilter(CqString filter)
 static TqFloat fastlog2(TqFloat a)
 {
 #ifdef FASTLOG2
-	register TqFloat x,y;
+	/*register*/ TqFloat x,y;
 	x = *(int*)&a;
 	x*= 1.19209e-007; /* pow(2.0, -23) */
 	x = x - 127.0f;
@@ -721,7 +721,7 @@ bool CqTextureMapOld::BiLinear(TqFloat u, TqFloat v, TqInt umapsize, TqInt vmaps
 	iv_n = clamp<TqInt>(iv_n, 0, vmapsize1);
 
 	// Read in the relevant texture tiles.
-	register TqInt c;
+	/*register*/ TqInt c;
 
 	// Read in the relevant texture tiles.
 	CqTextureMapBuffer* pTMBa = GetBuffer( iu, iv, id );	// Val00
@@ -779,7 +779,7 @@ bool CqTextureMapOld::BiLinear(TqFloat u, TqFloat v, TqInt umapsize, TqInt vmaps
  */
 void CqTextureMapOld::GetSampleWithoutBlur( TqFloat u1, TqFloat v1, TqFloat u2, TqFloat v2, std::valarray<TqFloat>& val )
 {
-	register TqInt c;
+	/*register*/ TqInt c;
 
 
 	// u/v is provided to the function now; they are the average of
@@ -872,7 +872,7 @@ void CqTextureMapOld::GetSampleWithoutBlur( TqFloat u1, TqFloat v1, TqFloat u2, 
  */
 void CqTextureMapOld::GetSampleWithBlur( TqFloat u1, TqFloat v1, TqFloat u2, TqFloat v2, std::valarray<TqFloat>& val )
 {
-	register TqInt c;
+	/*register*/ TqInt c;
 
 
 	// u/v is provided to the function now; they are the average of
@@ -1899,7 +1899,7 @@ void CqEnvironmentMapOld::SampleMap( CqVector3D& R1,
 	TqInt i;
 	EOrder order;
 	TqFloat side[2];
-	register TqInt c;
+	/*register*/ TqInt c;
 
         u = v = 0.0f;
 

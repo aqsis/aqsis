@@ -590,13 +590,13 @@ TqInt CqBlobby::Split( std::vector<boost::shared_ptr<CqSurface> >& aSplits )
 /** Blobby virtual machine program execution - calculates the value of an implicit surface at a given 3D point */
 TqFloat CqBlobby::implicit_value( const CqVector3D& Point, TqInt n, std::vector <TqFloat> &splits )
 {
-	register TqFloat sum = 0.0f;
-	register TqFloat result;
+	/*register*/ TqFloat sum = 0.0f;
+	/*register*/ TqFloat result;
 	std::stack<TqFloat> stack;
 	TqInt int_index = 0;
 	stack.push(0);
 
-	register unsigned long pc;
+	/*register*/ unsigned long pc;
 
 	for(pc = 0; pc < m_instructions.size(); )
 	{
@@ -787,8 +787,8 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point )
 {
 	std::stack<TqFloat> stack;
 	stack.push(0);
-	register TqFloat result;
-	register unsigned long pc;
+	/*register*/ TqFloat result;
+	/*register*/ unsigned long pc;
 
 	for(pc = 0; pc < m_instructions.size(); )
 	{
@@ -1028,7 +1028,7 @@ TqFloat CqBlobby::implicit_value( const CqVector3D& Point )
  */
 TqInt CqBlobby::polygonize( TqInt PixelsWidth, TqInt PixelsHeight, TqInt& NPoints, TqInt& NPolys, TqInt*& NVertices, TqInt*& Vertices, TqFloat*& Points )
 {
-	register TqInt i,j,k;
+	/*register*/ TqInt i,j,k;
 
 	// Make sure the blobby is big enough to show
 	if(PixelsWidth <= 0 || PixelsHeight <= 0)

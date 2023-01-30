@@ -595,19 +595,19 @@ int main( int argc, const char** argv )
 		}
 
 #		ifdef	AQSIS_SYSTEM_WIN32
-		std::auto_ptr<std::streambuf> ansi( new Aqsis::ansi_buf(Aqsis::log()) );
+		std::unique_ptr<std::streambuf> ansi( new Aqsis::ansi_buf(Aqsis::log()) );
 #		endif
 
-		std::auto_ptr<std::streambuf> reset_level( new Aqsis::reset_level_buf(Aqsis::log()) );
-		std::auto_ptr<std::streambuf> show_timestamps( new Aqsis::timestamp_buf(Aqsis::log()) );
-		std::auto_ptr<std::streambuf> fold_duplicates( new Aqsis::fold_duplicates_buf(Aqsis::log()) );
-		std::auto_ptr<std::streambuf> color_level;
-		if(!g_cl_no_color)
+		std::unique_ptr<std::streambuf> reset_level( new Aqsis::reset_level_buf(Aqsis::log()) );
+		std::unique_ptr<std::streambuf> show_timestamps( new Aqsis::timestamp_buf(Aqsis::log()) );
+		std::unique_ptr<std::streambuf> fold_duplicates( new Aqsis::fold_duplicates_buf(Aqsis::log()) );
+		std::unique_ptr<std::streambuf> color_level;
+		/*if(!g_cl_no_color)
 		{
-			std::auto_ptr<std::streambuf> temp_color_level( new Aqsis::color_level_buf(Aqsis::log()) );
+			std::unique_ptr<std::streambuf> temp_color_level( new Aqsis::color_level_buf(Aqsis::log()) );
 			color_level = temp_color_level;
-		}
-		std::auto_ptr<std::streambuf> show_level( new Aqsis::show_level_buf(Aqsis::log()) );
+		}*/
+		std::unique_ptr<std::streambuf> show_level( new Aqsis::show_level_buf(Aqsis::log()) );
 		Aqsis::log_level_t level = Aqsis::ERROR;
 		if( g_cl_verbose > 0 )
 			level = Aqsis::WARNING;
@@ -615,10 +615,10 @@ int main( int argc, const char** argv )
 			level = Aqsis::INFO;
 		if( g_cl_verbose > 2 )
 			level = Aqsis::DEBUG;
-		std::auto_ptr<std::streambuf> filter_level( new Aqsis::filter_by_level_buf(level, Aqsis::log()) );
+		std::unique_ptr<std::streambuf> filter_level( new Aqsis::filter_by_level_buf(level, Aqsis::log()) );
 #		ifdef AQSIS_SYSTEM_POSIX
 		if( g_cl_syslog )
-			std::auto_ptr<std::streambuf> use_syslog( new Aqsis::syslog_buf(Aqsis::log()) );
+			std::unique_ptr<std::streambuf> use_syslog( new Aqsis::syslog_buf(Aqsis::log()) );
 #		endif // AQSIS_SYSTEM_POSIX
 
 		if (g_cl_priority != 1)

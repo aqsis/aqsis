@@ -677,7 +677,7 @@ void CqMicroPolyGrid::Split( long xmin, long xmax, long ymin, long ymax )
 	aaPtimes.resize( tTime );
 
 	CqMatrix matObjectToCameraT;
-	register TqInt i;
+	/*register*/ TqInt i;
 	TqInt gsmin1;
 	gsmin1 = m_pShaderExecEnv->shadingPointCount() - 1;
 
@@ -967,7 +967,7 @@ void CqMotionMicroPolyGrid::Split( long xmin, long xmax, long ymin, long ymax )
 	
 	TqInt tTime = cTimes();
 	CqMatrix matObjectToCameraT;
-	register TqInt i;
+	/*register*/ TqInt i;
 	TqInt gsmin1;
 	gsmin1 = pGridA->pShaderExecEnv()->shadingPointCount() - 1;
 

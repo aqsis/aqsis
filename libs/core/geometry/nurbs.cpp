@@ -189,8 +189,8 @@ TqUint CqSurfaceNURBS::FindSpanV( TqFloat v ) const
 
 void CqSurfaceNURBS::BasisFunctions( TqFloat u, TqUint i, std::vector<TqFloat>& U, TqInt k, std::vector<TqFloat>& N )
 {
-	register TqInt j, r;
-	register TqFloat saved, temp;
+	/*register*/ TqInt j, r;
+	/*register*/ TqFloat saved, temp;
 	std::vector<TqFloat> left( k ), right( k );
 
 	N[ 0 ] = 1.0f;
@@ -217,8 +217,8 @@ void CqSurfaceNURBS::BasisFunctions( TqFloat u, TqUint i, std::vector<TqFloat>& 
 
 void CqSurfaceNURBS::DersBasisFunctions( TqFloat u, TqUint i, std::vector<TqFloat>& U, TqInt k, TqInt n, std::vector<std::vector<TqFloat> >& ders )
 {
-	register TqInt j, r;
-	register TqFloat saved, temp;
+	/*register*/ TqInt j, r;
+	/*register*/ TqFloat saved, temp;
 	std::vector<TqFloat> left( k ), right( k );
 	std::vector<std::vector<TqFloat> > ndu( k ), a( 2 );
 	for ( j = 0; j < k; j++ )

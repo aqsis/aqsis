@@ -1153,7 +1153,7 @@ void CqBucketProcessor::RenderMPG_Static( CqMicroPolygon* pMPG)
 			// Now sample the micropolygon at several subsample positions
 			// within the pixel. The subsample indices range from (start_m, n)
 			// to (end_m-1, end_n-1).
-			register int m, n;
+			/*register*/ int m, n;
 			n = ( iY == sY ) ? in : 0;
 			int end_n = ( iY == ( eY - 1 ) ) ? en : iYSamples;
 			int start_m = ( iX == sX ) ? im : 0;

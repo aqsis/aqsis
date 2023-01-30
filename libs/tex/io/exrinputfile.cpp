@@ -175,7 +175,8 @@ CqExrInputFile::CqExrInputFile(const boostfs::path& fileName)
 	{
 		m_exrFile.reset(new Imf::InputFile(native(fileName).c_str()));
 	}
-	catch(Iex::BaseExc &e)
+	catch(std::exception &e)
+	//catch(Iex::BaseExc &e)
 	{
 		AQSIS_THROW_XQERROR(XqBadTexture, EqE_BadFile, e.what());
 	}

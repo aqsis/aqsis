@@ -157,7 +157,7 @@ macro(aqsis_add_library target_name)
 		list(APPEND aal_lib_srcs ${aal_TEST_SOURCES})
 	endif()
 	add_library(${target_name} ${aal_lib_type} ${aal_lib_srcs})
-	get_target_property(aal_name ${target_name} LOCATION)
+	set(aal_name $<TARGET_FILE_NAME:${target_name}>)
 	get_filename_component(aal_name ${aal_name} PATH)
 	# Set the variables to be picked up if this library is needed during build, for
 	# example aqsl needs aqsis_slcomp when building the shaders.

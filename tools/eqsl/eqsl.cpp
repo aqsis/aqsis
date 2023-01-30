@@ -208,8 +208,8 @@ void EqslMainWindow::renderFile()
     args.push_back(renderEngineFile);
     // TODO: Things would be nicer if we used QProcess here...
     Aqsis::CqExecute tool(program, args, m_currentDirectory);
-    Aqsis::CqExecute::TqCallback outputStdOut = std::bind1st(
-            std::mem_fun(&EqslMainWindow::collectCommandStdout), this);
+    Aqsis::CqExecute::TqCallback outputStdOut = std::bind(
+            &EqslMainWindow::collectCommandStdout, this, std::placeholders::_1);
     tool.setStdOutCallback(outputStdOut);
     boost::thread thread(tool);
 
@@ -268,8 +268,8 @@ void EqslMainWindow::compileShader()
     }
     args.push_back(shaderCompilerFile);
     Aqsis::CqExecute tool(program, args, m_currentDirectory);
-    Aqsis::CqExecute::TqCallback outputStdOut = std::bind1st(
-            std::mem_fun(&EqslMainWindow::collectCommandStdout), this);
+    Aqsis::CqExecute::TqCallback outputStdOut = std::bind(
+            &EqslMainWindow::collectCommandStdout, this, std::placeholders::_1);
     tool.setStdOutCallback(outputStdOut);
     boost::thread thread(tool);
     commandLine += " \"" + shaderCompilerFile + "\"";
@@ -311,8 +311,8 @@ void EqslMainWindow::openFramebuffer()
 #ifdef AQSIS_COMPILER_GCC
     std::vector<std::string> args;
     Aqsis::CqExecute tool(program, args, m_currentDirectory);
-    Aqsis::CqExecute::TqCallback outputStdOut = std::bind1st(
-            std::mem_fun(&EqslMainWindow::collectCommandStdout), this);
+    Aqsis::CqExecute::TqCallback outputStdOut = std::bind(
+            &EqslMainWindow::collectCommandStdout, this, std::placeholders::_1);
     tool.setStdOutCallback(outputStdOut);
     boost::thread thread(tool);
 #else

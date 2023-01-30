@@ -49,8 +49,8 @@ TqUint CqTrimCurve::FindSpan( TqFloat u ) const
 
 void CqTrimCurve::BasisFunctions( TqFloat u, TqUint span, std::vector<TqFloat>& BasisVals )
 {
-	register TqInt r, s, i;
-	register double omega;
+	/*register*/ TqInt r, s, i;
+	/*register*/ double omega;
 
 	BasisVals[ 0 ] = 1.0;
 	for ( r = 2; r <= static_cast<TqInt>( m_Order ); r++ )

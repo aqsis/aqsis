@@ -127,8 +127,8 @@ if(APPLE OR WIN32)
 							"\${CMAKE_INSTALL_PREFIX}/${PLUGINDIR}/${piqsl_DISPLAYLIB}"
 							)
 
-	INSTALL(CODE "
-		include(BundleUtilities)
-		fixup_bundle(\"${APPS}\"   \"${PLUGINS}\"   \"${DIRS}\")
-		" COMPONENT main)
+						#	INSTALL(CODE "
+						#		include(BundleUtilities)
+						#		fixup_bundle(\"${APPS}\"   \"${PLUGINS}\"   \"${DIRS}\")
+						#		" COMPONENT main)
 endif()

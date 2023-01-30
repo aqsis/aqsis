@@ -1,6 +1,7 @@
 project(aqsis_all)
 
-cmake_minimum_required(VERSION 2.6.3)
+cmake_minimum_required(VERSION 3.25.1)
+set (CMAKE_CXX_STANDARD 17)
 set(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS TRUE)
 
 # Disallow in-source build
@@ -366,8 +367,10 @@ set(TEXTUREPATH "${TEXTUREPATH}" CACHE STRING "Aqsis texture searchpath")
 set(DISPLAYPATH "${DISPLAYPATH}" CACHE STRING "Aqsis display searchpath")
 set(PROCEDURALPATH "${PROCEDURALPATH}" CACHE STRING "Aqsis procedural searchpath")
 set(RESOURCEPATH "${RESOURCEPATH}" CACHE STRING "Aqsis resource searchpath")
+set(aqsisrc_in_name ${PROJECT_BINARY_DIR}/aqsisrc.in)
 set(aqsisrc_name ${PROJECT_BINARY_DIR}/aqsisrc)
-configure_file(aqsisrc.in.cmake ${aqsisrc_name})
+configure_file(aqsisrc.in.cmake ${aqsisrc_in_name})
+file(GENERATE OUTPUT ${aqsisrc_name} INPUT ${aqsisrc_in_name})
 install(FILES ${aqsisrc_name} DESTINATION ${SYSCONFDIR} COMPONENT main)
 
 #-------------------------------------------------------------------------------

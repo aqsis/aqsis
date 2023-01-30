@@ -4,7 +4,8 @@ declare_subproject(dspyutil)
 macro(aqsis_add_display target_name)
 	set(_full_target_name "${target_name}_dspy")
 	aqsis_add_library(${_full_target_name} ${ARGN} PLUGIN)
-	get_target_property(display_lib_name ${_full_target_name} LOCATION)
+	# get_target_property(display_lib_name ${_full_target_name} LOCATION)
+	set(display_lib_name $<TARGET_FILE_NAME:${_full_target_name}>)
 	get_filename_component(display_lib_name ${display_lib_name} NAME)
 	# Set variables in the display directory to be picked up when building
 	# the aqsisrc config file.

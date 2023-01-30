@@ -135,7 +135,7 @@ class AQSIS_UTIL_SHARE CqBitVector
 		void	SetAll( bool value )
 		{
 			bit setval = ( value ) ? ~0 : 0;
-			register TqInt i;
+			/*register*/ TqInt i;
 
 			for ( i = 0; i < m_cNumInts; i++ )
 				m_aBits[ i ] = setval;
@@ -145,7 +145,7 @@ class AQSIS_UTIL_SHARE CqBitVector
 		 */
 		void	Complement()
 		{
-			register TqInt i;
+			/*register*/ TqInt i;
 
 			for ( i = 0; i < m_cNumInts; i++ )
 				m_aBits[ i ] = ~m_aBits[ i ];

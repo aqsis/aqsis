@@ -1,0 +1,7 @@
+examples/**/*.tif
+examples/**/*.tex
+examples/**/*.slx
+examples/**/*.sm
+examples/**/*.shad
+examples/**/*.env
+examples/**/*.ptc

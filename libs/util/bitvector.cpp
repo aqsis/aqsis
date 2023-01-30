@@ -104,8 +104,8 @@ CqBitVector&	CqBitVector::Difference( CqBitVector& from )
 
 TqInt CqBitVector::Count() const
 {
-	register TqInt count;
-	register TqInt i;
+	/*register*/ TqInt count;
+	/*register*/ TqInt i;
 
 	static const unsigned bitcount[ 256 ] =
 	    {

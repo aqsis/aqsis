@@ -74,9 +74,8 @@ namespace Aqsis {
 class CqTexFileHeader
 {
 	private:
-		class CqTypeInfoHolder;
 		/// Underlying map type.
-		typedef std::map<CqTypeInfoHolder, boost::any> TqAttributeMap;
+		typedef std::map<std::type_index, boost::any> TqAttributeMap;
 		typedef TqAttributeMap::const_iterator const_iterator;
 	public:
 
@@ -183,23 +182,6 @@ class CqTexFileHeader
 //==============================================================================
 // Implementation details
 //==============================================================================
-/** \brief Wrapper around std::type_info to allow usage as a key type in std::map.
- *
- * Hold onto a reference to std::type_info, and provide operator<
- */
-class CqTexFileHeader::CqTypeInfoHolder
-{
-	private:
-		const std::type_info& m_typeInfo;
-	public:
-		CqTypeInfoHolder(const std::type_info& typeInfo)
-			: m_typeInfo(typeInfo)
-		{ }
-		bool operator<(const CqTypeInfoHolder& rhs) const
-		{
-			return m_typeInfo.before(rhs.m_typeInfo) != 0;
-		}
-};
 
 //------------------------------------------------------------------------------
 // CqTexFileHeader
@@ -261,13 +243,13 @@ inline void CqTexFileHeader::setTimestamp()
 template<typename AttrTagType>
 inline void CqTexFileHeader::set(const typename AttrTagType::type& value)
 {
-	m_attributeMap[CqTypeInfoHolder(typeid(AttrTagType))] = value;
+	m_attributeMap[std::type_index(typeid(AttrTagType))] = value;
 }
 
 template<typename AttrTagType>
 void CqTexFileHeader::erase()
 {
-	m_attributeMap.erase(CqTypeInfoHolder(typeid(AttrTagType)));
+	m_attributeMap.erase(std::type_index(typeid(AttrTagType)));
 }
 
 template<typename AttrTagType>
@@ -280,7 +262,7 @@ inline typename AttrTagType::type& CqTexFileHeader::find()
 template<typename AttrTagType>
 inline const typename AttrTagType::type& CqTexFileHeader::find() const
 {
-	const_iterator iter = m_attributeMap.find(CqTypeInfoHolder(typeid(AttrTagType)));
+	const_iterator iter = m_attributeMap.find(std::type_index(typeid(AttrTagType)));
 	if(iter == m_attributeMap.end())
 	{
 		AQSIS_THROW_XQERROR(XqInternal, EqE_BadFile, "Requested attribute \""
@@ -310,7 +292,7 @@ inline typename AttrTagType::type* CqTexFileHeader::findPtr()
 template<typename AttrTagType>
 inline const typename AttrTagType::type* CqTexFileHeader::findPtr() const
 {
-	const_iterator iter = m_attributeMap.find(CqTypeInfoHolder(typeid(AttrTagType)));
+	const_iterator iter = m_attributeMap.find(std::type_index(typeid(AttrTagType)));
 	if(iter == m_attributeMap.end())
 		return 0;
 	return & boost::any_cast<const typename AttrTagType::type&>(iter->second);

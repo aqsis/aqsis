@@ -223,7 +223,7 @@ int main( int argc, const char** argv )
 	float quality = ( float ) g_quality;
 
 
-	std::auto_ptr<std::streambuf> show_level( new Aqsis::show_level_buf(Aqsis::log()) );
+	std::unique_ptr<std::streambuf> show_level( new Aqsis::show_level_buf(Aqsis::log()) );
 	Aqsis::log_level_t level = Aqsis::ERROR;
 	if( g_cl_verbose > 0 )
 		level = Aqsis::WARNING;
@@ -231,7 +231,7 @@ int main( int argc, const char** argv )
 		level = Aqsis::INFO;
 	if( g_cl_verbose > 2 )
 		level = Aqsis::DEBUG;
-	std::auto_ptr<std::streambuf> filter_level( new Aqsis::filter_by_level_buf(level, Aqsis::log()) );
+	std::unique_ptr<std::streambuf> filter_level( new Aqsis::filter_by_level_buf(level, Aqsis::log()) );
 
 	RiBegin(RI_NULL);
 

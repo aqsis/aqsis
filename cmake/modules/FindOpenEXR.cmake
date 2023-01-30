@@ -24,7 +24,7 @@ ELSE(WIN32)
 	IF(NOT APPLE)
 		SET(AQSIS_OPENEXR_INCLUDE_SEARCHPATH /usr/include /usr/local/include)
 	ELSE(NOT APPLE)
-		# Todo: Need to add the default locations to check on MacOSX here.
+		SET(AQSIS_OPENEXR_INCLUDE_SEARCHPATH /opt/home/include)
 	ENDIF(NOT APPLE)
 ENDIF(WIN32)
 
