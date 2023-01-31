@@ -5,3 +5,4 @@ examples/**/*.sm
 examples/**/*.shad
 examples/**/*.env
 examples/**/*.ptc
+examples/**/*.zfile
