@@ -34,9 +34,9 @@
 
 #include <boost/scoped_array.hpp>
 
-#include <OpenEXR/ImathVec.h>
-#include <OpenEXR/ImathMath.h>
-#include <OpenEXR/ImathFun.h>
+#include <Imath/ImathVec.h>
+#include <Imath/ImathMath.h>
+#include <Imath/ImathFun.h>
 
 #include "MicroBuf.h"
 

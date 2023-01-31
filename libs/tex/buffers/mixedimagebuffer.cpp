@@ -40,7 +40,7 @@
 #include <aqsis/tex/buffers/mixedimagebuffer.h>
 
 #ifdef USE_OPENEXR
-#include <OpenEXR/half.h>
+#include <Imath/half.h>
 #endif
 
 #include <aqsis/util/exception.h>

@@ -20,19 +20,20 @@ source_group("Header files" FILES ${tex_hdrs})
 
 set(linklibs ${io_linklibs})
 if(AQSIS_USE_OPENEXR)
-    include_directories(${AQSIS_OPENEXR_INCLUDE_DIR} "${AQSIS_OPENEXR_INCLUDE_DIR}/OpenEXR")
+  message(ERROR ${OpenEXR_INCLUDES})
+  include_directories(${AQSIS_OPENEXR_INCLUDE_DIR} "${AQSIS_OPENEXR_INCLUDE_DIR}/OpenEXR" "${AQSIS_OPENEXR_INCLUDE_DIR}/Imath")
     add_definitions(-DUSE_OPENEXR)
 if(WIN32 AND AQSIS_USE_OPENEXR_DLL)
     add_definitions(-DOPENEXR_DLL)
 endif()
 
-	list(APPEND linklibs ${AQSIS_OPENEXR_LIBRARIES})
+list(APPEND linklibs ${AQSIS_OPENEXR_LIBRARIES})
 endif()
 if(AQSIS_USE_PNG)
-  include_directories(${AQSIS_PNG_INCLUDE_DIR} ${AQSIS_ZLIB_INCLUDE_DIR})
+  include_directories(${AQSIS_PNG_INCLUDE_DIR} ${ZLIB_INCLUDE_DIR})
 	add_definitions(-DAQSIS_USE_PNG)
 endif()
-list(APPEND linklibs ${AQSIS_ZLIB_LIBRARIES})
+list(APPEND linklibs ${ZLIB_LIBRARIES})
 
 aqsis_add_library(aqsis_tex ${tex_srcs} ${tex_hdrs}
 	TEST_SOURCES ${tex_test_srcs}

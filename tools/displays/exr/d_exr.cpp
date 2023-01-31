@@ -115,10 +115,10 @@
 #include <OpenEXR/ImfCompressionAttribute.h>
 #include <OpenEXR/ImfLut.h>
 #include <OpenEXR/ImfArray.h>
-#include <OpenEXR/ImathFun.h>
+#include <Imath/ImathFun.h>
 #include <OpenEXR/Iex.h>
-#include <OpenEXR/half.h>
-#include <OpenEXR/halfFunction.h>
+#include <Imath/half.h>
+#include <Imath/halfFunction.h>
 #if AQSIS_SYSTEM_WIN32 && (defined(AQSIS_COMPILER_MSVC6) || defined(AQSIS_COMPILER_MSVC7))
 #	pragma warning(pop)
 #endif

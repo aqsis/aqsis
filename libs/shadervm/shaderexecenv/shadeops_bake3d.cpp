@@ -23,6 +23,7 @@
 #endif
 
 #include <cstring>
+#include <float.h>
 
 #include <Partio.h>
 
@@ -31,7 +32,7 @@
 #include <aqsis/util/autobuffer.h>
 #include <aqsis/util/logging.h>
 
-#include <OpenEXR/ImathVec.h>
+#include <Imath/ImathVec.h>
 
 namespace Aqsis
 {

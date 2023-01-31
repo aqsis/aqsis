@@ -119,7 +119,7 @@ endif()
 if(AQSIS_USE_OPENEXR)
 	find_package(OpenEXR)
 
-	if(NOT AQSIS_OPENEXR_FOUND)
+  if(NOT AQSIS_OPENEXR_FOUND)
 		message("** Cannot find OpenEXR - aqsis will be built without support for the OpenEXR image format")
 		set(AQSIS_USE_OPENEXR OFF)
 	endif()

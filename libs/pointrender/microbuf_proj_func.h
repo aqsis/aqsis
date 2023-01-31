@@ -30,8 +30,8 @@
 #ifndef MICROBUF_PROJ_FUNC_H_
 #define MICROBUF_PROJ_FUNC_H_
 
-#include <OpenEXR/ImathVec.h>
-#include <OpenEXR/ImathMath.h>
+#include <Imath/ImathVec.h>
+#include <Imath/ImathMath.h>
 
 #include "diffuse/DiffusePointOctree.h"
 #include "MicroBuf.h"

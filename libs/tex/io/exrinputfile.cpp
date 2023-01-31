@@ -43,6 +43,8 @@
 
 #include <OpenEXR/ImfChannelList.h>
 #include <OpenEXR/ImfFrameBuffer.h>
+#include <OpenEXR/ImfCompression.h>
+#include <OpenEXR/ImfHeader.h>
 #include <OpenEXR/Iex.h>
 
 #include <aqsis/util/logging.h>

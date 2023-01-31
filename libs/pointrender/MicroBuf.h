@@ -37,9 +37,9 @@
 
 #include <boost/scoped_array.hpp>
 
-#include <OpenEXR/ImathMath.h>
-#include <OpenEXR/ImathVec.h>
-#include <OpenEXR/ImathColor.h>
+#include <Imath/ImathMath.h>
+#include <Imath/ImathVec.h>
+#include <Imath/ImathColor.h>
 
 
 namespace Aqsis {

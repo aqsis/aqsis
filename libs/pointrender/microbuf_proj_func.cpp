@@ -27,7 +27,7 @@
 //
 // (This is the New BSD license)
 
-#include <OpenEXR/ImathFun.h>
+#include <Imath/ImathFun.h>
 
 #include <boost/math/special_functions/sign.hpp>
 

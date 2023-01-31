@@ -32,9 +32,9 @@
 
 #include <vector>
 
-#include <OpenEXR/ImathVec.h>
-#include <OpenEXR/ImathBox.h>
-#include <OpenEXR/ImathColor.h>
+#include <Imath/ImathVec.h>
+#include <Imath/ImathBox.h>
+#include <Imath/ImathColor.h>
 
 namespace Aqsis {
 

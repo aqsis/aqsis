@@ -5,7 +5,7 @@ if(NOT Boost_REGEX_FOUND OR NOT AQSIS_USE_OPENEXR)
 	message(FATAL_ERROR "Aqsis shadervm requires boost regex and OpenEXR to build")
 endif()
 
-include_directories(${AQSIS_OPENEXR_INCLUDE_DIR} "${AQSIS_OPENEXR_INCLUDE_DIR}/OpenEXR")
+include_directories(${AQSIS_OPENEXR_INCLUDE_DIR} "${AQSIS_OPENEXR_INCLUDE_DIR}/OpenEXR" "${AQSIS_OPENEXR_INCLUDE_DIR}/Imath")
 
 set(shadervm_srcs
 	dsoshadeops.cpp

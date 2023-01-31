@@ -30,9 +30,9 @@
 #include	<aqsis/core/ilightsource.h>
 #include	"shaderexecenv.h"
 
-#include <OpenEXR/ImathMath.h>
-#include <OpenEXR/ImathVec.h>
-#include <OpenEXR/ImathColor.h>
+#include <Imath/ImathMath.h>
+#include <Imath/ImathVec.h>
+#include <Imath/ImathColor.h>
 
 #include	"../../pointrender/MicroBuf.h"
 #include	"../../pointrender/diffuse/DiffusePointOctreeCache.h"

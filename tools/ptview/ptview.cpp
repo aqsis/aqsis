@@ -41,8 +41,8 @@
 #include <boost/program_options.hpp>
 
 #define NOMINMAX
-#include <OpenEXR/ImathVec.h>
-#include <OpenEXR/ImathMatrix.h>
+#include <Imath/ImathVec.h>
+#include <Imath/ImathMatrix.h>
 
 #include "ptview.h"
 #include <MicroBuf.h>

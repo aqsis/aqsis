@@ -38,7 +38,7 @@
 #include <aqsis/tex/filtering/itexturesampler.h>
 
 #ifdef USE_OPENEXR
-#	include <OpenEXR/half.h>
+#	include <Imath/half.h>
 #endif
 
 #include "dummytexturesampler.h"

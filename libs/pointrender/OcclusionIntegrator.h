@@ -30,8 +30,8 @@
 #ifndef OCCLUSIONINTEGRATOR_H_
 #define OCCLUSIONINTEGRATOR_H_
 
-#include <OpenEXR/ImathVec.h>
-#include <OpenEXR/ImathMath.h>
+#include <Imath/ImathVec.h>
+#include <Imath/ImathMath.h>
 #include "MicroBuf.h"
 
 namespace Aqsis {

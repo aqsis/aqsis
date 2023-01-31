@@ -39,8 +39,8 @@
 #include <QtWidgets/QMainWindow>
 #include <QtOpenGL/QGLWidget>
 
-#include <OpenEXR/ImathVec.h>
-#include <OpenEXR/ImathColor.h>
+#include <Imath/ImathVec.h>
+#include <Imath/ImathColor.h>
 
 #include <Partio.h>
 
