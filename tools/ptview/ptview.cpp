@@ -733,7 +733,7 @@ void PointView::mouseMoveEvent(QMouseEvent* event)
 void PointView::wheelEvent(QWheelEvent* event)
 {
     // Translate mouse wheel events into vertical dragging for simplicity.
-    m_camera.mouseDrag(QPoint(0,0), QPoint(0, -event->delta()/2), true);
+    m_camera.mouseDrag(QPoint(0,0), QPoint(0, -event->angleDelta().y()/2), true);
 }
 
 

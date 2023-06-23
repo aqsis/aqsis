@@ -303,7 +303,7 @@ void PiqslImageView::wheelEvent(QWheelEvent* event)
 {
     float newZoom = 0;
     // Zoom in powers of two.
-    if(event->delta() > 0)
+    if(event->angleDelta().x() > 0 && event->angleDelta().y() > 0)
         newZoom = std::min(1024.0f, 2*m_zoom);
     else
         newZoom = std::max(1.0f, m_zoom/2);
