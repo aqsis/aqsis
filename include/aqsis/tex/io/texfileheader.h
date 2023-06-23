@@ -43,6 +43,8 @@
 
 #include <iostream>
 #include <map>
+#include <typeinfo>
+#include <typeindex>
 
 #include <boost/any.hpp>
 #include <boost/shared_ptr.hpp>
