@@ -116,7 +116,7 @@ aqsis_add_library(aqsis_core ${core_srcs} ${core_hdrs}
 	COMPILE_DEFINITIONS ${defs}
 	LINK_LIBRARIES aqsis_math aqsis_riutil aqsis_shadervm
 		aqsis_tex aqsis_util aqsis_riutil
-		${AQSIS_TIFF_LIBRARIES} ${Boost_THREAD_LIBRARY} ${CARBON_LIBRARY}
+		${AQSIS_TIFF_LIBRARIES} ${Boost_THREAD_LIBRARY} ${Boost_TIMER_LIBRARY} ${CARBON_LIBRARY}
 		# DEPENDS ri_inl
 )
 
