@@ -87,18 +87,18 @@ set(local_boost_version "${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}")
 if(local_boost_version VERSION_LESS "1.35")
     if(WIN32)
         find_package(Boost 1.34.1
-		COMPONENTS filesystem iostreams wave unit_test_framework thread regex zlib program_options)
+		COMPONENTS filesystem iostreams wave unit_test_framework thread regex zlib program_options timer)
     else()
         find_package(Boost 1.34.1
-		COMPONENTS filesystem iostreams wave unit_test_framework thread regex program_options)
+		COMPONENTS filesystem iostreams wave unit_test_framework thread regex program_options timer)
     endif()
 else()
     if(WIN32)
         find_package(Boost 1.34.1
-		COMPONENTS filesystem iostreams wave unit_test_framework thread regex system zlib program_options)
+		COMPONENTS filesystem iostreams wave unit_test_framework thread regex system zlib program_options timer)
     else()
         find_package(Boost 1.34.1
-		COMPONENTS filesystem iostreams wave unit_test_framework thread regex system program_options)
+		COMPONENTS filesystem iostreams wave unit_test_framework thread regex system program_options timer)
     endif()
 endif()
 

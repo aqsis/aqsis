@@ -303,13 +303,13 @@ void PiqslImageView::wheelEvent(QWheelEvent* event)
 {
     float newZoom = 0;
     // Zoom in powers of two.
-    if(event->delta() > 0)
+    if(event->angleDelta().x() > 0 && event->angleDelta().y() > 0)
         newZoom = std::min(1024.0f, 2*m_zoom);
     else
         newZoom = std::max(1.0f, m_zoom/2);
     // Adjust image position so that we zoom in toward the current mouse
     // cursor location
-    QPointF mousePos = event->pos();
+    QPointF mousePos = event->position();
     m_tlPos = mousePos - (newZoom/m_zoom)*(mousePos - m_tlPos);
     m_zoom = newZoom;
     update();

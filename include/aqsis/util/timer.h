@@ -40,7 +40,7 @@
 #include <vector>
 
 #include <boost/shared_ptr.hpp>
-#include <boost/timer.hpp>
+#include <boost/timer/timer.hpp>
 
 namespace Aqsis {
 
@@ -75,7 +75,7 @@ class CqTimer
 	private:
 		double m_totalTime;    ///< total time
 		long m_numSamples;     ///< total number of samples
-		boost::timer m_timer;  ///< current timer
+		boost::timer::cpu_timer m_timer;  ///< current timer
 };
 
 
@@ -160,12 +160,12 @@ inline CqTimer::CqTimer()
 
 inline void CqTimer::start()
 {
-	m_timer.restart();
+	m_timer.start();
 }
 
 inline void CqTimer::stop()
 {
-	m_totalTime += m_timer.elapsed();
+	m_totalTime += m_timer.elapsed().user;
 	++m_numSamples;
 }
 
