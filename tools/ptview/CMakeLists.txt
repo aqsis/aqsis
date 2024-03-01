@@ -25,7 +25,7 @@ if(QT_FOUND AND OPENGL_FOUND)
 	set(ptview_link_libraries
 	  Qt5::Core Qt5::Gui Qt5::OpenGL
 	  ${Boost_PROGRAM_OPTIONS_LIBRARY}
-	  ${OPENGL_opengl_LIBRARY} ${ZLIB_LIBRARY_RELEASE}
+	  ${OPENGL_LIBRARIES} ${ZLIB_LIBRARIES}
 	  ${pointrender_libs} aqsis_util)
 			
 	if(MINGW)
