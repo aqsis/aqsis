@@ -39,6 +39,7 @@
 #include	<map>
 #include	<algorithm>
 #include <float.h>
+#include <filesystem>
 
 #include <QTimer>
 
@@ -147,10 +148,10 @@ void CqDisplayServerImage::acceptData(TqUlong xmin, TqUlong xmaxplus1, TqUlong y
 void CqDisplayServerImage::serialise(const boost::filesystem::path& directory)
 {
 	namespace fs = boost::filesystem;
-	fs::path fileName(name());
+	std::filesystem::path fileName(name());
 	// Generate a unique name for the managed image in the specified directory.
-	std::string ext = fs::extension(fileName);
-	std::string base = fs::basename(fileName);
+	std::string ext = fileName.extension().string();
+	std::string base = fileName.stem().string();
 	fs::path uniquePath = directory/fileName;
 	TqInt index = 1;
 	while(fs::exists(uniquePath))

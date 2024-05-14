@@ -211,7 +211,7 @@ endif()
 # these version variables are potentially used there.
 set(VERSION_MAJOR 1)
 set(VERSION_MINOR 8)
-set(VERSION_BUILD 3)
+set(VERSION_BUILD 4)
 set(SCM_REVISION 0) # "?"
 set(AQSIS_PROJECT_NAME "Aqsis Renderer")
 set(AQSIS_PROJECT_NAME_SHORT "Aqsis")

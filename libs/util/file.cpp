@@ -30,6 +30,7 @@
 #include <cctype>
 #include <cstring>
 #include <fstream>
+#include <filesystem>
 
 #ifdef AQSIS_SYSTEM_WIN32
 #	include <direct.h>
@@ -72,9 +73,9 @@ namespace {
 	{
 		try
 		{
-			return is_regular(filePath);
+			return is_regular_file(filePath);
 		}
-		catch(boostfs::filesystem_error& e)
+		catch(std::filesystem::filesystem_error& e)
 		{ }
 		return false;
 	}
@@ -88,7 +89,7 @@ boostfs::path findFileNothrow(const std::string& fileName,
 		return boostfs::path();
 	// First check whether the path is complete (often called "absolute") or is
 	// relative to the current directory.
-	if(filePath.is_complete() || *filePath.begin() == "." || *filePath.begin() == "..")
+	if(filePath.is_absolute() || *filePath.begin() == "." || *filePath.begin() == "..")
 	{
 		if(isRegularFile(filePath))
 			return filePath;

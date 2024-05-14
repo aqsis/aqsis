@@ -31,6 +31,7 @@
 #include "imagelistmodel.h"
 
 #include <float.h>
+#include <filesystem>
 
 #include <QtCore/QStringList>
 #include <QtCore/QFileInfo>
@@ -106,7 +107,7 @@ void ImageListModel::loadImageFiles(const QStringList& fileNames)
 bool ImageListModel::saveImageLibrary(const QString& fileName) const
 {
     std::string name = fileName.toStdString();
-    boost::filesystem::path saveDir = boost::filesystem::path(name).branch_path();
+    std::filesystem::path saveDir = std::filesystem::path(name).parent_path();
     TiXmlDocument doc(name);
     TiXmlDeclaration* decl = new TiXmlDeclaration("1.0","","yes");
     TiXmlElement* booksXML = new TiXmlElement("Books");
@@ -119,7 +120,7 @@ bool ImageListModel::saveImageLibrary(const QString& fileName) const
     for(int i = 0; i < (int)m_images.size(); ++i)
     {
         // Serialise the image first.
-        m_images[i]->serialise(saveDir);
+        m_images[i]->serialise(saveDir.string());
         TiXmlElement* imageXML = m_images[i]->serialiseToXML();
         imagesXML->LinkEndChild(imageXML);
     }
