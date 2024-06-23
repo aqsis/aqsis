@@ -148,7 +148,7 @@ void CqDisplayServerImage::acceptData(TqUlong xmin, TqUlong xmaxplus1, TqUlong y
 void CqDisplayServerImage::serialise(const boost::filesystem::path& directory)
 {
 	namespace fs = boost::filesystem;
-	std::filesystem::path fileName(name());
+	boost::filesystem::path fileName(name());
 	// Generate a unique name for the managed image in the specified directory.
 	std::string ext = fileName.extension().string();
 	std::string base = fileName.stem().string();
