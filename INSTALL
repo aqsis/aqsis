@@ -30,7 +30,10 @@ You can either obtain the source archive or get the latest source code via Git.
 
 To clone the Git repository, ensure you have a recent Git installed, see the Git website for details of how to install on your platform.
 
-$ git clone git://aqsis.git.sourceforge.net/gitroot/aqsis/aqsis aqsis
+$ git clone git@github.com:aqsis/aqsis.git aqsis
+or 
+$ git clone https://github.com/aqsis/aqsis.git aqsis
+
 
 This will clone the entire project history, so may take a little time depending on your connection speed. The project source will be checked out to the folder named in the last parameter in that command sequence, i.e. 'aqsis' in the example.  You will also need to clone the git submodules of other libraries used in aqsis (currently only the Partio library).  To do this, change into the aqsis source directory and run the command
 
