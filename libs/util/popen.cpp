@@ -387,10 +387,13 @@ class CqPopenDevice::CqImpl
 				char errBuf[bufSize+1];
 				int nRead = 0;
 				while((nRead = ::read(parentErrorRead, errBuf, bufSize))
-						== -1 && errno == EINTR);
-				errBuf[nRead] = 0;
+						== -1 && errno == EINTR)
+					;
 				if(nRead > 0)
+				{
+					errBuf[nRead] = 0;
 					AQSIS_THROW_XQERROR(XqEnvironment, EqE_System, errBuf);
+				}
 				::close(parentErrorRead);
 				// Save the file descriptors connected to the child process
 				// stdin and stdout.
