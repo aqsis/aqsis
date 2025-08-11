@@ -87,7 +87,7 @@ struct SqDisplayInstance
 	TqInt		m_format;
 	TqInt		m_entrySize;
 	TqInt		m_lineLength;
-	uint16		m_compression, m_quality;
+	uint16_t	m_compression, m_quality;
 	std::string	m_hostname;
 	bool		m_RenderWholeFrame;
 	TqInt		m_imageType;
@@ -226,8 +226,8 @@ void SaveAsShadowMap(const std::string& filename, SqDisplayInstance* image, char
 
 void WriteTIFF(const std::string& filename, SqDisplayInstance* image)
 {
-	uint16 photometric = PHOTOMETRIC_RGB;
-	uint16 config = PLANARCONFIG_CONTIG;
+	uint16_t photometric = PHOTOMETRIC_RGB;
+	uint16_t config = PLANARCONFIG_CONTIG;
 	struct tm *ct;
 	char mydescription[80];
 	int year;
@@ -304,8 +304,8 @@ void WriteTIFF(const std::string& filename, SqDisplayInstance* image)
 		bool use_logluv = false;
 
 		TIFFSetField( pOut, TIFFTAG_SOFTWARE, ( char* ) version );
-		TIFFSetField( pOut, TIFFTAG_IMAGEWIDTH, ( uint32 ) image->m_width );
-		TIFFSetField( pOut, TIFFTAG_IMAGELENGTH, ( uint32 ) image->m_height );
+		TIFFSetField( pOut, TIFFTAG_IMAGEWIDTH, ( uint32_t ) image->m_width );
+		TIFFSetField( pOut, TIFFTAG_IMAGELENGTH, ( uint32_t ) image->m_height );
 		TIFFSetField( pOut, TIFFTAG_RESOLUTIONUNIT, RESUNIT_NONE );
 		TIFFSetField( pOut, TIFFTAG_XRESOLUTION, (float) 1.0 );
 		TIFFSetField( pOut, TIFFTAG_YRESOLUTION, (float) 1.0 );
@@ -322,8 +322,8 @@ void WriteTIFF(const std::string& filename, SqDisplayInstance* image)
 		// Set the position tages in case we aer dealing with a cropped image.
 		TIFFSetField( pOut, TIFFTAG_XPOSITION, ( float ) image->m_origin[0] );
 		TIFFSetField( pOut, TIFFTAG_YPOSITION, ( float ) image->m_origin[1] );
-		TIFFSetField( pOut, TIFFTAG_PIXAR_IMAGEFULLWIDTH, (uint32) image->m_OriginalSize[0] );
-		TIFFSetField( pOut, TIFFTAG_PIXAR_IMAGEFULLLENGTH, (uint32) image->m_OriginalSize[1] );
+		TIFFSetField( pOut, TIFFTAG_PIXAR_IMAGEFULLWIDTH, ( uint32_t ) image->m_OriginalSize[0] );
+		TIFFSetField( pOut, TIFFTAG_PIXAR_IMAGEFULLLENGTH, ( uint32_t ) image->m_OriginalSize[1] );
 
 		// Write out an 8 bits per pixel integer image.
 		if ( image->m_format == PkDspyUnsigned8 )

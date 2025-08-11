@@ -103,7 +103,7 @@ const char* texFormatToString(EqTextureFormat format)
 	return "unknown"; // shut up compiler warning.
 }
 
-typedef std::pair<uint16, const char*> TqComprPair;
+typedef std::pair<uint16_t, const char*> TqComprPair;
 TqComprPair comprTypesInit[] = {
 	TqComprPair(COMPRESSION_NONE, "none"),
 	TqComprPair(COMPRESSION_LZW, "lzw"),
@@ -117,7 +117,7 @@ const std::vector<TqComprPair> compressionTypes( comprTypesInit,
 		comprTypesInit + sizeof(comprTypesInit)/sizeof(TqComprPair));
 
 /// Get the tiff compression type from a string description.
-uint16 tiffCompressionTagFromName(const std::string& compressionName)
+uint16_t tiffCompressionTagFromName(const std::string& compressionName)
 {
 	for(std::vector<TqComprPair>::const_iterator i = compressionTypes.begin();
 			i != compressionTypes.end(); ++i)
@@ -129,7 +129,7 @@ uint16 tiffCompressionTagFromName(const std::string& compressionName)
 }
 
 /// Get the tiff compression type from a string description.
-const char* tiffCompressionNameFromTag(uint16 compressionType)
+const char* tiffCompressionNameFromTag(uint16_t compressionType)
 {
 	for(std::vector<TqComprPair>::const_iterator i = compressionTypes.begin();
 			i != compressionTypes.end(); ++i)
@@ -173,17 +173,17 @@ void CqTiffDirHandle::writeHeader(const CqTexFileHeader& header)
 void CqTiffDirHandle::writeRequiredAttrs(const CqTexFileHeader& header)
 {
 	// Width, height...
-	setTiffTagValue<uint32>(TIFFTAG_IMAGEWIDTH, header.width());
-	setTiffTagValue<uint32>(TIFFTAG_IMAGELENGTH, header.height());
+	setTiffTagValue<uint32_t>(TIFFTAG_IMAGEWIDTH, header.width());
+	setTiffTagValue<uint32_t>(TIFFTAG_IMAGELENGTH, header.height());
 
 	// Orientation & planar config should always be fixed.
-	setTiffTagValue<uint16>(TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
-	setTiffTagValue<uint16>(TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
+	setTiffTagValue<uint16_t>(TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
+	setTiffTagValue<uint16_t>(TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
 
 	// Pixel aspect ratio
 	// We have no meaningful resolution unit - we're only interested in pixel
 	// aspect ratio, so set the resolution unit to none.
-	setTiffTagValue<uint16>(TIFFTAG_RESOLUTIONUNIT, RESUNIT_NONE);
+	setTiffTagValue<uint16_t>(TIFFTAG_RESOLUTIONUNIT, RESUNIT_NONE);
 	setTiffTagValue<float>(TIFFTAG_XRESOLUTION, 1.0f);
 	setTiffTagValue<float>(TIFFTAG_YRESOLUTION, header.find<Attr::PixelAspectRatio>(1));
 
@@ -196,28 +196,28 @@ void CqTiffDirHandle::writeRequiredAttrs(const CqTexFileHeader& header)
 	if(tileInfo)
 	{
 		// Set tile dimensions if present.
-		setTiffTagValue<uint32>(TIFFTAG_TILEWIDTH, tileInfo->width);
-		setTiffTagValue<uint32>(TIFFTAG_TILELENGTH, tileInfo->height);
+		setTiffTagValue<uint32_t>(TIFFTAG_TILEWIDTH, tileInfo->width);
+		setTiffTagValue<uint32_t>(TIFFTAG_TILELENGTH, tileInfo->height);
 	}
 	else
 	{
 		// Else write strip size - AFAICT libtiff uses the values of some other
 		// fields (compression) to choose a default, so do this last.
-		setTiffTagValue<uint32>(TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize(tiffPtr(), 0));
+		setTiffTagValue<uint32_t>(TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize(tiffPtr(), 0));
 	}
 }
 
 void CqTiffDirHandle::writeCompressionAttrs(const CqTexFileHeader& header)
 {
 	// Set the compression type.
-	uint16 compression = tiffCompressionTagFromName(header.find<Attr::Compression>("none"));
+	uint16_t compression = tiffCompressionTagFromName(header.find<Attr::Compression>("none"));
 	if(!TIFFIsCODECConfigured(compression))
 	{
 		Aqsis::log() << warning << "No TIFF codec found for compression scheme \""
 			<< header.find<Attr::Compression>("none") << "\"\n";
 		return;
 	}
-	setTiffTagValue<uint16>(TIFFTAG_COMPRESSION, compression);
+	setTiffTagValue<uint16_t>(TIFFTAG_COMPRESSION, compression);
 
 	if(compression == COMPRESSION_LZW || compression == COMPRESSION_DEFLATE)
 	{
@@ -233,9 +233,9 @@ void CqTiffDirHandle::writeCompressionAttrs(const CqTexFileHeader& header)
 		// \todo Test whether PREDICTOR_FLOATINGPOINT is actually beneficial.
 		// (Some places on the web suggest not.)
 		if(header.channelList().sharedChannelType() == Channel_Float32)
-			setTiffTagValue<uint16>(TIFFTAG_PREDICTOR, PREDICTOR_FLOATINGPOINT);
+			setTiffTagValue<uint16_t>(TIFFTAG_PREDICTOR, PREDICTOR_FLOATINGPOINT);
 		else
-			setTiffTagValue<uint16>(TIFFTAG_PREDICTOR, PREDICTOR_HORIZONTAL);
+			setTiffTagValue<uint16_t>(TIFFTAG_PREDICTOR, PREDICTOR_HORIZONTAL);
 	}
 	if(compression == COMPRESSION_JPEG)
 	{
@@ -254,8 +254,8 @@ void CqTiffDirHandle::writeChannelAttrs(const CqTexFileHeader& header)
 	TqInt numChannels = channelList.numChannels();
 	assert(numChannels > 0);
 
-	setTiffTagValue<uint16>(TIFFTAG_SAMPLESPERPIXEL, numChannels); 
-	setTiffTagValue<uint16>(TIFFTAG_BITSPERSAMPLE, 8*bytesPerPixel(channelType));
+	setTiffTagValue<uint16_t>(TIFFTAG_SAMPLESPERPIXEL, numChannels);
+	setTiffTagValue<uint16_t>(TIFFTAG_BITSPERSAMPLE, 8*bytesPerPixel(channelType));
 	// It's hard to know which algorithm for deciding the photometric type is
 	// the best here.  Perhaps it would be better to simply depend on the
 	// number of channels, since TIFF doesn't have a standard facility to store
@@ -264,11 +264,11 @@ void CqTiffDirHandle::writeChannelAttrs(const CqTexFileHeader& header)
 			&& !channelList.hasRgbChannel() )
 	{
 		// greyscale image
-		setTiffTagValue<uint16>(TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
+		setTiffTagValue<uint16_t>(TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
 		if(numChannels == 2)
 		{
 			// Set extra sample types
-			std::vector<uint16> extraSamples(numChannels - 1, EXTRASAMPLE_UNSPECIFIED);
+			std::vector<uint16_t> extraSamples(numChannels - 1, EXTRASAMPLE_UNSPECIFIED);
 			if(channelList[1].name == "a")
 				extraSamples[0] = EXTRASAMPLE_ASSOCALPHA;
 			setTiffTagValue(TIFFTAG_EXTRASAMPLES, extraSamples);
@@ -278,11 +278,11 @@ void CqTiffDirHandle::writeChannelAttrs(const CqTexFileHeader& header)
 	else
 	{
 		// Assume a colour image by default (use PHOTOMETRIC_RGB)
-		setTiffTagValue<uint16>(TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
+		setTiffTagValue<uint16_t>(TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
 		/// \todo PHOTOMETRIC_LOGLUV alternative for floats
 		if(numChannels > 3)
 		{
-			std::vector<uint16> extraSamples(numChannels - 3, EXTRASAMPLE_UNSPECIFIED);
+			std::vector<uint16_t> extraSamples(numChannels - 3, EXTRASAMPLE_UNSPECIFIED);
 			// Set type of extra samples.
 			if(channelList[3].name == "a")
 				extraSamples[0] = EXTRASAMPLE_ASSOCALPHA;
@@ -301,7 +301,7 @@ void CqTiffDirHandle::writeChannelAttrs(const CqTexFileHeader& header)
 		}
 	}
 	/// \todo: deal with TIFFTAG_SGILOGDATAFMT
-	uint16 sampleFormat = 0;
+	uint16_t sampleFormat = 0;
 	switch(channelType)
 	{
         case Channel_Float32:
@@ -322,7 +322,7 @@ void CqTiffDirHandle::writeChannelAttrs(const CqTexFileHeader& header)
 				"Cannot handle provided pixel sample format");
 			break;
     }
-	setTiffTagValue<uint16>(TIFFTAG_SAMPLEFORMAT, sampleFormat);
+	setTiffTagValue<uint16_t>(TIFFTAG_SAMPLEFORMAT, sampleFormat);
 }
 
 
@@ -416,8 +416,8 @@ void CqTiffDirHandle::writeOptionalAttrs(const CqTexFileHeader& header)
 	const SqImageRegion* displayWindow = header.findPtr<Attr::DisplayWindow>();
 	if(displayWindow)
 	{
-		setTiffTagValue<uint32>(TIFFTAG_PIXAR_IMAGEFULLWIDTH, displayWindow->width);
-		setTiffTagValue<uint32>(TIFFTAG_PIXAR_IMAGEFULLLENGTH, displayWindow->height);
+		setTiffTagValue<uint32_t>(TIFFTAG_PIXAR_IMAGEFULLWIDTH, displayWindow->width);
+		setTiffTagValue<uint32_t>(TIFFTAG_PIXAR_IMAGEFULLLENGTH, displayWindow->height);
 		setTiffTagValue<float>(TIFFTAG_XPOSITION, displayWindow->topLeftX);
 		setTiffTagValue<float>(TIFFTAG_YPOSITION, displayWindow->topLeftY);
 	}
@@ -427,17 +427,17 @@ void CqTiffDirHandle::fillHeaderRequiredAttrs(CqTexFileHeader& header) const
 {
 	// Fill header with general metadata which won't affect the details of the
 	// pixel memory layout.
-	header.setWidth(tiffTagValue<uint32>(TIFFTAG_IMAGEWIDTH));
-	header.setHeight(tiffTagValue<uint32>(TIFFTAG_IMAGELENGTH));
+	header.setWidth(tiffTagValue<uint32_t>(TIFFTAG_IMAGEWIDTH));
+	header.setHeight(tiffTagValue<uint32_t>(TIFFTAG_IMAGELENGTH));
 	if(TIFFIsTiled(tiffPtr()))
 	{
 		header.set<Attr::TileInfo>( SqTileInfo(
-					tiffTagValue<uint32>(TIFFTAG_TILEWIDTH),
-					tiffTagValue<uint32>(TIFFTAG_TILELENGTH)) );
+					tiffTagValue<uint32_t>(TIFFTAG_TILEWIDTH),
+					tiffTagValue<uint32_t>(TIFFTAG_TILELENGTH)) );
 	}
 	// Get the compression type.
 	header.set<Attr::Compression>(
-			tiffCompressionNameFromTag(tiffTagValue<uint16>(TIFFTAG_COMPRESSION)) );
+			tiffCompressionNameFromTag(tiffTagValue<uint16_t>(TIFFTAG_COMPRESSION)) );
 	// Compute pixel aspect ratio
 	TqFloat xRes = 0;
 	TqFloat yRes = 0;
@@ -521,8 +521,8 @@ void CqTiffDirHandle::fillHeaderOptionalAttrs(CqTexFileHeader& header) const
 	// The origin of the image is apparently given in resolution units, but
 	// here we want to interpret it as the number of pixels from the top left
 	// of the image, hence the lfloor.
-	uint32 fullWidth = header.width();
-	uint32 fullHeight = header.height();
+	uint32_t fullWidth = header.width();
+	uint32_t fullHeight = header.height();
 	float xPos = 0;
 	float yPos = 0;
 	if( TIFFGetField(tiffPtr(), TIFFTAG_PIXAR_IMAGEFULLWIDTH, &fullWidth)
@@ -546,13 +546,13 @@ void CqTiffDirHandle::fillHeaderPixelLayout(CqTexFileHeader& header) const
 		// Deduce image channel information.
 		guessChannels(header.channelList());
 		// Check that channels are interlaced, otherwise we'll be confused.
-		TqInt planarConfig = tiffTagValue<uint16>(TIFFTAG_PLANARCONFIG,
+		TqInt planarConfig = tiffTagValue<uint16_t>(TIFFTAG_PLANARCONFIG,
 				PLANARCONFIG_CONTIG);
 		if(planarConfig != PLANARCONFIG_CONTIG)
 			AQSIS_THROW_XQERROR(XqUnknownTiffFormat, EqE_BadFile,
 				"non-interlaced channels detected");
 		// Check that the origin is at the topleft of the image.
-		TqInt orientation = tiffTagValue<uint16>(TIFFTAG_ORIENTATION,
+		TqInt orientation = tiffTagValue<uint16_t>(TIFFTAG_ORIENTATION,
 				ORIENTATION_TOPLEFT);
 		if(orientation != ORIENTATION_TOPLEFT)
 		{
@@ -591,8 +591,8 @@ void CqTiffDirHandle::fillHeaderPixelLayout(CqTexFileHeader& header) const
 
 EqChannelType CqTiffDirHandle::guessChannelType() const
 {
-	TqInt bitsPerSample = tiffTagValue<uint16>(TIFFTAG_BITSPERSAMPLE);
-	TqInt sampleFormat = tiffTagValue<uint16>(TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT);
+	TqInt bitsPerSample = tiffTagValue<uint16_t>(TIFFTAG_BITSPERSAMPLE);
+	TqInt sampleFormat = tiffTagValue<uint16_t>(TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT);
 	switch(bitsPerSample)
 	{
 		case 32:
@@ -658,11 +658,11 @@ void CqTiffDirHandle::guessChannels(CqChannelList& channelList) const
 	else
 	{
 		// Determine the channel type held in the tiff
-		switch(tiffTagValue<uint16>(TIFFTAG_PHOTOMETRIC))
+		switch(tiffTagValue<uint16_t>(TIFFTAG_PHOTOMETRIC))
 		{
 			case PHOTOMETRIC_MINISBLACK:
 				{
-					TqInt samplesPerPixel = tiffTagValue<uint16>(TIFFTAG_SAMPLESPERPIXEL, 1);
+					TqInt samplesPerPixel = tiffTagValue<uint16_t>(TIFFTAG_SAMPLESPERPIXEL, 1);
 					// We have an intensity (y) channel only.
 					channelList.addChannel(SqChannelInfo("y", chanType));
 					if(samplesPerPixel == 2)
@@ -680,7 +680,7 @@ void CqTiffDirHandle::guessChannels(CqChannelList& channelList) const
 				break;
 			case PHOTOMETRIC_RGB:
 				{
-					TqInt samplesPerPixel = tiffTagValue<uint16>(TIFFTAG_SAMPLESPERPIXEL);
+					TqInt samplesPerPixel = tiffTagValue<uint16_t>(TIFFTAG_SAMPLESPERPIXEL);
 					if(samplesPerPixel < 3)
 						channelList.addUnnamedChannels(chanType, samplesPerPixel);
 					else

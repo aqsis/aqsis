@@ -114,7 +114,7 @@ void CqTiffInputFile::readPixelsStripped(TqUint8* buffer, TqInt startLine,
 	for(TqInt line = startLine; line < startLine + numScanlines; ++line)
 	{
 		TIFFReadScanline(dirHandle.tiffPtr(), reinterpret_cast<tdata_t>(buffer),
-				static_cast<uint32>(line));
+				static_cast<uint32_t>(line));
 		buffer += bytesPerRow;
 	}
 }
@@ -195,8 +195,8 @@ void CqTiffInputFile::readPixelsRGBA(TqUint8* buffer, TqInt startLine,
 	// We read in the entire image each time readPixelsRGBA() is called; this
 	// *will* cause a performance bottleneck if the user calls readPixels() on
 	// only a small number of scanlines at a time.
-	boost::scoped_array<uint32> inBuf(
-			new uint32[m_header.width()*m_header.height()]);
+	boost::scoped_array<uint32_t> inBuf(
+			new uint32_t[m_header.width()*m_header.height()]);
 	TIFFReadRGBAImageOriented(dirHandle.tiffPtr(), m_header.width(),
 			m_header.height(), inBuf.get(), ORIENTATION_TOPLEFT, 0);
 
@@ -208,7 +208,7 @@ void CqTiffInputFile::readPixelsRGBA(TqUint8* buffer, TqInt startLine,
 	TqInt width = m_header.width();
 	TqInt bytesPerPixel = m_header.channelList().bytesPerPixel();
 	assert(bytesPerPixel == 4);
-	const uint32* inPtr = inBuf.get() + width*startLine;
+	const uint32_t* inPtr = inBuf.get() + width*startLine;
 	for(TqInt line = 0; line < numScanlines; ++line)
 	{
 		for(TqInt col = 0; col < width; ++col)
