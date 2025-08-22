@@ -47,8 +47,8 @@
 
 #include <tiffio.h>
 
-void setTiffFields(TIFF* outFile, const uint32 width, const uint32 height,
-		const uint16 samplesPerPixel, const uint16 bitsPerSample)
+void setTiffFields(TIFF* outFile, const uint32_t width, const uint32_t height,
+		const uint16_t samplesPerPixel, const uint16_t bitsPerSample)
 {
 	TIFFSetField(outFile, TIFFTAG_IMAGEWIDTH, width);
 	TIFFSetField(outFile, TIFFTAG_IMAGELENGTH, height);
@@ -75,11 +75,11 @@ void setBufToColor(unsigned char* buf, const int bufSize,
 // Write a 6x4 test tiff consisting of two directories
 void writeStripTiff(const char* fileName)
 {
-	uint32 height = 4;
-	uint32 width = 6;
-	uint32 rowsPerStrip = height/2;
-	uint16 samplesPerPixel = 3;
-	uint16 bitsPerSample = 8;
+	uint32_t height = 4;
+	uint32_t width = 6;
+	uint32_t rowsPerStrip = height/2;
+	uint16_t samplesPerPixel = 3;
+	uint16_t bitsPerSample = 8;
 
 	const unsigned char red[] = {0xFF, 0, 0};
 	const unsigned char blue[] = {0, 0, 0xFF};
@@ -120,12 +120,12 @@ void writeStripTiff(const char* fileName)
 // Write a 4x5 tiled test tiff intended to have the correct sizes for a mipmap
 void writeTiledTiff(const char* fileName)
 {
-	uint32 height = 5;
-	uint32 width = 4;
-	uint16 samplesPerPixel = 3;
-	uint16 bitsPerSample = 8;
-	uint32 tileWidth = 16;
-	uint32 tileHeight = 16;
+	uint32_t height = 5;
+	uint32_t width = 4;
+	uint16_t samplesPerPixel = 3;
+	uint16_t bitsPerSample = 8;
+	uint32_t tileWidth = 16;
+	uint32_t tileHeight = 16;
 
 	//TIFF* outFile = TIFFStreamOpen("stream", &outStream);
 	TIFF* outFile = TIFFOpen(fileName, "w");
@@ -145,8 +145,8 @@ void writeTiledTiff(const char* fileName)
 	// rest of the directories
 	while(width > 1 || height > 1)
 	{
-		width = std::max<uint32>((width+1)/2, 1);
-		height = std::max<uint32>((height+1)/2, 1);
+		width = std::max<uint32_t>((width+1)/2, 1);
+		height = std::max<uint32_t>((height+1)/2, 1);
 		setTiffFields(outFile, width, height, samplesPerPixel, bitsPerSample);
 		TIFFSetField(outFile, TIFFTAG_TILEWIDTH, tileWidth);
 		TIFFSetField(outFile, TIFFTAG_TILELENGTH, tileHeight);

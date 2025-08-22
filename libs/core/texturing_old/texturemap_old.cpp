@@ -434,7 +434,7 @@ bool CqTextureMapOld::CreateMIPMAP(bool fProtectBuffers)
 	if ( m_pImage != 0 )
 	{
 		// Check if the format is normal scanline, otherwise we are unable to MIPMAP it yet.
-		uint32 tsx;
+		uint32_t tsx;
 		TqInt ret = TIFFGetField( m_pImage, TIFFTAG_TILEWIDTH, &tsx );
 		if( ret )
 		{
@@ -583,7 +583,7 @@ CqTextureMapBuffer* CqTextureMapOld::GetBuffer( TqUlong s, TqUlong t, TqInt dire
 
 	if ( m_pImage )
 	{
-		uint32 tsx, tsy;
+		uint32_t tsx, tsy;
 		TqInt ret = TIFFGetField( m_pImage, TIFFTAG_TILEWIDTH, &tsx );
 		TIFFGetField( m_pImage, TIFFTAG_TILELENGTH, &tsy );
 		// If a tiled image, read the appropriate tile.
@@ -1101,17 +1101,17 @@ void CqTextureMapOld::Open()
 		TIFFGetField( m_pImage, TIFFTAG_IMAGEWIDTH, &m_XRes );
 		TIFFGetField( m_pImage, TIFFTAG_IMAGELENGTH, &m_YRes );
 
-		uint16 planarconfig;
+		uint16_t planarconfig;
 		TIFFGetField( m_pImage, TIFFTAG_PLANARCONFIG, &planarconfig );
 		m_PlanarConfig = planarconfig;
-		uint16 samplesperpixel = 1;
+		uint16_t samplesperpixel = 1;
 		TIFFGetField( m_pImage, TIFFTAG_SAMPLESPERPIXEL, &samplesperpixel );
 		m_SamplesPerPixel = samplesperpixel;
-		uint16 sampleformat;
+		uint16_t sampleformat;
 		TIFFGetFieldDefaulted( m_pImage, TIFFTAG_SAMPLEFORMAT, &sampleformat );
 		m_SampleFormat = sampleformat;
 
-		uint16 bitspersample;
+		uint16_t bitspersample;
 		TIFFGetFieldDefaulted( m_pImage, TIFFTAG_BITSPERSAMPLE, &bitspersample );
 		m_BitsPerSample = bitspersample;
 
@@ -1135,7 +1135,7 @@ void CqTextureMapOld::Open()
 		{
 			Interpreted( pModes );
 		}
-		uint32 tsx;
+		uint32_t tsx;
 
 		/* First tests; is it stored using tiles ? */
 		TqInt bMipMap = TIFFGetField( m_pImage, TIFFTAG_TILEWIDTH, &tsx );

@@ -391,7 +391,7 @@ template<typename T>
 void CqTiffDirHandle::setTiffTagValue(const ttag_t tag,
 		const std::vector<T>& values)
 {
-	if(!TIFFSetField(tiffPtr(), tag, static_cast<uint32>(values.size()), &values[0]))
+	if(!TIFFSetField(tiffPtr(), tag, static_cast<uint32_t>(values.size()), &values[0]))
 	{
 		AQSIS_THROW_XQERROR(XqInternal, EqE_System, "Could not set array tiff tag "
 				<< tag << " starting with value " << values[0] << " for file \""

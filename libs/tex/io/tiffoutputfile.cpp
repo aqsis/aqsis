@@ -149,7 +149,7 @@ void CqTiffOutputFile::writeScanlinePixels(const CqMixedImageBuffer& buffer)
 		std::memcpy(lineBuf.get(), rawBuf, rowStride);
 		// write data
 		TIFFWriteScanline( dirHandle.tiffPtr(), reinterpret_cast<tdata_t>(lineBuf.get()),
-				static_cast<uint32>(line) );
+				static_cast<uint32_t>(line) );
 		rawBuf += rowStride;
 	}
 	m_currentLine = endLine;
