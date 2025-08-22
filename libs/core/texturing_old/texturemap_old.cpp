@@ -46,7 +46,7 @@
 #endif		// AQSIS_SYSTEM_WIN32
 
 #if defined(AQSIS_SYSTEM_MACOSX)
-#include "Carbon/Carbon.h"
+//#include "Carbon/Carbon.h"
 #endif
 
 namespace Aqsis {
